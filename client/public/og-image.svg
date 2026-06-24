@@ -1,0 +1,58 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0F172A" />
+      <stop offset="1" stop-color="#1E293B" />
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#3B82F6" />
+      <stop offset="1" stop-color="#10B981" />
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bg)" />
+  <circle cx="1010" cy="120" r="260" fill="#10B981" opacity="0.10" />
+  <circle cx="170" cy="560" r="220" fill="#3B82F6" opacity="0.10" />
+
+  <!-- Logo -->
+  <g transform="translate(90,86)">
+    <rect width="64" height="64" rx="16" fill="#0B1220" stroke="#10B981" stroke-width="2" />
+    <g transform="translate(16,17)" stroke="#10B981" stroke-width="3.5" fill="none" stroke-linecap="round">
+      <line x1="2" y1="28" x2="2" y2="18" />
+      <line x1="14" y1="28" x2="14" y2="10" />
+      <line x1="26" y1="28" x2="26" y2="2" />
+    </g>
+    <text x="84" y="44" font-family="Arial, sans-serif" font-size="34" font-weight="700" fill="#FFFFFF">
+      Digital <tspan fill="#3B82F6">CFO</tspan>
+    </text>
+  </g>
+
+  <!-- Sarlavha -->
+  <text x="90" y="300" font-family="Arial, sans-serif" font-size="68" font-weight="800" fill="#FFFFFF">
+    Moliyaviy tahlilni
+  </text>
+  <text x="90" y="378" font-family="Arial, sans-serif" font-size="68" font-weight="800" fill="url(#accent)">
+    AI boshqaruviga toping
+  </text>
+
+  <text x="90" y="446" font-family="Arial, sans-serif" font-size="30" fill="#94A3B8">
+    Excel yuklang → KPI hisoblanadi → tayyor PDF hisobot
+  </text>
+
+  <!-- KPI pill'lar -->
+  <g font-family="Arial, sans-serif">
+    <rect x="90" y="496" width="190" height="64" rx="14" fill="#FFFFFF" opacity="0.06" />
+    <text x="110" y="524" font-size="18" fill="#94A3B8">Likvidlik</text>
+    <text x="110" y="550" font-size="26" font-weight="700" fill="#3B82F6">2.41</text>
+
+    <rect x="298" y="496" width="190" height="64" rx="14" fill="#FFFFFF" opacity="0.06" />
+    <text x="318" y="524" font-size="18" fill="#94A3B8">Sof foyda</text>
+    <text x="318" y="550" font-size="26" font-weight="700" fill="#10B981">18.5%</text>
+
+    <rect x="506" y="496" width="190" height="64" rx="14" fill="#FFFFFF" opacity="0.06" />
+    <text x="526" y="524" font-size="18" fill="#94A3B8">Risk Score</text>
+    <text x="526" y="550" font-size="26" font-weight="700" fill="#FFFFFF">23</text>
+  </g>
+
+  <rect x="0" y="624" width="1200" height="6" fill="url(#accent)" />
+</svg>

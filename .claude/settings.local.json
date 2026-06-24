@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cp \"C:/Users/lenovo/Downloads/CFO_final/reports_pdf/2026-06-14/5000431126_nbwvvy_093421_uz.pdf\" \"C:/Users/lenovo/OneDrive/Desktop/digital-cfo-fullstack/client/public/Namuna_Moliyaviy_Hisobot.pdf\" && ls -la \"C:/Users/lenovo/OneDrive/Desktop/digital-cfo-fullstack/client/public/\")",
+      "mcp__Claude_Preview__preview_start",
+      "PowerShell(winget install OpenJS.NodeJS.LTS --accept-source-agreements --accept-package-agreements --silent -e)",
+      "PowerShell(try { $h = Invoke-RestMethod -Uri \"http://localhost:4000/api/health\" -TimeoutSec 6; \"server /api/health -> \" + \\($h | ConvertTo-Json -Compress\\) } catch { \"server XATO: \" + $_.Exception.Message })",
+      "mcp__visualize__read_me",
+      "mcp__visualize__show_widget",
+      "Bash(bash -n deploy/setup.sh)"
+    ]
+  }
+}

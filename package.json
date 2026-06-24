@@ -1,0 +1,15 @@
+{
+  "name": "digital-cfo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Digital CFO — full-stack (Express API + Vite/React client) bitta xizmat sifatida.",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "npm --prefix server install && npm --prefix client install --include=dev && npm --prefix client run build",
+    "start": "node server/index.js",
+    "dev:server": "node --watch --env-file=server/.env server/index.js",
+    "dev:client": "npm --prefix client run dev"
+  }
+}
