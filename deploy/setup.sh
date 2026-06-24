@@ -10,6 +10,16 @@ DOMAIN="digitalcfo.uz"
 echo "==> Loyiha papkasi: $APP_DIR"
 cd "$APP_DIR"
 
+# 1 GB RAM serverda build (vite) xotira yetmay yiqilmasligi uchun 2GB swap.
+if [ "$(free -m | awk '/^Swap:/ {print $2}')" = "0" ]; then
+  echo "==> Swap (2GB) yaratish — kam RAM uchun"
+  sudo fallocate -l 2G /swapfile 2>/dev/null || sudo dd if=/dev/zero of=/swapfile bs=1M count=2048
+  sudo chmod 600 /swapfile
+  sudo mkswap /swapfile
+  sudo swapon /swapfile
+  echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab >/dev/null
+fi
+
 echo "==> 1/6  Node.js 22 o'rnatish"
 if ! command -v node >/dev/null 2>&1; then
   curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
