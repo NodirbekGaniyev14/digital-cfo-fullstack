@@ -7,7 +7,9 @@
       "PowerShell(try { $h = Invoke-RestMethod -Uri \"http://localhost:4000/api/health\" -TimeoutSec 6; \"server /api/health -> \" + \\($h | ConvertTo-Json -Compress\\) } catch { \"server XATO: \" + $_.Exception.Message })",
       "mcp__visualize__read_me",
       "mcp__visualize__show_widget",
-      "Bash(bash -n deploy/setup.sh)"
+      "Bash(bash -n deploy/setup.sh)",
+      "WebFetch(domain:dns.google)",
+      "WebFetch(domain:digitalcfo.uz)"
     ]
   }
 }
