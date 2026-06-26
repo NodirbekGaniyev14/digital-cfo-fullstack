@@ -8,6 +8,7 @@ import {
   Download,
   ShieldCheck,
   AlertTriangle,
+  Send,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -17,6 +18,8 @@ import { fadeUp, viewportOnce } from "@/lib/motion";
 
 const ACCEPT = ".xlsx,.xls";
 const MAX_SIZE = 15 * 1024 * 1024;
+const FREE_KEY = "cfo_free_used"; // saytda bir marta bepul tahlil
+const BOT_URL = "https://t.me/Moliyaviy_Tahlilchi_bot";
 
 const ST = {
   good: { t: "text-emerald-700", b: "bg-emerald-500/12", label: "Yaxshi", ring: "#10B981" },
@@ -43,6 +46,13 @@ export default function InstantAnalysis() {
   const [moliyaviy, setMoliyaviy] = useState(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
+  const [used, setUsed] = useState(() => {
+    try {
+      return !!localStorage.getItem(FREE_KEY);
+    } catch {
+      return false;
+    }
+  });
 
   function pick(setter, f) {
     if (!f) return;
@@ -60,6 +70,10 @@ export default function InstantAnalysis() {
     try {
       const data = await analyzeFile(files);
       setResult(data);
+      try {
+        localStorage.setItem(FREE_KEY, String(Date.now()));
+      } catch {}
+      setUsed(true);
       toast.success("Tahlil tayyor — natijalar quyida.");
     } catch (err) {
       toast.error(err.message || "Tahlil amalga oshmadi");
@@ -114,11 +128,13 @@ export default function InstantAnalysis() {
           <p className="mt-3.5 text-[16px] leading-relaxed text-slate-600">
             Shakl 1 (Balans) va Shakl 2 (Moliyaviy natijalar) ni yuklang —
             tizim ~50 ta ko'rsatkichni hisoblab, baholab, tayyor PDF hisobot
-            beradi. Faylingiz serverda saqlanmaydi.
+            beradi. <span className="font-semibold text-emerald-600">Saytda bir
+            marta bepul</span> · faylingiz saqlanmaydi.
           </p>
         </motion.div>
 
-        {/* Yuklash paneli */}
+        {/* Yuklash paneli — faqat bepul tahlil ishlatilmagan bo'lsa */}
+        {!used && (
         <motion.div
           initial="hidden"
           whileInView="show"
@@ -161,6 +177,22 @@ export default function InstantAnalysis() {
             </Button>
           </div>
         </motion.div>
+        )}
+
+        {/* Bepul limit tugagan — botga taklif */}
+        {used && !result && (
+          <motion.div
+            initial="hidden"
+            whileInView="show"
+            viewport={viewportOnce}
+            variants={fadeUp}
+          >
+            <BotCTA
+              heading="Bepul tahlildan foydalandingiz"
+              text="Saytdagi bepul tahlil bir martalik. Cheksiz tahlil, hisobotlaringiz tarixi va to'liq xizmat uchun Telegram botimizdan foydalaning — u sizni taniydi va barcha natijalarni saqlaydi."
+            />
+          </motion.div>
+        )}
 
         {/* Natijalar */}
         <AnimatePresence>
@@ -271,19 +303,38 @@ export default function InstantAnalysis() {
                 </div>
               ))}
 
-              <p className="mt-6 text-center text-[13px] text-slate-500">
-                Bu — Telegram <span className="font-semibold">@Moliyaviy_Tahlilchi_bot</span> bilan
-                bir xil to'liq tahlil. Savollar bo'lsa{" "}
-                <a href="#contact" className="font-semibold text-azure hover:underline">
-                  biz bilan bog'laning
-                </a>
-                .
-              </p>
+              <div className="mt-8">
+                <BotCTA
+                  heading="Bu sizning bepul tahlilingiz edi"
+                  text="Yana tahlil qilish, barcha hisobotlaringizni saqlash va cheksiz foydalanish uchun Telegram botimizga o'ting — bu yerdagi bilan aynan bir xil to'liq xizmat."
+                />
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
       </div>
     </section>
+  );
+}
+
+function BotCTA({ heading, text }) {
+  return (
+    <div className="rounded-[22px] border border-azure/25 bg-gradient-to-b from-azure/[.06] to-emerald-500/[.04] p-7 text-center shadow-[0_8px_24px_rgba(15,23,42,.06)]">
+      <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-azure/[.12] text-azure">
+        <Send className="h-7 w-7" />
+      </div>
+      <h3 className="font-heading text-[20px] font-bold">{heading}</h3>
+      <p className="mx-auto mt-2 max-w-[540px] text-[14.5px] leading-relaxed text-slate-600">
+        {text}
+      </p>
+      <div className="mt-5 flex justify-center">
+        <Button asChild variant="navy" size="lg">
+          <a href={BOT_URL} target="_blank" rel="noreferrer">
+            <Send className="h-[17px] w-[17px]" /> Telegram botga o'tish
+          </a>
+        </Button>
+      </div>
+    </div>
   );
 }
 
