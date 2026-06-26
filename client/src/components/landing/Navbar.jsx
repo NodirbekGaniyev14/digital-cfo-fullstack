@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 const NAV_LINKS = [
   { label: "Bosh sahifa", href: "#hero" },
   { label: "Qanday ishlaydi", href: "#how-it-works" },
+  { label: "Bepul tahlil", href: "#tahlil" },
   { label: "Xizmatlar", href: "#services" },
   { label: "KPI Tahlil", href: "#kpi" },
   { label: "Narxlar", href: "#pricing" },

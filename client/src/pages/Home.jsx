@@ -2,6 +2,7 @@ import Navbar from "@/components/landing/Navbar";
 import HeroSection from "@/components/landing/HeroSection";
 import ProblemSolution from "@/components/landing/ProblemSolution";
 import HowItWorks from "@/components/landing/HowItWorks";
+import InstantAnalysis from "@/components/landing/InstantAnalysis";
 import Roadmap from "@/components/landing/Roadmap";
 import Services from "@/components/landing/Services";
 import KPIAnalytics from "@/components/landing/KPIAnalytics";
@@ -20,6 +21,7 @@ export default function Home() {
       <HeroSection />
       <ProblemSolution />
       <HowItWorks />
+      <InstantAnalysis />
       <Roadmap />
       <Services />
       <KPIAnalytics />

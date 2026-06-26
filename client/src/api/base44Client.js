@@ -17,3 +17,19 @@ export async function submitContact(formData) {
   if (!res.ok) throw new Error("So'rovni yuborib bo'lmadi");
   return res.json();
 }
+
+/**
+ * Moliyaviy faylni backendga yuborib, hisoblangan KPI natijasini oladi.
+ * Fayl serverda tahlildan keyin saqlanmaydi.
+ */
+export async function analyzeFile(file) {
+  const fd = new FormData();
+  fd.append("file", file);
+  const res = await fetch(`${base44Client.baseURL}/analyze`, {
+    method: "POST",
+    body: fd,
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || "Tahlil amalga oshmadi");
+  return data;
+}
