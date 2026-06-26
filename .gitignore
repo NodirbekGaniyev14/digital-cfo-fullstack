@@ -3,6 +3,8 @@ dist/
 .env
 *.log
 .DS_Store
+__pycache__/
+*.pyc
 
 # Server runtime ma'lumotlari (deploy'da saqlanmaydi)
 server/leads.json

@@ -1,0 +1,456 @@
+# -*- coding: utf-8 -*-
+"""
+i18n.py — uch tilli (uz / ru / en) matnlar.
+Barcha ko'rinadigan matnlar shu yerda. Yangi til qo'shish uchun shu yerga
+mos kalitlarni qo'shish kifoya.
+"""
+
+LANGS = ("uz", "ru", "en")
+
+# --- Guruh sarlavhalari (kod birinchi harfi bo'yicha) ---
+GROUPS = {
+    "A": {"uz": "A. Likvidlik va to'lov qobiliyati",
+          "ru": "A. Ликвидность и платёжеспособность",
+          "en": "A. Liquidity & Solvency"},
+    "B": {"uz": "B. Moliyaviy barqarorlik",
+          "ru": "B. Финансовая устойчивость",
+          "en": "B. Financial Stability"},
+    "C": {"uz": "C. Rentabellik",
+          "ru": "C. Рентабельность",
+          "en": "C. Profitability"},
+    "D": {"uz": "D. Ishbilarmonlik faolligi (aylanuvchanlik)",
+          "ru": "D. Деловая активность (оборачиваемость)",
+          "en": "D. Business Activity (Turnover)"},
+    "E": {"uz": "E. O'sish va dinamika",
+          "ru": "E. Рост и динамика",
+          "en": "E. Growth & Dynamics"},
+}
+
+# --- Ko'rsatkich nomlari va normalari: code -> {name:{...}, norm:{...}} ---
+def _i(uz, ru, en, nuz, nru, nen):
+    return {"name": {"uz": uz, "ru": ru, "en": en},
+            "norm": {"uz": nuz, "ru": nru, "en": nen}}
+
+IND = {
+ "A1": _i("Joriy likvidlik koeffitsienti", "Коэффициент текущей ликвидности", "Current ratio", "1,0–2,0", "1,0–2,0", "1.0–2.0"),
+ "A2": _i("Tezkor (oraliq) likvidlik", "Коэффициент быстрой ликвидности", "Quick ratio", "0,7–1,0", "0,7–1,0", "0.7–1.0"),
+ "A3": _i("Mutlaq likvidlik koeffitsienti", "Коэффициент абсолютной ликвидности", "Cash ratio", "≥ 0,2", "≥ 0,2", "≥ 0.2"),
+ "A4": _i("Sof aylanma kapital", "Чистый оборотный капитал", "Net working capital", "> 0", "> 0", "> 0"),
+ "A5": _i("Umumiy to'lov qobiliyati", "Общая платёжеспособность", "Overall solvency", "≥ 2,0", "≥ 2,0", "≥ 2.0"),
+ "A6": _i("Debitorlik / Kreditorlik nisbati", "Соотношение деб./кред. задолж.", "Receivables/Payables ratio", "≈ 1,0", "≈ 1,0", "≈ 1.0"),
+ "A7": _i("Zaxiralarning o'z mablag' bilan ta'minlanishi", "Обеспеченность запасов СОС", "Inventory coverage by own funds", "≥ 0,5", "≥ 0,5", "≥ 0.5"),
+ "A8": _i("Aylanma mablag'larda pul ulushi", "Доля денежных средств в обор. активах", "Cash share in current assets", "≥ 10%", "≥ 10%", "≥ 10%"),
+ "A9": _i("Joriy aktivlar ulushi", "Доля текущих активов", "Current assets share", "soha bo'yicha", "по отрасли", "industry-specific"),
+ "A10": _i("O'z aylanma mablag' bilan ta'minlanish", "Обеспеченность собств. оборотными ср-ми", "Own working capital ratio", "≥ 0,1", "≥ 0,1", "≥ 0.1"),
+
+ "B1": _i("Avtonomiya (mustaqillik) koeffitsienti", "Коэффициент автономии", "Autonomy (equity) ratio", "≥ 0,5", "≥ 0,5", "≥ 0.5"),
+ "B2": _i("Moliyaviy qaramlik koeffitsienti", "Коэффициент финансовой зависимости", "Debt ratio", "≤ 0,5", "≤ 0,5", "≤ 0.5"),
+ "B3": _i("Moliyaviy leveraj (qarz/kapital)", "Финансовый леверидж (долг/капитал)", "Financial leverage (debt/equity)", "≤ 1,0", "≤ 1,0", "≤ 1.0"),
+ "B4": _i("Manyovrlik koeffitsienti", "Коэффициент манёвренности", "Equity maneuverability", "0,2–0,5", "0,2–0,5", "0.2–0.5"),
+ "B5": _i("Uzoq muddatli jalb qilingan mablag'", "Коэф. долгосрочного привлечения", "Long-term debt attraction", "≤ 0,4", "≤ 0,4", "≤ 0.4"),
+ "B6": _i("Doimiy aktiv indeksi", "Индекс постоянного актива", "Fixed asset index", "< 1,0", "< 1,0", "< 1.0"),
+ "B7": _i("Moliyalashtirish koeffitsienti", "Коэффициент финансирования", "Financing ratio", "≥ 1,0", "≥ 1,0", "≥ 1.0"),
+ "B8": _i("Uzoq muddatli aktivlar qoplanishi", "Покрытие долгосрочных активов", "Non-current asset coverage", "≥ 1,0", "≥ 1,0", "≥ 1.0"),
+ "B9": _i("Kapitallashuv koeffitsienti", "Коэффициент капитализации", "Capitalization ratio", "≤ 0,5", "≤ 0,5", "≤ 0.5"),
+ "B10": _i("Moliyaviy barqarorlik koeffitsienti", "Коэффициент финансовой устойчивости", "Financial stability ratio", "0,6–0,8", "0,6–0,8", "0.6–0.8"),
+
+ "C1": _i("Aktivlar rentabelligi (ROA)", "Рентабельность активов (ROA)", "Return on assets (ROA)", "> soha o'rtachasi", "> средн. по отрасли", "> industry avg"),
+ "C2": _i("O'z kapitali rentabelligi (ROE)", "Рентабельность собств. капитала (ROE)", "Return on equity (ROE)", "> bank stavkasi", "> ставки банка", "> bank rate"),
+ "C3": _i("Sotuv rentabelligi (sof marja)", "Рентабельность продаж (чистая маржа)", "Net profit margin", "> 0", "> 0", "> 0"),
+ "C4": _i("Yalpi foyda marjasi", "Валовая маржа", "Gross margin", "soha bo'yicha", "по отрасли", "industry-specific"),
+ "C5": _i("Operatsion marja", "Операционная маржа", "Operating margin", "> 0", "> 0", "> 0"),
+ "C6": _i("Mahsulot rentabelligi", "Рентабельность продукции", "Product profitability", "> 0", "> 0", "> 0"),
+ "C7": _i("Soliqqacha foyda marjasi", "Маржа прибыли до налога", "Pre-tax margin", "> 0", "> 0", "> 0"),
+ "C8": _i("Investitsiyalangan kapital rentabelligi (ROIC)", "Рентабельность инвест. капитала (ROIC)", "Return on invested capital (ROIC)", "> kapital narxi", "> стоимости капитала", "> cost of capital"),
+ "C9": _i("Xarajatlar rentabelligi", "Рентабельность затрат", "Return on costs", "> 0", "> 0", "> 0"),
+ "C10": _i("Asosiy faoliyat aktivlar rentabelligi", "Рентаб. активов по осн. деятельности", "Operating return on assets", "> 0", "> 0", "> 0"),
+
+ "D1": _i("Aktivlar aylanuvchanligi", "Оборачиваемость активов", "Asset turnover", "soha bo'yicha", "по отрасли", "industry-specific"),
+ "D2": _i("Joriy aktivlar aylanuvchanligi", "Оборачиваемость текущих активов", "Current asset turnover", "yuqori — yaxshi", "выше — лучше", "higher is better"),
+ "D3": _i("Zaxiralar aylanuvchanligi", "Оборачиваемость запасов", "Inventory turnover", "yuqori — yaxshi", "выше — лучше", "higher is better"),
+ "D4": _i("Zaxiralarning aylanish davri", "Период оборота запасов", "Days inventory", "qisqa — yaxshi", "короче — лучше", "shorter is better"),
+ "D5": _i("Debitorlik qarzlari aylanuvchanligi", "Оборачиваемость дебиторки", "Receivables turnover", "yuqori — yaxshi", "выше — лучше", "higher is better"),
+ "D6": _i("Debitorlik qaytish davri (DSO)", "Период погашения дебиторки (DSO)", "Days sales outstanding (DSO)", "≤ 60 kun", "≤ 60 дн.", "≤ 60 days"),
+ "D7": _i("Kreditorlik qarzlari aylanuvchanligi", "Оборачиваемость кредиторки", "Payables turnover", "—", "—", "—"),
+ "D8": _i("Kreditorlik to'lash davri (DPO)", "Период погашения кредиторки (DPO)", "Days payable outstanding (DPO)", "—", "—", "—"),
+ "D9": _i("Operatsion sikl", "Операционный цикл", "Operating cycle", "qisqa — yaxshi", "короче — лучше", "shorter is better"),
+ "D10": _i("Pul aylanish sikli (CCC)", "Денежный цикл (CCC)", "Cash conversion cycle (CCC)", "qisqa — yaxshi", "короче — лучше", "shorter is better"),
+
+ "E1": _i("Sotuv tushumi o'sishi", "Рост выручки", "Revenue growth", "> inflyatsiya", "> инфляции", "> inflation"),
+ "E2": _i("Sof foyda o'sishi", "Рост чистой прибыли", "Net profit growth", "> 0", "> 0", "> 0"),
+ "E3": _i("Yalpi foyda o'sishi", "Рост валовой прибыли", "Gross profit growth", "> 0", "> 0", "> 0"),
+ "E4": _i("Tannarx o'sishi", "Рост себестоимости", "COGS growth", "< sotuv o'sishi", "< роста выручки", "< revenue growth"),
+ "E5": _i("Aktivlar o'sishi", "Рост активов", "Asset growth", "barqaror", "стабильный", "stable"),
+ "E6": _i("O'z kapitali o'sishi", "Рост собственного капитала", "Equity growth", "> 0", "> 0", "> 0"),
+ "E7": _i("Debitorlik qarzlari o'zgarishi", "Изменение дебиторки", "Receivables change", "< sotuv o'sishi", "< роста выручки", "< revenue growth"),
+ "E8": _i("Sof marja o'zgarishi (p.p.)", "Изменение чистой маржи (п.п.)", "Net margin change (p.p.)", "> 0", "> 0", "> 0"),
+}
+
+# --- Izoh (comment) kalitlari ---
+CK = {
+ "cover_ok": {"uz": "Joriy aktivlar qisqa muddatli qarzlarni qoplaydi", "ru": "Текущие активы покрывают краткосрочные долги", "en": "Current assets cover short-term debt"},
+ "cover_no": {"uz": "Qisqa muddatli qarzlarni qoplash yetishmaydi", "ru": "Недостаточно для покрытия краткосрочных долгов", "en": "Insufficient to cover short-term debt"},
+ "wc_pos": {"uz": "Ijobiy — moliyaviy mustahkam", "ru": "Положительный — финансово устойчиво", "en": "Positive — financially sound"},
+ "wc_neg": {"uz": "Salbiy — aylanma kapital yetishmaydi", "ru": "Отрицательный — нехватка оборотного капитала", "en": "Negative — working capital shortfall"},
+ "rec_high": {"uz": "Debitorlik kreditorlikdan yuqori", "ru": "Дебиторка выше кредиторки", "en": "Receivables exceed payables"},
+ "mobility": {"uz": "Aktivlar tarkibi mobilligi", "ru": "Мобильность структуры активов", "en": "Asset structure mobility"},
+ "self_fin": {"uz": "Asosan o'z mablag'i bilan moliyalashtirilgan", "ru": "Финансируется в осн. за счёт собств. средств", "en": "Mainly financed by own funds"},
+ "debt_dep": {"uz": "Qarz mablag'lariga qaramlik yuqori", "ru": "Высокая зависимость от заёмных средств", "en": "High dependence on borrowed funds"},
+ "debt_high": {"uz": "Qarz yuki yuqori", "ru": "Высокая долговая нагрузка", "en": "High debt load"},
+ "loss": {"uz": "Foydasiz / zararli", "ru": "Убыточно", "en": "Loss-making"},
+ "neg_ccc": {"uz": "Salbiy CCC — juda yaxshi", "ru": "Отрицательный CCC — отлично", "en": "Negative CCC — excellent"},
+ "growth": {"uz": "O'sish kuzatilmoqda", "ru": "Наблюдается рост", "en": "Growth observed"},
+ "decline": {"uz": "Pasayish", "ru": "Снижение", "en": "Decline"},
+ "cogs_faster": {"uz": "Tannarx tushumdan tez o'smoqda", "ru": "Себестоимость растёт быстрее выручки", "en": "COGS growing faster than revenue"},
+ "margin_up": {"uz": "Marja yaxshilandi", "ru": "Маржа улучшилась", "en": "Margin improved"},
+}
+
+# --- Status va verdikt so'zlari ---
+STATUS = {
+ "good": {"uz": "Yaxshi", "ru": "Хорошо", "en": "Good"},
+ "warn": {"uz": "Chegaraviy", "ru": "Погранично", "en": "Borderline"},
+ "bad":  {"uz": "Past", "ru": "Низко", "en": "Low"},
+ "na":   {"uz": "—", "ru": "—", "en": "—"},
+}
+VERDICT = {
+ "strong":       {"uz": "Mustahkam", "ru": "Прочное", "en": "Strong"},
+ "satisfactory": {"uz": "Qoniqarli", "ru": "Удовлетворительное", "en": "Satisfactory"},
+ "weak":         {"uz": "Zaif", "ru": "Слабое", "en": "Weak"},
+ "critical":     {"uz": "Inqirozli", "ru": "Кризисное", "en": "Critical"},
+}
+
+# --- Hisobotning statik matnlari ---
+UI = {
+ "title": {"uz": "Moliyaviy tahlil hisoboti", "ru": "Отчёт о финансовом анализе", "en": "Financial Analysis Report"},
+ "subtitle": {"uz": "Digital CFO · avtomatik tahlil tizimi", "ru": "Digital CFO · система автоматического анализа", "en": "Digital CFO · automated analysis system"},
+ "company": {"uz": "Korxona", "ru": "Предприятие", "en": "Company"},
+ "date": {"uz": "Sana", "ru": "Дата", "en": "Date"},
+ "period": {"uz": "Davr", "ru": "Период", "en": "Period"},
+ "indicators": {"uz": "Ko'rsatkichlar", "ru": "Показатели", "en": "Indicators"},
+ "overall": {"uz": "Umumiy baho", "ru": "Общая оценка", "en": "Overall score"},
+ "c_num": {"uz": "#", "ru": "#", "en": "#"},
+ "c_name": {"uz": "Ko'rsatkich", "ru": "Показатель", "en": "Indicator"},
+ "c_value": {"uz": "Qiymat", "ru": "Значение", "en": "Value"},
+ "c_norm": {"uz": "Norma", "ru": "Норма", "en": "Norm"},
+ "c_eval": {"uz": "Baho", "ru": "Оценка", "en": "Rating"},
+ "c_comment": {"uz": "Izoh", "ru": "Комментарий", "en": "Comment"},
+ "conclusions": {"uz": "Xulosa", "ru": "Выводы", "en": "Conclusions"},
+ "recommendations": {"uz": "Tavsiyalar", "ru": "Рекомендации", "en": "Recommendations"},
+ "footer": {"uz": "Digital CFO · moliyaviy tahlil", "ru": "Digital CFO · финансовый анализ", "en": "Digital CFO · financial analysis"},
+ "page": {"uz": "{}-bet", "ru": "стр. {}", "en": "page {}"},
+ "unit_days": {"uz": "kun", "ru": "дн.", "en": "days"},
+ "money_unit": {"uz": "ming so'm", "ru": "тыс. сум", "en": "thousand UZS"},
+ "disclaimer": {
+   "uz": "Ushbu hisobot Digital CFO tizimi tomonidan Shakl 1 (Balans) va Shakl 2 (Moliyaviy natijalar) ma'lumotlari asosida avtomatik shakllantirilgan.",
+   "ru": "Данный отчёт сформирован автоматически системой Digital CFO на основе данных Формы 1 (Баланс) и Формы 2 (Отчёт о фин. результатах).",
+   "en": "This report was generated automatically by Digital CFO based on Form 1 (Balance Sheet) and Form 2 (Income Statement) data."},
+ "no_form2": {
+   "uz": "Eslatma: Shakl 2 (Moliyaviy natijalar) topilmadi — rentabellik va aylanuvchanlik ko'rsatkichlari hisoblanmadi. To'liq tahlil uchun Shakl 2 ni ham qo'shing.",
+   "ru": "Примечание: Форма 2 (Отчёт о фин. результатах) не найдена — показатели рентабельности и оборачиваемости не рассчитаны. Для полного анализа добавьте Форму 2.",
+   "en": "Note: Form 2 (Income Statement) was not found — profitability and turnover indicators were not calculated. Add Form 2 for a full analysis."},
+}
+
+# --- Xulosa shablonlari (placeholder'lar bilan) ---
+CONCL = {
+ "overall": {
+   "uz": "Korxonaning umumiy moliyaviy holati — «{v}» (integral baho: {s}/100). Tahlil qilingan ko'rsatkichlardan {g} tasi normada, {w} tasi chegaraviy, {b} tasi normadan past.",
+   "ru": "Общее финансовое состояние предприятия — «{v}» (интегральная оценка: {s}/100). Из проанализированных показателей {g} в норме, {w} пограничны, {b} ниже нормы.",
+   "en": "Overall financial condition — “{v}” (integral score: {s}/100). Of the indicators analyzed, {g} are normal, {w} borderline, {b} below norm."},
+ "liq_good": {"uz": "Likvidlik yetarli: joriy aktivlar qisqa muddatli majburiyatlarni qoplaydi.", "ru": "Ликвидность достаточная: текущие активы покрывают краткосрочные обязательства.", "en": "Liquidity is adequate: current assets cover short-term liabilities."},
+ "liq_warn": {"uz": "Likvidlik chegaraviy darajada — to'lov qobiliyatini kuzatib borish zarur.", "ru": "Ликвидность на пограничном уровне — необходимо контролировать платёжеспособность.", "en": "Liquidity is borderline — solvency should be monitored."},
+ "liq_bad": {"uz": "Likvidlik past: joriy majburiyatlarni o'z vaqtida qoplash xavfi mavjud.", "ru": "Ликвидность низкая: есть риск несвоевременного погашения текущих обязательств.", "en": "Liquidity is low: risk of failing to meet current obligations on time."},
+ "auto_good": {"uz": "Moliyaviy mustaqillik yuqori (avtonomiya {x}): faoliyat asosan o'z mablag'i bilan moliyalashtirilgan.", "ru": "Высокая финансовая независимость (автономия {x}): деятельность финансируется в основном собственными средствами.", "en": "High financial independence (autonomy {x}): operations are mainly financed by own funds."},
+ "auto_bad": {"uz": "Qarz mablag'lariga qaramlik sezilarli (avtonomiya {x}): kapital tarkibini mustahkamlash kerak.", "ru": "Значительная зависимость от заёмных средств (автономия {x}): необходимо укрепить структуру капитала.", "en": "Notable dependence on borrowed funds (autonomy {x}): capital structure needs strengthening."},
+ "prof_loss": {"uz": "Faoliyat zararli: sof natija manfiy, daromad/xarajat tarkibini qayta ko'rish shart.", "ru": "Деятельность убыточна: чистый результат отрицательный, требуется пересмотр структуры доходов/расходов.", "en": "Operations are loss-making: net result is negative; revenue/cost structure must be revised."},
+ "prof_good": {"uz": "Rentabellik ijobiy: sof marja {m}%, ROA {r}% — kapital samarali ishlatilmoqda.", "ru": "Рентабельность положительная: чистая маржа {m}%, ROA {r}% — капитал используется эффективно.", "en": "Profitability is positive: net margin {m}%, ROA {r}% — capital is used efficiently."},
+ "prof_low": {"uz": "Rentabellik past (sof marja {m}%): foyda marjasini oshirish zaxiralari bor.", "ru": "Рентабельность низкая (чистая маржа {m}%): есть резервы повышения маржи прибыли.", "en": "Profitability is low (net margin {m}%): there is room to improve the profit margin."},
+ "dso_slow": {"uz": "Debitorlik qarzlari sekin qaytmoqda (DSO ≈ {x} kun) — pul oqimiga bosim.", "ru": "Дебиторка погашается медленно (DSO ≈ {x} дн.) — давление на денежный поток.", "en": "Receivables are collected slowly (DSO ≈ {x} days) — pressure on cash flow."},
+ "sales_up": {"uz": "Sotuv hajmi o'sgan (+{x}%), bu ijobiy tendentsiya.", "ru": "Объём продаж вырос (+{x}%), это положительная тенденция.", "en": "Sales volume grew (+{x}%), a positive trend."},
+ "sales_down": {"uz": "Sotuv hajmi qisqargan ({x}%) — bozor va narx siyosatini tahlil qilish lozim.", "ru": "Объём продаж сократился ({x}%) — следует проанализировать рынок и ценовую политику.", "en": "Sales volume declined ({x}%) — market and pricing policy should be reviewed."},
+}
+
+# --- Tavsiya shablonlari ---
+RECS = {
+ "liquidity": {"uz": "Likvidlikni oshirish: qisqa muddatli qarzlarni qayta tuzilmalash, ortiqcha zaxiralarni pulga aylantirish, naqd pul rezervini ko'paytirish.", "ru": "Повысить ликвидность: реструктуризировать краткосрочные долги, конвертировать излишние запасы в деньги, увеличить денежный резерв.", "en": "Improve liquidity: restructure short-term debt, convert excess inventory to cash, increase the cash reserve."},
+ "capital": {"uz": "Kapital tarkibini mustahkamlash: foydani reinvestitsiya qilish yoki ustav kapitalini oshirish hisobiga qarz yukini kamaytirish.", "ru": "Укрепить структуру капитала: снизить долговую нагрузку за счёт реинвестирования прибыли или увеличения уставного капитала.", "en": "Strengthen capital structure: reduce debt load by reinvesting profit or increasing charter capital."},
+ "profitability": {"uz": "Rentabellikni oshirish: tannarxni optimallashtirish, davr xarajatlarini qisqartirish va yuqori marjali mahsulot/xizmatlar ulushini oshirish.", "ru": "Повысить рентабельность: оптимизировать себестоимость, сократить расходы периода и увеличить долю высокомаржинальных продуктов/услуг.", "en": "Improve profitability: optimize COGS, cut period expenses, and increase the share of high-margin products/services."},
+ "inventory": {"uz": "Zaxiralar boshqaruvi: ABC-tahlil va talab prognozi orqali ortiqcha zaxiralarni kamaytirib, aylanuvchanlikni tezlashtirish.", "ru": "Управление запасами: с помощью ABC-анализа и прогноза спроса сократить излишние запасы и ускорить оборачиваемость.", "en": "Inventory management: use ABC analysis and demand forecasting to cut excess stock and speed up turnover."},
+ "receivables": {"uz": "Debitorlik nazorati: to'lov shartlari va kredit siyosatini qattiqlashtirish, muddati o'tgan qarzlar bo'yicha undirish ishlarini kuchaytirish.", "ru": "Контроль дебиторки: ужесточить условия оплаты и кредитную политику, усилить взыскание просроченной задолженности.", "en": "Receivables control: tighten payment terms and credit policy, strengthen collection of overdue debt."},
+ "costs": {"uz": "Xarajatlar nazorati: tannarx sotuv tushumidan tez o'smoqda — yetkazib beruvchilar bilan narxni qayta kelishish va samaradorlikni oshirish.", "ru": "Контроль затрат: себестоимость растёт быстрее выручки — пересмотреть цены с поставщиками и повысить эффективность.", "en": "Cost control: COGS is growing faster than revenue — renegotiate supplier prices and improve efficiency."},
+ "all_ok": {"uz": "Asosiy ko'rsatkichlar normada. Mavjud barqarorlikni saqlab, o'sish uchun investitsiya imkoniyatlarini ko'rib chiqish tavsiya etiladi.", "ru": "Основные показатели в норме. Рекомендуется сохранять устойчивость и рассмотреть инвестиционные возможности для роста.", "en": "Key indicators are normal. Maintain stability and consider investment opportunities for growth."},
+ "disclaimer": {"uz": "Eslatma: hisobot avtomatik shakllantirilgan. Yakuniy qarorlar uchun moliyaviy mutaxassis bilan maslahatlashish tavsiya etiladi.", "ru": "Примечание: отчёт сформирован автоматически. Для окончательных решений рекомендуется консультация с финансовым специалистом.", "en": "Note: this report was generated automatically. Consult a financial specialist before making final decisions."},
+}
+
+
+# --- Pul oqimi (bilvosita usul) bo'limi ---
+CF = {
+ "title": {"uz": "Pul oqimlari tahlili (bilvosita usul)",
+           "ru": "Анализ денежных потоков (косвенный метод)",
+           "en": "Cash Flow Analysis (Indirect Method)"},
+ "item": {"uz": "Modda", "ru": "Статья", "en": "Item"},
+ "amount": {"uz": "Summa", "ru": "Сумма", "en": "Amount"},
+ "net_profit": {"uz": "Sof foyda", "ru": "Чистая прибыль", "en": "Net profit"},
+ "d_receivables": {"uz": "Debitorlik qarzlari o'zgarishi", "ru": "Изменение дебиторской задолженности", "en": "Change in receivables"},
+ "d_inventories": {"uz": "Zaxiralar o'zgarishi", "ru": "Изменение запасов", "en": "Change in inventories"},
+ "d_other_ca": {"uz": "Boshqa joriy aktivlar o'zgarishi", "ru": "Изменение прочих текущих активов", "en": "Change in other current assets"},
+ "d_current_liab": {"uz": "Joriy majburiyatlar o'zgarishi", "ru": "Изменение текущих обязательств", "en": "Change in current liabilities"},
+ "ocf": {"uz": "Operatsion faoliyatdan pul oqimi", "ru": "Денежный поток от операционной деятельности", "en": "Operating cash flow"},
+ "d_nca": {"uz": "Uzoq muddatli aktivlar o'zgarishi (sof)", "ru": "Изменение долгосрочных активов (нетто)", "en": "Change in non-current assets (net)"},
+ "d_sti": {"uz": "Qisqa muddatli investitsiyalar o'zgarishi", "ru": "Изменение краткосрочных инвестиций", "en": "Change in short-term investments"},
+ "icf": {"uz": "Investitsion faoliyatdan pul oqimi", "ru": "Денежный поток от инвестиционной деятельности", "en": "Investing cash flow"},
+ "d_ltl": {"uz": "Uzoq muddatli majburiyatlar o'zgarishi", "ru": "Изменение долгосрочных обязательств", "en": "Change in long-term liabilities"},
+ "d_eq_other": {"uz": "Kapitalning boshqa o'zgarishlari (dividend, ustav va h.k.)", "ru": "Прочие изменения капитала (дивиденды, уставный и пр.)", "en": "Other equity changes (dividends, capital, etc.)"},
+ "fcf": {"uz": "Moliyaviy faoliyatdan pul oqimi", "ru": "Денежный поток от финансовой деятельности", "en": "Financing cash flow"},
+ "total": {"uz": "Pul mablag'larining sof o'zgarishi", "ru": "Чистое изменение денежных средств", "en": "Net change in cash"},
+ "d_cash_actual": {"uz": "Balans bo'yicha haqiqiy o'zgarish (tekshiruv)", "ru": "Фактическое изменение по балансу (контроль)", "en": "Actual change per balance sheet (check)"},
+ "chart_title": {"uz": "Pul oqimlari diagrammasi", "ru": "Диаграмма денежных потоков", "en": "Cash Flow Chart"},
+ "ocf_short": {"uz": "Operatsion (OCF)", "ru": "Операционный (OCF)", "en": "Operating (OCF)"},
+ "icf_short": {"uz": "Investitsion (ICF)", "ru": "Инвестиционный (ICF)", "en": "Investing (ICF)"},
+ "fcf_short": {"uz": "Moliyaviy (FCF)", "ru": "Финансовый (FCF)", "en": "Financing (FCF)"},
+ "net_short": {"uz": "Sof o'zgarish", "ru": "Чистое изменение", "en": "Net change"},
+ "note": {"uz": "Eslatma: amortizatsiya ma'lumoti bo'lmagani uchun investitsion oqim sof o'zgarish (kapital qo'yilmalar − amortizatsiya) sifatida baholangan.",
+          "ru": "Примечание: из-за отсутствия данных об амортизации инвестиционный поток оценён как нетто-изменение (капвложения − амортизация).",
+          "en": "Note: as depreciation data is unavailable, investing flow is estimated as the net change (capex − depreciation)."},
+ "no_data": {"uz": "Pul oqimi tahlili uchun balansning davr boshi ustuni topilmadi.",
+             "ru": "Для анализа денежных потоков не найдена графа баланса на начало периода.",
+             "en": "Begin-of-period balance column not found for cash flow analysis."},
+ "ocf_neg": {"uz": "Diqqat: operatsion faoliyatdan pul oqimi manfiy — asosiy faoliyat pul yaratmayapti.",
+             "ru": "Внимание: операционный денежный поток отрицателен — основная деятельность не генерирует деньги.",
+             "en": "Warning: operating cash flow is negative — core operations are not generating cash."},
+ "ocf_below_profit": {"uz": "Sof foyda bor, lekin operatsion pul oqimi undan ancha past — foyda «qog'ozda», pul aylanma kapitalga bog'lanib qolmoqda.",
+                      "ru": "Прибыль есть, но операционный поток заметно ниже — прибыль «бумажная», деньги связываются в оборотном капитале.",
+                      "en": "Profit exists, but operating cash flow is well below it — profit is on paper while cash is tied up in working capital."},
+}
+
+
+# --- Yordamchilar ---
+def t_ind_name(code: str, lang: str) -> str:
+    return IND.get(code, {}).get("name", {}).get(lang, code)
+
+def t_ind_norm(code: str, lang: str) -> str:
+    return IND.get(code, {}).get("norm", {}).get(lang, "")
+
+def t_group(code: str, lang: str) -> str:
+    return GROUPS.get(code[0], {}).get(lang, code[0])
+
+def t_comment(ck: str, lang: str) -> str:
+    if not ck:
+        return ""
+    return CK.get(ck, {}).get(lang, "")
+
+def t(table: dict, key: str, lang: str) -> str:
+    return table.get(key, {}).get(lang, key)
+
+
+# --- Avtomatik CFO izohlari: kod -> status -> (uz, ru, en) ---
+AUTO_CK = {
+ "A1": {"good": ("Qisqa muddatli majburiyatlar ishonchli qoplanadi", "Краткосрочные обязательства надёжно покрыты", "Short-term obligations are well covered"),
+        "warn": ("Likvidlik zaxirasi kichik — to'lov kalendarini haftalik kuzating", "Запас ликвидности мал — контролируйте платёжный календарь еженедельно", "Thin liquidity buffer — monitor the payment calendar weekly"),
+        "bad":  ("To'lov uzilishlari xavfi — qisqa qarzni qayta tuzilmalash zarur", "Риск кассовых разрывов — необходима реструктуризация короткого долга", "Risk of payment gaps — restructure short-term debt")},
+ "A2": {"good": ("Zaxiralarni sotmasdan ham to'lovga qodir", "Платёжеспособность без распродажи запасов", "Solvent without liquidating inventory"),
+        "warn": ("Tezkor aktivlar chegarada — debitorlik undiruvini tezlashtiring", "Быстрые активы на грани — ускорьте взыскание дебиторки", "Quick assets are borderline — speed up collections"),
+        "bad":  ("Zaxiralarsiz to'lov qobiliyati yetarli emas", "Без запасов платёжеспособность недостаточна", "Insufficient solvency excluding inventory")},
+ "A3": {"good": ("Naqd zaxira favqulodda to'lovlar uchun yetarli", "Денежный резерв достаточен для срочных платежей", "Cash reserve covers urgent payments"),
+        "warn": ("Naqd rezerv past — zaxira kredit liniyasini oching", "Низкий денежный резерв — откройте резервную кредитную линию", "Low cash reserve — arrange a standby credit line"),
+        "bad":  ("Naqd pul tanqis — har qanday kechikish to'lov uzilishiga olib keladi", "Денег критически мало — любая задержка приведёт к разрыву", "Cash is critically short — any delay causes a payment gap")},
+ "A4": {"good": ("Joriy faoliyat barqaror manbalar bilan moliyalashtirilgan", "Текущая деятельность профинансирована устойчиво", "Operations financed from stable sources"),
+        "bad":  ("Joriy faoliyat qisqa qarz hisobiga — tuzilmaviy xavf", "Текущая деятельность за счёт короткого долга — структурный риск", "Operations run on short debt — structural risk")},
+ "A5": {"good": ("Aktivlar barcha majburiyatlarni to'liq qoplaydi", "Активы полностью покрывают все обязательства", "Assets fully cover all liabilities"),
+        "warn": ("Qarz yuki sezilarli — yangi qarz olishdan saqlaning", "Долговая нагрузка ощутима — воздержитесь от нового долга", "Debt load is notable — avoid new borrowing"),
+        "bad":  ("Qarzlar aktivlarga nisbatan xavfli yuqori", "Долги опасно высоки относительно активов", "Debt is dangerously high vs assets")},
+ "A6": {"good": ("Debitor-kreditor muvozanati saqlangan", "Баланс дебиторки и кредиторки соблюдён", "Receivables and payables are balanced"),
+        "warn": ("Nomutanosiblik bor — to'lov shartlarini ikki tomonlama tenglashtiring", "Есть дисбаланс — выровняйте условия оплат с обеих сторон", "Imbalance present — align payment terms both ways"),
+        "bad":  ("Jiddiy nomutanosiblik — aylanma mablag' bosim ostida", "Серьёзный дисбаланс — оборотные средства под давлением", "Severe imbalance — working capital under pressure")},
+ "A7": {"good": ("Zaxiralar o'z mablag' bilan ta'minlangan", "Запасы обеспечены собственными средствами", "Inventory funded by own capital"),
+        "warn": ("Zaxiralar qisman qarzga tayanadi", "Запасы частично опираются на долг", "Inventory partly debt-funded"),
+        "bad":  ("Zaxiralar to'liq qarz hisobiga — barqarorlik xavfi", "Запасы полностью за счёт долга — риск устойчивости", "Inventory fully debt-funded — stability risk")},
+ "A8": {"good": ("Aylanmada pul ulushi yetarli", "Доля денег в оборотке достаточна", "Healthy cash share in current assets"),
+        "warn": ("Pul ulushi past — likvidlik rejasini tuzing", "Доля денег низка — составьте план ликвидности", "Low cash share — build a liquidity plan"),
+        "bad":  ("Aylanmada pul deyarli yo'q — to'lovlar xavf ostida", "Денег в оборотке почти нет — платежи под угрозой", "Almost no cash in current assets — payments at risk")},
+ "A9": {"good": ("Aktivlar tarkibini soha benchmarki bilan solishtiring: savdoda joriy aktivlar ulushi yuqori, ishlab chiqarishda past bo'lishi tabiiy", "Сопоставьте структуру активов с отраслью: в торговле доля текущих активов выше, в производстве — ниже", "Benchmark asset mix vs industry: trade runs higher current-asset share, manufacturing lower")},
+ "A10": {"good": ("O'z aylanma mablag'i yetarli", "Собственных оборотных средств достаточно", "Sufficient own working capital"),
+         "warn": ("O'z aylanma mablag'i chegarada", "Собственные оборотные средства на грани", "Own working capital is borderline"),
+         "bad":  ("O'z aylanma mablag'i taqchil — kapital kiritish yoki foydani ushlab qolish zarur", "Дефицит СОС — нужен взнос капитала или удержание прибыли", "Own WC deficit — inject capital or retain earnings")},
+ "B1": {"good": ("Moliyaviy mustaqillik yuqori — kredit jozibadorligi kuchli", "Высокая финансовая независимость — хорошая кредитоспособность", "Strong independence — good creditworthiness"),
+        "warn": ("Qarz ulushi o'sib bormoqda — limit belgilang", "Доля долга растёт — установите лимит", "Debt share rising — set a ceiling"),
+        "bad":  ("Kreditorlarga qaramlik kritik — kapital kiritish zarur", "Критическая зависимость от кредиторов — нужен капитал", "Critical creditor dependence — equity injection needed")},
+ "B2": {"good": ("Qarz yuki me'yorda", "Долговая нагрузка в норме", "Debt load within norms"),
+        "warn": ("Qarz ulushi yuqorilamoqda — yangi qarzni asoslang", "Доля долга повышается — обосновывайте новый долг", "Debt share climbing — justify any new debt"),
+        "bad":  ("Qarz ulushi xavfli — leverage'ni bosqichma-bosqich kamaytiring", "Доля долга опасна — поэтапно снижайте леверидж", "Debt share is risky — deleverage gradually")},
+ "B3": {"good": ("Leverage xavfsiz doirada", "Леверидж в безопасной зоне", "Leverage in a safe range"),
+        "warn": ("Leverage yuqori — foiz xarajatlari foydani yemoqda", "Леверидж высок — проценты съедают прибыль", "High leverage — interest is eroding profit"),
+        "bad":  ("Leverage kritik — qarz xizmatini qayta ko'rib chiqing", "Леверидж критичен — пересмотрите обслуживание долга", "Critical leverage — review debt service")},
+ "B4": {"good": ("Kapital harakatchan — manyovr imkoni bor", "Капитал манёвренный — есть свобода действий", "Capital is flexible — room to maneuver"),
+        "warn": ("Kapital asosan doimiy aktivlarga bog'langan", "Капитал в основном связан в постоянных активах", "Capital mostly tied in fixed assets"),
+        "bad":  ("Kapital to'liq immobilizatsiyalangan — joriy ehtiyojga qarz ketmoqda", "Капитал полностью иммобилизован — текущие нужды на долге", "Capital fully immobilized — operations rely on debt")},
+ "B5": {"good": ("Uzoq muddatli qarz me'yorda", "Долгосрочный долг в норме", "Long-term debt within norms"),
+        "warn": ("Uzoq qarz ulushi yuqori — to'lov grafigini tekshiring", "Доля долгого долга высока — проверьте график погашения", "High LT debt share — check the repayment schedule"),
+        "bad":  ("Uzoq qarzga ortiqcha tayanish — refinans xavfi", "Чрезмерная опора на долгий долг — риск рефинансирования", "Over-reliance on LT debt — refinancing risk")},
+ "B6": {"good": ("Doimiy aktivlar kapital bilan qoplangan", "Постоянные активы покрыты капиталом", "Fixed assets covered by equity"),
+        "warn": ("Doimiy aktivlar kapitaldan ortmoqda", "Постоянные активы превышают капитал", "Fixed assets exceed equity"),
+        "bad":  ("Doimiy aktivlar qarz hisobiga — moliyalash tuzilmasi xavfli", "Постоянные активы за счёт долга — структура финансирования опасна", "Fixed assets debt-funded — risky financing structure")},
+ "B7": {"good": ("O'z mablag' qarzdan ustun", "Собственные средства превышают долг", "Equity exceeds debt"),
+        "warn": ("Qarz o'z mablag'ga yaqinlashdi", "Долг приблизился к собственным средствам", "Debt approaching equity level"),
+        "bad":  ("Qarz o'z mablag'dan ustun — kreditorlar nazoratida", "Долг превышает собственные средства — контроль у кредиторов", "Debt exceeds equity — creditors in control")},
+ "B8": {"good": ("Uzoq aktivlar barqaror manbalar bilan qoplangan", "Долгосрочные активы покрыты устойчивыми источниками", "LT assets covered by stable funding"),
+        "warn": ("Qoplash chegarada — yangi capex'ni uzoq manba bilan moliyalang", "Покрытие на грани — новый capex финансируйте длинными деньгами", "Coverage borderline — fund new capex long-term"),
+        "bad":  ("Uzoq aktivlar qisqa qarz bilan moliyalashtirilgan — «oltin qoida»ga zid", "Долгие активы на коротком долге — нарушено «золотое правило»", "LT assets on short debt — golden rule violated")},
+ "B9": {"good": ("Kapitallashuv me'yorda", "Капитализация в норме", "Capitalization within norms"),
+        "warn": ("Uzoq muddatli qarz kapitalga nisbatan yuqori — qaytarish grafigini nazorat qiling", "Долгий долг высок относительно капитала", "LT debt high vs equity"),
+        "bad":  ("Kapitallashuv xavfli darajada", "Капитализация на опасном уровне", "Capitalization at a risky level")},
+ "B10": {"good": ("Barqaror manbalar ulushi yetarli", "Доля устойчивых источников достаточна", "Stable funding share is adequate"),
+         "warn": ("Barqaror manbalar chegarada", "Устойчивые источники на грани", "Stable funding is borderline"),
+         "bad":  ("Qisqa qarzga qaramlik yuqori — moliyalashni cho'zing", "Высокая зависимость от короткого долга — удлиняйте фондирование", "High short-debt dependence — extend funding tenor")},
+ "C1": {"good": ("Aktivlar samarali foyda yaratmoqda", "Активы эффективно генерируют прибыль", "Assets generate profit efficiently"),
+        "warn": ("Aktiv samaradorligi past — aylanuvchanlik yoki marjani oshiring", "Низкая отдача активов — повышайте оборачиваемость или маржу", "Low asset returns — lift turnover or margin"),
+        "bad":  ("Aktivlar foyda yaratmayapti — portfelni qayta ko'ring", "Активы не генерируют прибыль — пересмотрите портфель", "Assets not generating profit — review the portfolio")},
+ "C2": {"good": ("Kapital egalari uchun jozibador daromad", "Привлекательная доходность для собственников", "Attractive return for owners"),
+        "warn": ("ROE bank depozitidan past bo'lishi mumkin — samarani oshiring", "ROE может быть ниже депозита — повышайте отдачу", "ROE may trail deposit rates — improve returns"),
+        "bad":  ("Kapital daromad keltirmayapti — strategiyani qayta ko'ring", "Капитал не приносит доход — пересмотрите стратегию", "Equity earns nothing — revisit strategy")},
+ "C3": {"good": ("Sof marja sog'lom", "Чистая маржа здоровая", "Healthy net margin"),
+        "warn": ("Marja yupqa — narx va xarajat tuzilmasini ko'ring", "Маржа тонкая — пересмотрите цены и затраты", "Thin margin — review pricing and costs"),
+        "bad":  ("Sotuvlar zarar bilan — shoshilinch chora zarur", "Продажи убыточны — нужны срочные меры", "Sales are loss-making — urgent action required")},
+ "C4": {"good": ("Yalpi marja kuchli — narx siyosati ishlayapti", "Сильная валовая маржа — ценообразование работает", "Strong gross margin — pricing works"),
+        "warn": ("Tannarx bosimi — xarid va narxni qayta kelishing", "Давление себестоимости — пересогласуйте закупки и цены", "Cost pressure — renegotiate procurement and prices"),
+        "bad":  ("Yalpi marja juda past — biznes-model xavf ostida", "Валовая маржа крайне низка — бизнес-модель под угрозой", "Gross margin too low — business model at risk")},
+ "C5": {"good": ("Asosiy faoliyat rentabel", "Основная деятельность рентабельна", "Core operations are profitable"),
+        "warn": ("Davr xarajatlari marjani yemoqda — OPEX nazorati zarur", "Расходы периода съедают маржу — контроль OPEX", "Period costs eroding margin — control OPEX"),
+        "bad":  ("Asosiy faoliyat zararli — operatsion modelni qayta quring", "Основная деятельность убыточна — перестройте операционную модель", "Core operations loss-making — rebuild the operating model")},
+ "C6": {"good": ("Mahsulot rentabelligi yetarli", "Рентабельность продукции достаточна", "Product profitability is adequate"),
+        "warn": ("Mahsulot marjasi past — assortimentni qayta ko'ring", "Маржа продукции низка — пересмотрите ассортимент", "Low product margin — review the mix"),
+        "bad":  ("Mahsulot zararli sotilmoqda", "Продукция продаётся в убыток", "Products sold at a loss")},
+ "C7": {"good": ("Soliqqacha marja barqaror", "Маржа до налога устойчива", "Stable pre-tax margin"),
+        "warn": ("Soliqqacha marja yupqa", "Маржа до налога тонкая", "Thin pre-tax margin"),
+        "bad":  ("Soliqqacha natija manfiy", "Результат до налога отрицателен", "Negative pre-tax result")},
+ "C8": {"good": ("Investitsiya qilingan kapital qiymat yaratmoqda", "Инвестированный капитал создаёт стоимость", "Invested capital creates value"),
+        "warn": ("ROIC kapital narxiga yaqin — yangi loyihalarni saralang", "ROIC близок к стоимости капитала — фильтруйте проекты", "ROIC near cost of capital — screen projects"),
+        "bad":  ("ROIC kapital narxidan past — qiymat yo'qolmoqda", "ROIC ниже стоимости капитала — стоимость разрушается", "ROIC below cost of capital — value destruction")},
+ "C9": {"good": ("Xarajatlar samarali foydaga aylanmoqda", "Затраты эффективно конвертируются в прибыль", "Costs convert to profit efficiently"),
+        "warn": ("Xarajat samaradorligi past", "Низкая отдача затрат", "Low cost efficiency"),
+        "bad":  ("Xarajatlar foyda bermayapti", "Затраты не окупаются", "Costs are not paying off")},
+ "C10": {"good": ("Operatsion faoliyat aktivlardan yaxshi foyda olmoqda", "Операционная отдача активов хорошая", "Good operating return on assets"),
+         "warn": ("Operatsion samara past", "Операционная отдача низка", "Weak operating return"),
+         "bad":  ("Operatsion faoliyat aktivlarni oqlamayapti", "Операционная деятельность не окупает активы", "Operations don't justify the asset base")},
+ "D1": {"good": ("Aktivlar faol ishlamoqda", "Активы работают активно", "Assets are working hard"),
+        "warn": ("Aktivlar sekin aylanmoqda — ortiqcha/ishlamayotgan aktivlarni aniqlang", "Активы оборачиваются медленно — выявите лишние активы", "Slow asset turnover — identify idle assets")},
+ "D2": {"good": ("Joriy aktivlar tez aylanadi", "Текущие активы оборачиваются быстро", "Current assets turn quickly"),
+        "warn": ("Aylanma sekin — zaxira va debitorlikni qisqartiring", "Оборот медленный — сожмите запасы и дебиторку", "Slow turnover — squeeze inventory and receivables")},
+ "D3": {"good": ("Zaxiralar tez aylanadi", "Запасы оборачиваются быстро", "Inventory turns fast"),
+        "warn": ("Zaxiralar turg'un — ABC-tahlil va norma joriy eting", "Запасы залёживаются — внедрите ABC-анализ и нормативы", "Inventory stagnant — apply ABC analysis and norms")},
+ "D4": {"good": ("Zaxira saqlash davri qisqa", "Срок хранения запасов короткий", "Short inventory holding period"),
+        "warn": ("Zaxira davri uzun — ombor xarajati va eskirish xavfi", "Долгий период запасов — затраты на склад и риск устаревания", "Long inventory days — storage cost and obsolescence risk")},
+ "D5": {"good": ("Debitorlik tez undirilmoqda", "Дебиторка взыскивается быстро", "Receivables collected quickly"),
+        "warn": ("Undiruv sekin — kredit limitlari va eslatmalarni joriy eting", "Взыскание медленное — введите кредитные лимиты и напоминания", "Slow collections — set credit limits and reminders")},
+ "D6": {"good": ("Undiruv muddati me'yorda", "Срок инкассации в норме", "Collection period within norms"),
+        "warn": ("DSO yuqori — to'lov shartlarini qattiqlashtiring", "DSO высок — ужесточите условия оплаты", "High DSO — tighten payment terms"),
+        "bad":  ("Pul debitorlikda muzlagan — undiruv bo'yicha shoshilinch reja zarur", "Деньги заморожены в дебиторке — срочный план взыскания", "Cash frozen in receivables — urgent collection plan needed")},
+ "D7": {"good": ("Kreditorlik aylanishi yetkazib beruvchilar bilan to'lov intizomini ko'rsatadi — DPO bilan birga baholang", "Оборачиваемость кредиторки отражает платёжную дисциплину с поставщиками — оценивайте вместе с DPO", "Payables turnover reflects supplier payment discipline — assess together with DPO")},
+ "D8": {"good": ("DPO ≥ DSO bo'lsa, yetkazib beruvchilar aylanmani bepul moliyalaydi; aksincha bo'lsa pul siklini qisqartirish zarur", "Если DPO ≥ DSO — поставщики бесплатно финансируют оборот; иначе сокращайте денежный цикл", "If DPO ≥ DSO, suppliers finance your cycle for free; otherwise shorten the cash cycle")},
+ "D9": {"good": ("Operatsion sikl qisqa", "Операционный цикл короткий", "Short operating cycle"),
+        "warn": ("Sikl uzun — zaxira va undiruvni parallel tezlashtiring", "Цикл длинный — ускоряйте запасы и инкассацию параллельно", "Long cycle — speed up inventory and collections in parallel")},
+ "D10": {"good": ("Pul sikli samarali", "Денежный цикл эффективен", "Efficient cash cycle"),
+         "warn": ("Pul sikli uzun — aylanma kapitalga doimiy bosim", "Денежный цикл длинный — постоянное давление на оборотку", "Long cash cycle — constant working-capital strain")},
+ "E1": {"good": ("Sotuv o'sishda — tendentsiyani mustahkamlang", "Продажи растут — закрепляйте тренд", "Sales growing — reinforce the trend"),
+        "warn": ("O'sish sekinlashdi — bozor va kanal tahlili zarur", "Рост замедлился — нужен анализ рынка и каналов", "Growth slowing — analyze market and channels"),
+        "bad":  ("Sotuv qisqarmoqda — narx, mahsulot va kanalni qayta ko'ring", "Продажи падают — пересмотрите цены, продукт и каналы", "Sales declining — revisit pricing, product, channels")},
+ "E2": {"good": ("Foyda o'sishda", "Прибыль растёт", "Profit is growing"),
+        "warn": ("Foyda o'sishi to'xtadi — xarajat tahlili zarur", "Рост прибыли остановился — нужен анализ затрат", "Profit growth stalled — analyze costs"),
+        "bad":  ("Foyda pasaymoqda — marja va hajm omillarini ajrating", "Прибыль снижается — разделите факторы маржи и объёма", "Profit falling — split margin vs volume effects")},
+ "E3": {"good": ("Yalpi foyda o'sishda", "Валовая прибыль растёт", "Gross profit growing"),
+        "warn": ("Yalpi foyda o'sishi sust", "Рост валовой прибыли слабый", "Weak gross profit growth"),
+        "bad":  ("Yalpi foyda pasaymoqda — tannarx va narxni ko'ring", "Валовая прибыль падает — смотрите себестоимость и цены", "Gross profit falling — check COGS and pricing")},
+ "E4": {"good": ("Tannarx nazoratda", "Себестоимость под контролем", "COGS under control"),
+        "warn": ("Tannarx tushumdan tez o'smoqda — marja yemirilmoqda", "Себестоимость растёт быстрее выручки — эрозия маржи", "COGS outpacing revenue — margin erosion")},
+ "E5": {"good": ("Aktivlar o'sishda", "Активы растут", "Assets growing"),
+        "warn": ("Aktivlar qisqarmoqda — sabab tahlili zarur", "Активы сокращаются — нужен анализ причин", "Assets shrinking — investigate causes"),
+        "bad":  ("Aktivlar sezilarli qisqardi", "Активы заметно сократились", "Assets contracted notably")},
+ "E6": {"good": ("Kapital mustahkamlanmoqda", "Капитал укрепляется", "Equity strengthening"),
+        "warn": ("Kapital o'smayapti", "Капитал не растёт", "Equity stagnant"),
+        "bad":  ("Kapital yemirilmoqda — zarar yoki dividend bosimi", "Капитал размывается — убытки или дивидендное давление", "Equity eroding — losses or dividend pressure")},
+ "E7": {"good": ("Debitorlik nazoratda", "Дебиторка под контролем", "Receivables under control"),
+        "warn": ("Debitorlik sotuvdan tez o'smoqda — pul bog'lanmoqda", "Дебиторка растёт быстрее продаж — деньги связываются", "Receivables outpacing sales — cash getting tied up")},
+ "E8": {"good": ("Marja yaxshilanmoqda", "Маржа улучшается", "Margin improving"),
+        "warn": ("Marja siqilmoqda — narx/xarajat balansini ko'ring", "Маржа сжимается — смотрите баланс цен и затрат", "Margin compressing — review price/cost balance")},
+}
+
+_LANG_IDX = {"uz": 0, "ru": 1, "en": 2}
+
+def t_auto_comment(code: str, status: str, lang: str) -> str:
+    """Status bo'yicha avtomatik CFO izohi. Topilmasa bo'sh qator."""
+    tup = AUTO_CK.get(code, {}).get(status)
+    if not tup:
+        return ""
+    return tup[_LANG_IDX.get(lang, 0)]
+
+# --- Pul oqimi: yo'nalishlar bo'yicha xulosa va takliflar ---
+CFA = {
+ "dir_title": {"uz": "Yo'nalishlar bo'yicha xulosa", "ru": "Выводы по направлениям", "en": "Conclusions by Direction"},
+ "sol_title": {"uz": "Pul oqimini yaxshilash bo'yicha takliflar", "ru": "Предложения по улучшению денежного потока", "en": "Cash Flow Improvement Proposals"},
+ "lbl_ocf": {"uz": "Operatsion", "ru": "Операционный", "en": "Operating"},
+ "lbl_icf": {"uz": "Investitsion", "ru": "Инвестиционный", "en": "Investing"},
+ "lbl_fcf": {"uz": "Moliyaviy", "ru": "Финансовый", "en": "Financing"},
+ "lbl_tied": {"uz": "Pul qayerda band", "ru": "Где связаны деньги", "en": "Where Cash Is Tied"},
+ "ocf_good": {"uz": "asosiy faoliyat {x} pul yaratdi \u2014 biznes o'zini o'zi moliyalaydi.",
+              "ru": "основная деятельность сгенерировала {x} \u2014 бизнес самофинансируется.",
+              "en": "core operations generated {x} \u2014 the business is self-funding."},
+ "ocf_paper": {"uz": "foyda {p} bo'lsa-da, operatsion oqim atigi {x} \u2014 foyda \u00abqog'ozda\u00bb, pul aylanma kapitalga singib ketmoqda.",
+               "ru": "при прибыли {p} операционный поток лишь {x} \u2014 прибыль \u00abбумажная\u00bb, деньги уходят в оборотный капитал.",
+               "en": "despite profit of {p}, operating flow is only {x} \u2014 profit is on paper, cash sinks into working capital."},
+ "ocf_neg": {"uz": "operatsion oqim manfiy ({x}) \u2014 asosiy faoliyat pul yutmoqda, joriy to'lovlar tashqi manbalar hisobiga qoplanmoqda.",
+             "ru": "операционный поток отрицателен ({x}) \u2014 основная деятельность поглощает деньги, текущие платежи покрываются из внешних источников.",
+             "en": "operating flow is negative ({x}) \u2014 core operations consume cash; current payments rely on external sources."},
+ "tied_receivables": {"uz": "debitorlik qarzlariga {x} bog'landi \u2014 mijozlar to'lovi kechikmoqda",
+                      "ru": "в дебиторской задолженности связано {x} \u2014 клиенты задерживают оплату",
+                      "en": "{x} tied up in receivables \u2014 customer payments are delayed"},
+ "tied_inventories": {"uz": "zaxiralarga {x} bog'landi \u2014 ombor qoldig'i o'sgan",
+                      "ru": "в запасах связано {x} \u2014 складские остатки выросли",
+                      "en": "{x} tied up in inventory \u2014 stock levels grew"},
+ "tied_other_ca": {"uz": "boshqa joriy aktivlarga {x} bog'landi",
+                   "ru": "в прочих текущих активах связано {x}",
+                   "en": "{x} tied up in other current assets"},
+ "tied_creditors": {"uz": "kreditorlik {x} ga kamaytirildi \u2014 pul yetkazib beruvchilarga yo'naltirilgan",
+                    "ru": "кредиторская задолженность сокращена на {x} \u2014 деньги ушли поставщикам",
+                    "en": "payables reduced by {x} \u2014 cash went to suppliers"},
+ "icf_capex": {"uz": "{x} uzoq muddatli aktivlarga yo'naltirildi \u2014 kengayish/yangilanish bosqichi.",
+               "ru": "{x} направлено в долгосрочные активы \u2014 этап расширения/обновления.",
+               "en": "{x} went into non-current assets \u2014 expansion/renewal phase."},
+ "icf_fininv": {"uz": "{x} qisqa muddatli moliyaviy investitsiyalarga joylandi \u2014 bu tez pulga aylanadigan zaxira bo'lib xizmat qilishi mumkin.",
+                "ru": "{x} размещено в краткосрочные финансовые вложения \u2014 это быстроликвидный резерв при необходимости.",
+                "en": "{x} placed into short-term financial investments \u2014 a quickly liquid reserve if needed."},
+ "icf_divest": {"uz": "investitsion oqim musbat ({x}) \u2014 aktivlar sotilmoqda yoki investitsiyalar qaytmoqda.",
+                "ru": "инвестиционный поток положителен ({x}) \u2014 активы продаются или инвестиции возвращаются.",
+                "en": "investing flow is positive ({x}) \u2014 assets are being sold or investments returned."},
+ "icf_flat": {"uz": "investitsion faoliyat deyarli neytral.",
+              "ru": "инвестиционная деятельность практически нейтральна.",
+              "en": "investing activity is nearly neutral."},
+ "fcf_inflow": {"uz": "{x} tashqaridan jalb qilindi (qarz/kapital) \u2014 taqchillik tashqi pul bilan yopilmoqda.",
+                "ru": "{x} привлечено извне (долг/капитал) \u2014 дефицит закрывается внешними деньгами.",
+                "en": "{x} raised externally (debt/equity) \u2014 the deficit is covered by outside money."},
+ "fcf_outflow": {"uz": "{x} moliyaviy yo'nalishda chiqdi (qarz qaytarish/dividend).",
+                 "ru": "{x} ушло по финансовому направлению (погашение долга/дивиденды).",
+                 "en": "{x} flowed out via financing (debt repayment/dividends)."},
+ "fcf_flat": {"uz": "moliyaviy faoliyat deyarli neytral \u2014 tashqi moliyalashga murojaat qilinmadi.",
+              "ru": "финансовая деятельность практически нейтральна \u2014 внешнее финансирование не привлекалось.",
+              "en": "financing activity is nearly neutral \u2014 no external funding was tapped."},
+ "sol_receivables": {"uz": "Debitorlik bilan ishlash: to'lov muddatlarini qisqartirish, oldindan to'lov ulushini oshirish, yirik qarzdorlar bo'yicha faktoringni ko'rib chiqish \u2014 {x} ning bir qismini pulga aylantirish mumkin.",
+                     "ru": "Работа с дебиторкой: сократить сроки оплаты, увеличить долю предоплаты, рассмотреть факторинг по крупным должникам \u2014 часть из {x} можно вернуть в деньги.",
+                     "en": "Receivables management: shorten payment terms, raise prepayment share, consider factoring for large debtors \u2014 part of {x} can be converted back to cash."},
+ "sol_inventories": {"uz": "Zaxiralarni ABC-tahlil bilan qisqartirish: sekin aylanuvchi pozitsiyalarni chegirma bilan sotish, xarid normativlarini joriy etish.",
+                     "ru": "Сократить запасы через ABC-анализ: распродать неликвиды со скидкой, ввести нормативы закупок.",
+                     "en": "Cut inventory via ABC analysis: discount slow movers, set procurement norms."},
+ "sol_creditors": {"uz": "Yetkazib beruvchilar bilan to'lov muddatini uzaytirishni kelishish \u2014 DPO ni DSO ga yaqinlashtirish pul siklini yengillashtiradi.",
+                   "ru": "Договориться с поставщиками об удлинении сроков оплаты \u2014 сближение DPO с DSO облегчит денежный цикл.",
+                   "en": "Negotiate longer supplier terms \u2014 bringing DPO closer to DSO eases the cash cycle."},
+ "sol_sti": {"uz": "Qisqa muddatli investitsiyalar ({x}) \u2014 likvidlik tanqisligida birinchi navbatda shu rezervni pulga aylantirish mumkin.",
+             "ru": "Краткосрочные вложения ({x}) \u2014 при дефиците ликвидности этот резерв можно конвертировать в деньги в первую очередь.",
+             "en": "Short-term investments ({x}) \u2014 in a liquidity squeeze this reserve can be liquidated first."},
+ "sol_capex": {"uz": "Operatsion oqim musbat bo'lguncha yangi kapital qo'yilmalarni cheklash yoki lizing orqali moliyalash.",
+               "ru": "До выхода операционного потока в плюс ограничить новые капвложения или финансировать их через лизинг.",
+               "en": "Until operating flow turns positive, limit new capex or finance it via leasing."},
+ "sol_debt_risk": {"uz": "Operatsion taqchillik qarz hisobiga yopilmoqda \u2014 bu barqaror emas: birinchi navbatda aylanma kapitaldagi pulni bo'shating, keyin qarz oling.",
+                   "ru": "Операционный дефицит закрывается долгом \u2014 это неустойчиво: сначала высвободите деньги из оборотного капитала, затем привлекайте долг.",
+                   "en": "The operating deficit is debt-funded \u2014 unsustainable: free cash from working capital first, borrow second."},
+ "sol_ok": {"uz": "Pul oqimi sog'lom tuzilmada: operatsion oqim musbat va investitsiyalarni qoplaydi. Ortiqcha pulni qisqa muddatli daromadli joylashtirishni ko'rib chiqing.",
+            "ru": "Структура денежного потока здоровая: операционный поток положителен и покрывает инвестиции. Рассмотрите доходное размещение свободных средств.",
+            "en": "Cash flow structure is healthy: operating flow is positive and covers investments. Consider yield placement of surplus cash."},
+}

@@ -27,15 +27,19 @@ if ! command -v node >/dev/null 2>&1; then
 fi
 node --version
 
-echo "==> 2/6  nginx, certbot, git o'rnatish"
+echo "==> 2/6  nginx, certbot, git, python3 o'rnatish"
 sudo apt-get update -y
-sudo apt-get install -y nginx certbot python3-certbot-nginx git
+sudo apt-get install -y nginx certbot python3-certbot-nginx git python3 python3-pip
 
 echo "==> 3/6  PM2 o'rnatish"
 sudo npm install -g pm2
 
 echo "==> 4/6  Loyihani build qilish (server+client deps + frontend)"
 npm run build
+
+echo "==> Python tahlil yadrosi (engine) kutubxonalari"
+pip3 install --break-system-packages -r "$APP_DIR/server/engine/requirements.txt" 2>/dev/null \
+  || pip3 install -r "$APP_DIR/server/engine/requirements.txt"
 
 if [ ! -f "$APP_DIR/.env" ]; then
   echo "!!  DIQQAT: $APP_DIR/.env topilmadi."

@@ -6,7 +6,7 @@ import multer from "multer";
 import path from "node:path";
 import fs from "node:fs";
 import { fileURLToPath } from "node:url";
-import { analyzeFile } from "./analyze.js";
+import { execFile } from "node:child_process";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 4000;
@@ -254,18 +254,56 @@ const analyzeLimiter = rateLimit({
   message: { error: "Juda ko'p so'rov. Birozdan so'ng qayta urinib ko'ring." },
 });
 
-app.post("/api/analyze", analyzeLimiter, upload.single("file"), (req, res) => {
-  if (!req.file) return res.status(400).json({ error: "Fayl yuklanmadi" });
-  try {
-    const result = analyzeFile(req.file.path);
-    res.json({ ok: true, file: req.file.originalname, ...result });
-  } catch (err) {
-    console.warn("⚠️ Tahlil xatosi:", err.message);
-    res.status(400).json({ error: "Faylni o'qib bo'lmadi. Format to'g'riligini tekshiring." });
-  } finally {
-    // Tahlil fayllarini saqlamaymiz — tahlildan keyin o'chiramiz.
-    fs.promises.unlink(req.file.path).catch(() => {});
-  }
+// Tahlil yadrosi — Telegram bot bilan AYNAN bir xil (Python engine).
+const ENGINE = path.join(__dirname, "engine", "analyze_cli.py");
+const PYTHON_BIN = process.env.PYTHON_BIN || "python3";
+
+app.post("/api/analyze", analyzeLimiter, upload.array("files", 2), (req, res) => {
+  const files = req.files || [];
+  if (!files.length) return res.status(400).json({ error: "Fayl yuklanmadi" });
+
+  const paths = files.map((f) => f.path);
+  const pdfPath = path.join(uploadDir, `report-${Date.now()}.pdf`);
+  const cleanup = () => {
+    paths.forEach((p) => fs.promises.unlink(p).catch(() => {}));
+    fs.promises.unlink(pdfPath).catch(() => {});
+  };
+
+  const args = [ENGINE, ...paths, "--lang", "uz", "--pdf", pdfPath];
+  execFile(
+    PYTHON_BIN,
+    args,
+    { timeout: 60000, maxBuffer: 12 * 1024 * 1024 },
+    (err, stdout) => {
+      if (err && !stdout) {
+        console.warn("⚠️ Tahlil (python) xatosi:", err.message);
+        cleanup();
+        return res
+          .status(500)
+          .json({ error: "Tahlil amalga oshmadi. Fayl formatini tekshiring." });
+      }
+      let data;
+      try {
+        data = JSON.parse(String(stdout).trim());
+      } catch {
+        cleanup();
+        return res.status(500).json({ error: "Natijani o'qib bo'lmadi." });
+      }
+      if (!data.ok) {
+        cleanup();
+        return res
+          .status(400)
+          .json({ error: data.error || "Tahlil amalga oshmadi" });
+      }
+      // Bot bilan bir xil PDF — javobga base64 sifatida qo'shamiz, so'ng o'chiramiz.
+      let pdfBase64 = "";
+      try {
+        pdfBase64 = fs.readFileSync(pdfPath).toString("base64");
+      } catch {}
+      cleanup();
+      res.json({ ...data, pdfBase64 });
+    }
+  );
 });
 
 // /api/leads — faqat admin token bilan yoki localhost'dan

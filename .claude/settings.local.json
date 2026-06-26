@@ -9,7 +9,11 @@
       "mcp__visualize__show_widget",
       "Bash(bash -n deploy/setup.sh)",
       "WebFetch(domain:dns.google)",
-      "WebFetch(domain:digitalcfo.uz)"
+      "WebFetch(domain:digitalcfo.uz)",
+      "Bash(git add *)",
+      "Bash(git commit -q -m 'feat: '\\\\''Bepul tahlil'\\\\'' bo'\\\\''limini qaytarish — ekranda darhol KPI tahlili *)",
+      "Bash(git push *)",
+      "Bash(git commit -q -m 'fix: Telegram xabaridagi vaqt har doim GMT+5 \\(Asia/Tashkent\\) *)"
     ]
   }
 }

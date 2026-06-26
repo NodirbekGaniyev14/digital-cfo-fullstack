@@ -19,12 +19,14 @@ export async function submitContact(formData) {
 }
 
 /**
- * Moliyaviy faylni backendga yuborib, hisoblangan KPI natijasini oladi.
- * Fayl serverda tahlildan keyin saqlanmaydi.
+ * Moliyaviy fayllarni (Balans + Moliyaviy) backendga yuborib, bot bilan
+ * bir xil tahlil natijasini (ko'rsatkichlar + PDF) oladi. Fayllar saqlanmaydi.
  */
-export async function analyzeFile(file) {
+export async function analyzeFile(files) {
   const fd = new FormData();
-  fd.append("file", file);
+  (Array.isArray(files) ? files : [files])
+    .filter(Boolean)
+    .forEach((f) => fd.append("files", f));
   const res = await fetch(`${base44Client.baseURL}/analyze`, {
     method: "POST",
     body: fd,
