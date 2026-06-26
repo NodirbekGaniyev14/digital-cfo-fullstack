@@ -36,6 +36,10 @@ app.use(express.json({ limit: "1mb" }));
 const uploadDir = path.join(__dirname, "uploads");
 fs.mkdirSync(uploadDir, { recursive: true });
 
+const dataDir = path.join(__dirname, "data");
+fs.mkdirSync(dataDir, { recursive: true });
+const statsFile = path.join(dataDir, "stats.json");
+
 const storage = multer.diskStorage({
   destination: (_req, _file, cb) => cb(null, uploadDir),
   filename: (_req, file, cb) => {
@@ -315,6 +319,43 @@ app.get("/api/leads", (req, res) => {
     : isLocal; // token sozlanmagan bo'lsa — faqat localhost
   if (!authed) return res.status(403).json({ error: "Ruxsat yo'q" });
   res.json({ leads });
+});
+
+// ---- Bot statistikasi (kunlik) -----------------------------------------------
+// Bot har kuni 03:00 da POST /api/stats orqali yangilab turadi (token bilan).
+app.get("/api/stats", (_req, res) => {
+  try {
+    res.json(JSON.parse(fs.readFileSync(statsFile, "utf8")));
+  } catch {
+    res.json({}); // hali ma'lumot yo'q
+  }
+});
+
+app.post("/api/stats", (req, res) => {
+  const token = process.env.STATS_TOKEN;
+  if (!token || req.get("x-stats-token") !== token) {
+    return res.status(403).json({ error: "Ruxsat yo'q" });
+  }
+  const b = req.body || {};
+  const num = (v) => (Number.isFinite(Number(v)) ? Number(v) : 0);
+  const stats = {
+    users: num(b.users),
+    visits: num(b.visits),
+    reports: num(b.reports),
+    with_phone: num(b.with_phone),
+    today_active: num(b.today_active),
+    premium: num(b.premium),
+    updated_at: new Date().toISOString(),
+  };
+  try {
+    const tmp = statsFile + ".tmp";
+    fs.writeFileSync(tmp, JSON.stringify(stats, null, 2));
+    fs.renameSync(tmp, statsFile);
+  } catch {
+    return res.status(500).json({ error: "Saqlab bo'lmadi" });
+  }
+  console.log("📊 Statistika yangilandi:", stats.users, "foydalanuvchi");
+  res.json({ ok: true });
 });
 
 // ---- Multer/umumiy xatolarni chiroyli qaytarish ------------------------------

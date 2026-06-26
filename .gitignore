@@ -11,3 +11,5 @@ server/leads.json
 server/leads.json.tmp
 server/uploads/*
 !server/uploads/.gitkeep
+server/data/stats.json
+server/data/stats.json.tmp
