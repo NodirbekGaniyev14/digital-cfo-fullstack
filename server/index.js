@@ -86,6 +86,20 @@ function saveLeads(list) {
 }
 let leads = loadLeads();
 
+// Vaqtni har doim Toshkent (GMT+5) zonasida formatlash.
+function fmtTashkent(iso) {
+  return new Date(iso).toLocaleString("uz-UZ", {
+    timeZone: "Asia/Tashkent",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  });
+}
+
 // ---- Telegram bildirishnoma (ixtiyoriy) --------------------------------------
 async function notifyTelegram(lead, files = []) {
   const token = process.env.TELEGRAM_BOT_TOKEN;
@@ -103,7 +117,7 @@ async function notifyTelegram(lead, files = []) {
       ? files.map((f) => `📎 *${f.label}:* ${f.file.originalname}`).join("\n") +
         "\n"
       : "") +
-    `🕒 ${new Date(lead.createdAt).toLocaleString("uz-UZ")}`;
+    `🕒 ${fmtTashkent(lead.createdAt)} (GMT+5)`;
 
   try {
     const res = await fetch(
