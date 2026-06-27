@@ -5,10 +5,10 @@ import {
   Loader2,
   FileSpreadsheet,
   X,
-  Download,
   ShieldCheck,
   AlertTriangle,
   Send,
+  Lock,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -22,11 +22,20 @@ const FREE_KEY = "cfo_free_used"; // saytda bir marta bepul tahlil
 const BOT_URL = "https://t.me/Moliyaviy_Tahlilchi_bot";
 
 const ST = {
-  good: { t: "text-emerald-700", b: "bg-emerald-500/12", label: "Yaxshi", ring: "#10B981" },
-  warn: { t: "text-amber-700", b: "bg-amber-500/12", label: "Chegaraviy", ring: "#f59e0b" },
-  bad: { t: "text-red-700", b: "bg-red-500/12", label: "Past", ring: "#ef4444" },
-  na: { t: "text-slate-400", b: "bg-slate-400/10", label: "—", ring: "#94a3b8" },
+  good: { t: "text-emerald-700", b: "bg-emerald-500/12", label: "Yaxshi" },
+  warn: { t: "text-amber-700", b: "bg-amber-500/12", label: "Chegaraviy" },
+  bad: { t: "text-red-700", b: "bg-red-500/12", label: "Past" },
+  na: { t: "text-slate-400", b: "bg-slate-400/10", label: "—" },
 };
+
+const LOCKED_NAMES = [
+  "Tezkor likvidlik",
+  "Avtonomiya koeffitsienti",
+  "Sof rentabellik (ROS)",
+  "Aktivlar aylanuvchanligi",
+  "Debitorlik aylanishi (kun)",
+  "Sotuv o'sish sur'ati",
+];
 
 function fmtVal(v, unit) {
   if (v === null || v === undefined) return "—";
@@ -74,7 +83,7 @@ export default function InstantAnalysis() {
         localStorage.setItem(FREE_KEY, String(Date.now()));
       } catch {}
       setUsed(true);
-      toast.success("Tahlil tayyor — natijalar quyida.");
+      toast.success("Asosiy ko'rsatkichlar tayyor!");
     } catch (err) {
       toast.error(err.message || "Tahlil amalga oshmadi");
     } finally {
@@ -82,20 +91,7 @@ export default function InstantAnalysis() {
     }
   }
 
-  function downloadPdf() {
-    if (!result?.pdfBase64) return;
-    const a = document.createElement("a");
-    a.href = `data:application/pdf;base64,${result.pdfBase64}`;
-    a.download = `${(result.company || "moliyaviy-hisobot").slice(0, 50)}.pdf`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-  }
-
   const score = result?.score ?? null;
-  const groupKeys = result
-    ? [...new Set(result.indicators.map((i) => i.group))]
-    : [];
   const period = result
     ? [result.period_year, result.period_quarter && `${result.period_quarter}-chorak`]
         .filter(Boolean)
@@ -111,7 +107,7 @@ export default function InstantAnalysis() {
           "radial-gradient(50% 50% at 50% 0%, rgba(16,185,129,.1), transparent 60%), #F8FAFC",
       }}
     >
-      <div className="mx-auto max-w-[960px]">
+      <div className="mx-auto max-w-[820px]">
         <motion.div
           initial="hidden"
           whileInView="show"
@@ -126,75 +122,55 @@ export default function InstantAnalysis() {
             Faylingizni hoziroq sinab ko'ring
           </h2>
           <p className="mt-3.5 text-[16px] leading-relaxed text-slate-600">
-            Shakl 1 (Balans) va Shakl 2 (Moliyaviy natijalar) ni yuklang —
-            tizim ~50 ta ko'rsatkichni hisoblab, baholab, tayyor PDF hisobot
-            beradi. <span className="font-semibold text-emerald-600">Saytda bir
-            marta bepul</span> · faylingiz saqlanmaydi.
+            Balans va Moliyaviy hisobotni yuklang — umumiy ball va{" "}
+            <span className="font-semibold text-navy">5 ta asosiy ko'rsatkich</span> bepul
+            ko'rinadi. To'liq tahlil (~50 ko'rsatkich + PDF hisobot) Telegram botda.
+            <span className="block text-emerald-600">Saytda bir marta bepul · faylingiz saqlanmaydi.</span>
           </p>
         </motion.div>
 
-        {/* Yuklash paneli — faqat bepul tahlil ishlatilmagan bo'lsa */}
+        {/* Yuklash paneli — faqat ishlatilmagan bo'lsa */}
         {!used && (
-        <motion.div
-          initial="hidden"
-          whileInView="show"
-          viewport={viewportOnce}
-          variants={fadeUp}
-          className="glass-card rounded-[22px] p-6 shadow-[0_10px_30px_rgba(15,23,42,.07)] sm:p-8"
-        >
-          <div className="grid gap-4 sm:grid-cols-2">
-            <FileDrop
-              id="ia-balans"
-              label="1. Balans (Shakl 1)"
-              file={balans}
-              onPick={(f) => pick(setBalans, f)}
-              onClear={() => setBalans(null)}
-            />
-            <FileDrop
-              id="ia-moliyaviy"
-              label="2. Moliyaviy natijalar (Shakl 2)"
-              file={moliyaviy}
-              onPick={(f) => pick(setMoliyaviy, f)}
-              onClear={() => setMoliyaviy(null)}
-            />
-          </div>
-          <div className="mt-5 flex justify-center">
-            <Button
-              onClick={run}
-              variant="emerald"
-              size="lg"
-              disabled={loading || (!balans && !moliyaviy)}
-              className="min-w-[240px]"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="h-[18px] w-[18px] animate-spin" />
-                  Tahlil qilinmoqda...
-                </>
-              ) : (
-                "Tahlil qilish"
-              )}
-            </Button>
-          </div>
-        </motion.div>
-        )}
-
-        {/* Bepul limit tugagan — botga taklif */}
-        {used && !result && (
           <motion.div
             initial="hidden"
             whileInView="show"
             viewport={viewportOnce}
             variants={fadeUp}
+            className="glass-card rounded-[22px] p-6 shadow-[0_10px_30px_rgba(15,23,42,.07)] sm:p-8"
           >
+            <div className="grid gap-4 sm:grid-cols-2">
+              <FileDrop id="ia-balans" label="1. Balans (Shakl 1)" file={balans}
+                onPick={(f) => pick(setBalans, f)} onClear={() => setBalans(null)} />
+              <FileDrop id="ia-moliyaviy" label="2. Moliyaviy natijalar (Shakl 2)" file={moliyaviy}
+                onPick={(f) => pick(setMoliyaviy, f)} onClear={() => setMoliyaviy(null)} />
+            </div>
+            <div className="mt-5 flex justify-center">
+              <Button onClick={run} variant="emerald" size="lg"
+                disabled={loading || (!balans && !moliyaviy)} className="min-w-[240px]">
+                {loading ? (
+                  <>
+                    <Loader2 className="h-[18px] w-[18px] animate-spin" />
+                    Tahlil qilinmoqda...
+                  </>
+                ) : (
+                  "Tahlil qilish"
+                )}
+              </Button>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Bepul limit tugagan va natija yo'q — botga taklif */}
+        {used && !result && (
+          <motion.div initial="hidden" whileInView="show" viewport={viewportOnce} variants={fadeUp}>
             <BotCTA
               heading="Bepul tahlildan foydalandingiz"
-              text="Saytdagi bepul tahlil bir martalik. Cheksiz tahlil, hisobotlaringiz tarixi va to'liq xizmat uchun Telegram botimizdan foydalaning — u sizni taniydi va barcha natijalarni saqlaydi."
+              text="Saytdagi bepul tahlil bir martalik. Cheksiz tahlil, barcha ~50 ko'rsatkich va to'liq PDF hisobotlar uchun Telegram botimizdan foydalaning."
             />
           </motion.div>
         )}
 
-        {/* Natijalar */}
+        {/* Natijalar — teaser */}
         <AnimatePresence>
           {result && (
             <motion.div
@@ -204,27 +180,18 @@ export default function InstantAnalysis() {
               className="mt-8"
             >
               {/* Scorecard */}
-              <div className="mb-6 rounded-[22px] border border-navy/[.06] bg-white p-7 shadow-[0_8px_24px_rgba(15,23,42,.06)]">
+              <div className="mb-5 rounded-[22px] border border-navy/[.06] bg-white p-7 shadow-[0_8px_24px_rgba(15,23,42,.06)]">
                 <div className="flex flex-col items-center gap-5 sm:flex-row sm:gap-7">
                   <div className="relative flex h-[120px] w-[120px] flex-none items-center justify-center">
                     <svg className="h-full w-full -rotate-90" viewBox="0 0 120 120">
                       <circle cx="60" cy="60" r="52" fill="none" stroke="#E2E8F0" strokeWidth="12" />
-                      <circle
-                        cx="60"
-                        cy="60"
-                        r="52"
-                        fill="none"
-                        stroke={scoreColor(score)}
-                        strokeWidth="12"
-                        strokeLinecap="round"
+                      <circle cx="60" cy="60" r="52" fill="none" stroke={scoreColor(score)}
+                        strokeWidth="12" strokeLinecap="round"
                         strokeDasharray={2 * Math.PI * 52}
-                        strokeDashoffset={2 * Math.PI * 52 * (1 - score / 100)}
-                      />
+                        strokeDashoffset={2 * Math.PI * 52 * (1 - score / 100)} />
                     </svg>
                     <div className="absolute flex flex-col items-center">
-                      <span className="font-mono text-[30px] font-bold leading-none text-navy">
-                        {score}
-                      </span>
+                      <span className="font-mono text-[30px] font-bold leading-none text-navy">{score}</span>
                       <span className="text-[11px] text-slate-400">/ 100</span>
                     </div>
                   </div>
@@ -250,65 +217,81 @@ export default function InstantAnalysis() {
                       <Cnt n={result.counts.bad} t="Past" c="text-red-700 bg-red-500/12" />
                     </div>
                   </div>
-                  {result.pdfBase64 && (
-                    <Button onClick={downloadPdf} variant="navy" size="lg" className="flex-none">
-                      <Download className="h-[17px] w-[17px]" /> PDF hisobot
+                </div>
+              </div>
+
+              {/* 5 ta asosiy ko'rsatkich (ochiq) */}
+              <div className="overflow-hidden rounded-[18px] border border-navy/[.07] bg-white">
+                <div className="flex items-center justify-between bg-navy px-5 py-3">
+                  <span className="font-heading text-[15px] font-bold text-white">
+                    Asosiy ko'rsatkichlar
+                  </span>
+                  <span className="rounded-md bg-emerald-500/20 px-2 py-0.5 font-mono text-[11px] font-semibold text-emerald-300">
+                    {result.highlights?.length || 0} / {result.total} ochiq
+                  </span>
+                </div>
+                <div className="divide-y divide-navy/[.05]">
+                  {(result.highlights || []).map((ind) => {
+                    const s = ST[ind.status] || ST.na;
+                    return (
+                      <div key={ind.code} className="flex items-center gap-3 px-5 py-3 text-[13.5px]">
+                        <span className="w-8 flex-none font-mono text-[12px] font-semibold text-slate-400">
+                          {ind.code}
+                        </span>
+                        <span className="flex-1 text-slate-700">{ind.name}</span>
+                        <span className="w-[90px] flex-none text-right font-mono font-semibold text-navy">
+                          {fmtVal(ind.value, ind.unit)}
+                        </span>
+                        <span className={`w-[86px] flex-none rounded-md px-2 py-0.5 text-center text-[11.5px] font-semibold ${s.b} ${s.t}`}>
+                          {s.label}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Yopiq qism — botga taklif */}
+              {result.locked > 0 && (
+                <div className="relative mt-5 overflow-hidden rounded-[18px] border border-navy/[.08] bg-white">
+                  <div aria-hidden className="pointer-events-none select-none blur-[6px]">
+                    {LOCKED_NAMES.map((n, i) => (
+                      <div key={i} className={`flex items-center gap-3 px-5 py-3 text-[13.5px] ${i % 2 ? "bg-navy/[.02]" : ""}`}>
+                        <span className="w-8 font-mono text-[12px] text-slate-400">··</span>
+                        <span className="flex-1 text-slate-600">{n}</span>
+                        <span className="w-[90px] text-right font-mono font-semibold text-navy">··.·</span>
+                        <span className="w-[86px] rounded-md bg-slate-400/20 py-0.5 text-center text-[11.5px]">·····</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-white/50 px-6 text-center backdrop-blur-[2px]">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-navy/[.06] text-navy">
+                      <Lock className="h-6 w-6" />
+                    </div>
+                    <p className="font-heading text-[17px] font-bold">
+                      Yana {result.locked} ta ko'rsatkich yopiq
+                    </p>
+                    <p className="max-w-[480px] text-[13.5px] leading-relaxed text-slate-600">
+                      Likvidlik, barqarorlik, rentabellik, aylanuvchanlik va o'sishning
+                      barcha ko'rsatkichlari, pul oqimi tahlili, xulosa-tavsiyalar va
+                      <span className="font-semibold"> to'liq PDF hisobot</span> — Telegram botda.
+                    </p>
+                    <Button asChild variant="navy" size="lg">
+                      <a href={BOT_URL} target="_blank" rel="noreferrer">
+                        <Send className="h-[17px] w-[17px]" /> Telegram botda to'liq ko'rish
+                      </a>
                     </Button>
-                  )}
-                </div>
-                {!result.has_pl && (
-                  <div className="mt-4 flex items-start gap-2.5 rounded-xl border border-amber-500/30 bg-amber-500/[.06] p-3 text-[13px] text-amber-800">
-                    <AlertTriangle className="mt-0.5 h-4 w-4 flex-none" />
-                    Shakl 2 (Moliyaviy natijalar) topilmadi — rentabellik va o'sish
-                    ko'rsatkichlari hisoblanmadi. To'liq tahlil uchun ikkala shaklni yuklang.
-                  </div>
-                )}
-              </div>
-
-              {/* Guruhlar bo'yicha ko'rsatkichlar */}
-              {groupKeys.map((g) => (
-                <div key={g} className="mb-5 overflow-hidden rounded-[18px] border border-navy/[.07] bg-white">
-                  <div className="bg-navy px-5 py-3 font-heading text-[15px] font-bold text-white">
-                    {result.groups[g]}
-                  </div>
-                  <div className="divide-y divide-navy/[.05]">
-                    {result.indicators
-                      .filter((i) => i.group === g)
-                      .map((ind) => {
-                        const s = ST[ind.status] || ST.na;
-                        return (
-                          <div
-                            key={ind.code}
-                            className="flex items-center gap-3 px-5 py-2.5 text-[13.5px]"
-                          >
-                            <span className="w-8 flex-none font-mono text-[12px] font-semibold text-slate-400">
-                              {ind.code}
-                            </span>
-                            <span className="flex-1 text-slate-700">{ind.name}</span>
-                            <span className="hidden w-[120px] flex-none text-right font-mono text-[12px] text-slate-400 sm:block">
-                              {ind.norm}
-                            </span>
-                            <span className="w-[90px] flex-none text-right font-mono font-semibold text-navy">
-                              {fmtVal(ind.value, ind.unit)}
-                            </span>
-                            <span
-                              className={`w-[86px] flex-none rounded-md px-2 py-0.5 text-center text-[11.5px] font-semibold ${s.b} ${s.t}`}
-                            >
-                              {s.label}
-                            </span>
-                          </div>
-                        );
-                      })}
                   </div>
                 </div>
-              ))}
+              )}
 
-              <div className="mt-8">
-                <BotCTA
-                  heading="Bu sizning bepul tahlilingiz edi"
-                  text="Yana tahlil qilish, barcha hisobotlaringizni saqlash va cheksiz foydalanish uchun Telegram botimizga o'ting — bu yerdagi bilan aynan bir xil to'liq xizmat."
-                />
-              </div>
+              {!result.has_pl && (
+                <div className="mt-5 flex items-start gap-2.5 rounded-xl border border-amber-500/30 bg-amber-500/[.06] p-3 text-[13px] text-amber-800">
+                  <AlertTriangle className="mt-0.5 h-4 w-4 flex-none" />
+                  Shakl 2 (Moliyaviy natijalar) topilmadi — ba'zi ko'rsatkichlar hisoblanmadi.
+                  To'liq tahlil uchun ikkala shaklni yuklang.
+                </div>
+              )}
             </motion.div>
           )}
         </AnimatePresence>
@@ -324,9 +307,7 @@ function BotCTA({ heading, text }) {
         <Send className="h-7 w-7" />
       </div>
       <h3 className="font-heading text-[20px] font-bold">{heading}</h3>
-      <p className="mx-auto mt-2 max-w-[540px] text-[14.5px] leading-relaxed text-slate-600">
-        {text}
-      </p>
+      <p className="mx-auto mt-2 max-w-[540px] text-[14.5px] leading-relaxed text-slate-600">{text}</p>
       <div className="mt-5 flex justify-center">
         <Button asChild variant="navy" size="lg">
           <a href={BOT_URL} target="_blank" rel="noreferrer">
@@ -376,13 +357,8 @@ function FileDrop({ id, label, file, onPick, onClear }) {
         ) : (
           <span>Faylni tanlang (.xlsx, .xls)</span>
         )}
-        <input
-          id={id}
-          type="file"
-          accept={ACCEPT}
-          className="hidden"
-          onChange={(e) => onPick(e.target.files?.[0])}
-        />
+        <input id={id} type="file" accept={ACCEPT} className="hidden"
+          onChange={(e) => onPick(e.target.files?.[0])} />
       </label>
     </div>
   );

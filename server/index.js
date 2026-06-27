@@ -268,21 +268,19 @@ app.post("/api/analyze", analyzeLimiter, upload.array("files", 2), (req, res) =>
   if (!files.length) return res.status(400).json({ error: "Fayl yuklanmadi" });
 
   const paths = files.map((f) => f.path);
-  const pdfPath = path.join(uploadDir, `report-${Date.now()}.pdf`);
-  const cleanup = () => {
+  const cleanup = () =>
     paths.forEach((p) => fs.promises.unlink(p).catch(() => {}));
-    fs.promises.unlink(pdfPath).catch(() => {});
-  };
 
-  const args = [ENGINE, ...paths, "--lang", "uz", "--pdf", pdfPath];
+  // Sayt — TEASER rejimi: PDF generatsiya qilmaymiz (faqat botda).
+  const args = [ENGINE, ...paths, "--lang", "uz"];
   execFile(
     PYTHON_BIN,
     args,
     { timeout: 60000, maxBuffer: 12 * 1024 * 1024 },
     (err, stdout) => {
+      cleanup();
       if (err && !stdout) {
         console.warn("⚠️ Tahlil (python) xatosi:", err.message);
-        cleanup();
         return res
           .status(500)
           .json({ error: "Tahlil amalga oshmadi. Fayl formatini tekshiring." });
@@ -291,22 +289,39 @@ app.post("/api/analyze", analyzeLimiter, upload.array("files", 2), (req, res) =>
       try {
         data = JSON.parse(String(stdout).trim());
       } catch {
-        cleanup();
         return res.status(500).json({ error: "Natijani o'qib bo'lmadi." });
       }
       if (!data.ok) {
-        cleanup();
         return res
           .status(400)
           .json({ error: data.error || "Tahlil amalga oshmadi" });
       }
-      // Bot bilan bir xil PDF — javobga base64 sifatida qo'shamiz, so'ng o'chiramiz.
-      let pdfBase64 = "";
-      try {
-        pdfBase64 = fs.readFileSync(pdfPath).toString("base64");
-      } catch {}
-      cleanup();
-      res.json({ ...data, pdfBase64 });
+      // FAQAT 5 ta asosiy ko'rsatkich (har guruhdan bittadan) — qolgani "yopiq".
+      // To'liq tahlil (~50 ko'rsatkich + PDF hisobot) Telegram botda.
+      const inds = Array.isArray(data.indicators) ? data.indicators : [];
+      const seen = new Set();
+      const highlights = [];
+      for (const i of inds) {
+        if (!seen.has(i.group)) {
+          seen.add(i.group);
+          highlights.push(i);
+        }
+        if (highlights.length >= 5) break;
+      }
+      res.json({
+        ok: true,
+        company: data.company,
+        stir: data.stir,
+        period_year: data.period_year,
+        period_quarter: data.period_quarter,
+        has_pl: data.has_pl,
+        score: data.score,
+        verdict: data.verdict,
+        counts: data.counts,
+        highlights,
+        locked: Math.max(inds.length - highlights.length, 0),
+        total: inds.length,
+      });
     }
   );
 });
