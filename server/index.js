@@ -7,6 +7,7 @@ import path from "node:path";
 import fs from "node:fs";
 import { fileURLToPath } from "node:url";
 import { execFile } from "node:child_process";
+import { timingSafeEqual } from "node:crypto";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 4000;
@@ -321,6 +322,13 @@ app.get("/api/leads", (req, res) => {
   res.json({ leads });
 });
 
+// Doimiy-vaqt token solishtirish (timing-attack'dan himoya)
+function safeEqual(a, b) {
+  const ab = Buffer.from(String(a));
+  const bb = Buffer.from(String(b));
+  return ab.length === bb.length && timingSafeEqual(ab, bb);
+}
+
 // ---- Bot statistikasi (kunlik) -----------------------------------------------
 // Bot har kuni 03:00 da POST /api/stats orqali yangilab turadi (token bilan).
 app.get("/api/stats", (_req, res) => {
@@ -333,8 +341,8 @@ app.get("/api/stats", (_req, res) => {
 
 app.post("/api/stats", (req, res) => {
   const token = process.env.STATS_TOKEN;
-  if (!token || req.get("x-stats-token") !== token) {
-    return res.status(403).json({ error: "Ruxsat yo'q" });
+  if (!token || !safeEqual(req.get("x-stats-token") || "", token)) {
+    return res.status(401).json({ error: "unauthorized" });
   }
   const b = req.body || {};
   const num = (v) => (Number.isFinite(Number(v)) ? Number(v) : 0);
