@@ -8,6 +8,10 @@ import {
   Phone,
   Star,
   Clock,
+  Bot,
+  Video,
+  Bell,
+  TrendingUp,
 } from "lucide-react";
 import { base44Client } from "@/api/base44Client";
 import { fadeUp, viewportOnce } from "@/lib/motion";
@@ -73,6 +77,24 @@ export default function DashboardPreview() {
         { label: "Premium foydalanuvchilar", pct: pct(stats.premium, stats.users), color: "#10B981" },
       ]
     : SAMPLE.bars;
+
+  // AI Sotuv agenti metrikalari (faqat bot yuborgan bo'lsa ko'rinadi)
+  const agent = live && stats.agent ? stats.agent : null;
+  const funnel = agent
+    ? [
+        { label: "Start → Telefon", pct: agent.conversions?.start_phone ?? 0, color: "#3B82F6" },
+        { label: "Telefon → Hisobot", pct: agent.conversions?.phone_report ?? 0, color: "#8B5CF6" },
+        { label: "Hisobot → Premium", pct: agent.conversions?.report_premium ?? 0, color: "#10B981" },
+      ]
+    : [];
+  const aiActivity = agent
+    ? [
+        { label: "Suhbatlar", value: agent.today?.conversations ?? 0, Icon: MessageSquare },
+        { label: "AI xabarlari", value: agent.today?.messages ?? 0, Icon: Bot },
+        { label: "Videolar", value: agent.today?.videos ?? 0, Icon: Video },
+        { label: "Eslatmalar", value: agent.today?.reminders ?? 0, Icon: Bell },
+      ]
+    : [];
 
   return (
     <section id="dashboard" className="bg-navy px-6 py-[90px]">
@@ -178,6 +200,60 @@ export default function DashboardPreview() {
                 </div>
               </div>
             </div>
+
+            {/* AI Sotuv agenti — voronka konversiyalari + bugungi faollik */}
+            {agent && (
+              <div className="mt-6 rounded-[14px] border border-emerald-400/15 bg-emerald-400/[.03] p-5">
+                <div className="mb-[18px] flex items-center gap-2">
+                  <Bot className="h-[18px] w-[18px] text-emerald-400" />
+                  <span className="font-heading text-[15px] font-bold text-white">
+                    AI Sotuv agenti
+                  </span>
+                  <span className="ml-auto inline-flex items-center gap-1 text-[11.5px] font-medium text-emerald-300">
+                    <TrendingUp className="h-[13px] w-[13px]" /> Konversiya voronkasi
+                  </span>
+                </div>
+
+                <div className="grid gap-6 lg:grid-cols-2">
+                  {/* Voronka konversiyalari */}
+                  <div className="flex flex-col gap-4">
+                    {funnel.map((f) => (
+                      <div key={f.label}>
+                        <div className="mb-1.5 flex justify-between text-[13px] text-slate-300">
+                          <span>{f.label}</span>
+                          <span className="font-mono" style={{ color: f.color }}>{f.pct}%</span>
+                        </div>
+                        <div className="h-2 overflow-hidden rounded-md bg-white/[.06]">
+                          <motion.div
+                            initial={{ width: 0 }}
+                            whileInView={{ width: `${f.pct}%` }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 1, ease: "easeOut" }}
+                            className="h-full rounded-md"
+                            style={{ background: f.color }}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Bugungi AI faolligi */}
+                  <div className="grid grid-cols-2 gap-3">
+                    {aiActivity.map((s) => (
+                      <div key={s.label} className="rounded-[12px] border border-white/10 bg-white/[.04] p-3.5">
+                        <div className="mb-1.5 flex items-center justify-between">
+                          <span className="text-[12px] text-slate-400">{s.label}</span>
+                          <s.Icon className="h-[15px] w-[15px] text-emerald-400/80" />
+                        </div>
+                        <div className="font-mono text-[22px] font-bold text-white">
+                          <CountUp value={s.value} />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </motion.div>
       </div>

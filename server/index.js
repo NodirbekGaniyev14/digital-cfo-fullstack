@@ -370,6 +370,20 @@ app.post("/api/stats", (req, res) => {
     premium: num(b.premium),
     updated_at: new Date().toISOString(),
   };
+
+  // AI agent metrikalari (ixtiyoriy, ichki obyekt) — har bir sonni tozalaymiz.
+  const a = b.agent;
+  if (a && typeof a === "object") {
+    const sanitize = (obj) =>
+      obj && typeof obj === "object"
+        ? Object.fromEntries(Object.keys(obj).map((k) => [k, num(obj[k])]))
+        : {};
+    stats.agent = {
+      funnel: sanitize(a.funnel),
+      conversions: sanitize(a.conversions),
+      today: sanitize(a.today),
+    };
+  }
   try {
     const tmp = statsFile + ".tmp";
     fs.writeFileSync(tmp, JSON.stringify(stats, null, 2));
