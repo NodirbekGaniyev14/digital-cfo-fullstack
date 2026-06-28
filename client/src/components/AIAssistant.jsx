@@ -5,81 +5,203 @@ import { Bot, Send, X, Sparkles } from "lucide-react";
 /**
  * AIAssistant — "Maliya", Digital CFO AI yordamchisi.
  * Suzuvchi chat oynasi: namunaviy savollar, typing animatsiya, avto-javoblar.
- * Bilim bazasi mahsulot bo'yicha (offline ishlaydi, xarajatsiz). Keyinchalik
- * /api/chat orqali haqiqiy Claude AI ga ulash mumkin (qarang: tryRemote).
+ * Bilim bazasi (KB) — eng ko'p so'raladigan 25 ta savol. Offline ishlaydi,
+ * xarajatsiz. Keyinchalik /api/chat orqali haqiqiy Claude AI ga ulash mumkin.
  */
 
-// --- Bilim bazasi (kalit so'zlar -> javob) ------------------------------------
+// --- Bilim bazasi: TOP-25 savol (kalit so'zlar -> javob) ----------------------
 const KB = [
+  // 0 — Salom (suhbat)
   {
-    k: ["salom", "assalom", "hi", "hello", "privet", "hayrli", "kun yaxshi"],
-    a: "Assalomu alaykum! Men Maliya — Digital CFO AI yordamchisiman 🤝 "
-      + "Korxonangiz moliyaviy holatini avtomatik tahlil qilishda yordam beraman. "
-      + "Savolingizni yozing yoki yuqoridagi namunaviy savollardan tanlang.",
+    k: ["salom", "assalom", "hello", "hi", "privet", "hayrli", "kun yaxshi"],
+    a: "Assalomu alaykum! Men Maliya — Digital CFO AI yordamchisiman 👋 "
+      + "Korxonangiz moliyasini tahlil qilishda yordam beraman. Savolingizni "
+      + "yozing yoki yuqoridagi namunaviy savollardan tanlang.",
   },
+  // 1 — Digital CFO nima?
   {
-    k: ["telefon", "raqam", "nomer", "number", "phone"],
+    k: ["digital cfo nima", "xizmat", "platforma", "tanishtir", "nima taklif",
+        "bu nima", "loyiha nima"],
+    a: "Digital CFO — korxonangiz moliyaviy hisobotlarini avtomatik tahlil "
+      + "qiladigan AI platforma. 1C'dan fayllaringizni yuborasiz, biz 20+ "
+      + "ko'rsatkich bo'yicha to'liq tahlil va amaliy tavsiyalar bilan CFO "
+      + "darajasidagi hisobotni bir necha daqiqada qaytaramiz.",
+  },
+  // 2 — Qanday boshlayman?
+  {
+    k: ["qanday boshla", "boshla", "qadam", "start", "ishlay", "qanday foydalan",
+        "nimadan boshla"],
+    a: "3 ta oddiy qadam: 1) Telegram botimizni oching va telefon raqamingizni "
+      + "ulang. 2) 1C'dan Forma 1 (Balans) va Forma 2 (Moliyaviy natijalar) "
+      + "Excel fayllarini yuboring. 3) Bir necha daqiqada to'liq hisobotni oling 📊",
+  },
+  // 3 — Telefon nega kerak?
+  {
+    k: ["telefon", "raqam", "nomer", "phone"],
     a: "Telefon raqami hisobot tayyorligi haqida xabar berish va akkauntingizni "
       + "identifikatsiya qilish uchun kerak. Boshqa maqsadda ishlatilmaydi va "
       + "uchinchi shaxslarga berilmaydi.",
   },
+  // 4 — Qanday fayl?
   {
-    k: ["fayl", "format", "excel", "qaysi", "qanaqa", "yubor", "balans", "forma"],
-    a: "1C dan eksport qilingan 2 ta standart fayl kerak: Forma 1 (Buxgalteriya "
+    k: ["qanday fayl", "qaysi fayl", "format", "excel", "forma", "balans", "yubor"],
+    a: "1C'dan eksport qilingan 2 ta standart fayl kerak: Forma 1 (Buxgalteriya "
       + "balansi) va Forma 2 (Moliyaviy natijalar), .xlsx formatida. Namuna botda "
       + "/namuna buyrug'i orqali ham mavjud.",
   },
+  // 5 — 1C dan qanday chiqaraman?
   {
-    k: ["1c", "eksport", "chiqar", "yuklab", "export", "8.2", "8.3"],
-    a: "1C dan chiqarish: kerakli hisobotni oching → 'Saqlash' yoki 'Eksport' → "
+    k: ["1c", "eksport", "chiqar", "yuklab", "export", "8.2", "8.3", "1c dan"],
+    a: "1C'dan chiqarish: kerakli hisobotni oching → 'Saqlash' yoki 'Eksport' → "
       + "Excel (.xlsx) formatini tanlang → saqlang. 1C 8.2 va 8.3 uchun qadamlar "
       + "biroz farq qiladi — versiyangizni ayting, aniq yo'riqnoma beraman.",
   },
+  // 6 — Hisobot qancha vaqtda?
   {
-    k: ["qancha vaqt", "necha daqiqa", "necha soniya", "tayyor", "qachon", "tez"],
+    k: ["qancha vaqt", "necha daqiqa", "necha soniya", "qachon tayyor", "tayyor bo'l",
+        "tez tayyor"],
     a: "Fayl to'g'ri bo'lsa, hisobot odatda 3–5 daqiqada tayyor bo'ladi. Fayl "
       + "katta bo'lsa 7–10 daqiqa ketishi mumkin.",
   },
+  // 7 — Qanday ko'rsatkichlar?
   {
-    k: ["ko'rsatkich", "korsatkich", "koeffitsient", "indikator", "nima hisoblan", "50"],
-    a: "Hisobotda likvidlik, rentabellik, moliyaviy barqarorlik va faollik — jami "
-      + "20+ asosiy koeffitsient hamda Altman Z-Score (bankrotlik xavfi) "
-      + "hisoblanadi. Har biriga umumiy ball va amaliy tavsiya beriladi.",
+    k: ["ko'rsatkich", "korsatkich", "koeffitsient", "indikator", "50", "nechta korsat"],
+    a: "Likvidlik, rentabellik, moliyaviy barqarorlik va faollik — jami 20+ asosiy "
+      + "koeffitsient hamda Altman Z-Score (bankrotlik xavfi) hisoblanadi. Har "
+      + "biriga umumiy ball va amaliy tavsiya beriladi.",
   },
+  // 8 — Hisobotda nimalar bo'ladi?
   {
-    k: ["premium", "tarif", "imkoniyat", "obuna", "abonement"],
+    k: ["hisobotda nima", "hisobot ichida", "bo'lim", "hisobot tarkibi", "nimalar bo'l",
+        "qanday hisobot"],
+    a: "Hisobotda: boshqaruv xulosasi (Executive Summary), asosiy KPI jadvali, "
+      + "likvidlik va to'lov qobiliyati, rentabellik va foyda dinamikasi, risk "
+      + "diagnostikasi (Altman Z) hamda AI tavsiyalari va xulosalar bo'ladi.",
+  },
+  // 9 — Premium nima beradi?
+  {
+    k: ["premium", "tarif", "obuna", "abonement", "imkoniyat"],
     a: "Premium tarif: cheksiz hisobotlar (oylik abonement), shaxsiy moliyaviy "
       + "maslahat (oyiga 2 marta), haftalik monitoring va ogohlantirish, soliqlar "
       + "va risklarga oid to'liq tahlil.",
   },
+  // 10 — Narxi qancha?
   {
-    k: ["narx", "qancha turadi", "pul", "to'lov", "tolov", "price", "narxi"],
+    k: ["narx", "qancha turadi", "narxi", "pul", "price", "qimmat"],
     a: "Narxlar so'rovga qarab individual belgilanadi. To'liq ma'lumot uchun "
-      + "mutaxassisimiz bilan bog'lashingiz mumkin — pastdagi tugma orqali yoki "
-      + "Telegram botimizda.",
+      + "mutaxassisimiz bilan bog'lashingiz mumkin — Telegram botimizda yoki "
+      + "saytdagi 'Aloqa' bo'limida.",
   },
+  // 11 — Bepulmi?
   {
-    k: ["maxfiy", "xavfsiz", "ma'lumot", "malumot", "security", "himoya"],
+    k: ["bepul", "tekin", "pulsiz", "free", "sinab ko'r", "pul to'lamasdan"],
+    a: "Ha, asosiy tahlilni bepul sinab ko'rishingiz mumkin — botga fayl yuboring "
+      + "va asosiy ko'rsatkichlar bilan hisobot oling. To'liq kengaytirilgan tahlil "
+      + "(20+ ko'rsatkich, doimiy monitoring) Premium tarifda.",
+  },
+  // 12 — Maxfiylik
+  {
+    k: ["maxfiy", "xavfsiz", "ma'lumot", "himoya", "security", "sir", "maxfiylik"],
     a: "Ma'lumotlaringiz xavfsiz. Fayllaringiz faqat tahlil uchun ishlatiladi, "
       + "uchinchi shaxslarga berilmaydi, hisobot esa faqat sizga yuboriladi.",
   },
+  // 13 — AI nima qiladi?
   {
-    k: ["ai", "sun'iy", "suniy", "intellekt", "nima qil", "robot"],
+    k: ["ai nima", "sun'iy", "intellekt", "robot", "ai qanday", "ai qiladi"],
     a: "AI moliyaviy holatingizni baholaydi, kuchli va zaif tomonlarni ko'rsatadi "
       + "va amaliy tavsiyalar beradi — lekin yakuniy qaror har doim sizniki.",
   },
+  // 14 — Altman Z / bankrotlik xavfi
   {
-    k: ["qanday boshla", "boshla", "qanday ishlay", "ishlay", "start", "qadam"],
-    a: "3 ta oddiy qadam: 1) Telegram botimizni oching va telefon raqamingizni "
-      + "ulang. 2) 1C dan Forma 1 va Forma 2 Excel fayllarini yuboring. 3) Bir "
-      + "necha daqiqada to'liq moliyaviy hisobotni oling 📊",
+    k: ["altman", "bankrot", "z-score", "z score", "to'lovga qobiliyat", "xavf zona",
+        "risk score"],
+    a: "Altman Z-Score — korxonaning bankrotlik (to'lovga qobiliyatsizlik) xavfini "
+      + "baholaydigan xalqaro model. Biz uni avtomatik hisoblab, 'barqaror', "
+      + "'ehtiyot' yoki 'xavf' zonasini ko'rsatamiz va sabablarini tushuntiramiz.",
   },
+  // 15 — Tillar
   {
-    k: ["bog'lan", "boglan", "aloqa", "operator", "telegram", "kontakt", "murojaat"],
+    k: ["til", "tilda", "rus tili", "ingliz", "qaysi til", "language"],
+    a: "Platforma va hisobotlar o'zbek, rus va ingliz tillarida mavjud. Telegram "
+      + "botda /language buyrug'i orqali tilni o'zgartirishingiz mumkin.",
+  },
+  // 16 — Mosligi (1C versiyalari / boshqa dasturlar)
+  {
+    k: ["versiya", "qaysi 1c", "boshqa dastur", "didox", "saturn", "qaysi dastur",
+        "mosmi"],
+    a: "1C 8.2 va 8.3 dan eksport qilingan standart .xlsx fayllar qo'llab-"
+      + "quvvatlanadi (Forma 1 va Forma 2). Boshqa buxgalteriya dasturidan bo'lsa "
+      + "ham yuboring — ko'pchilik formatlar mos keladi, ko'rib chiqamiz.",
+  },
+  // 17 — Namuna / demo
+  {
+    k: ["namuna", "demo", "misol", "qanday ko'rinadi", "namunaviy", "ko'rsat"],
+    a: "Albatta — saytimizda 'Namuna ko'rish' yoki 'Namunani yuklab olish' tugmasi "
+      + "orqali to'liq namunaviy hisobotni ko'rishingiz mumkin. Sizning hisobotingiz "
+      + "ham xuddi shunday ko'rinishda bo'ladi.",
+  },
+  // 18 — Kimga mo'ljallangan?
+  {
+    k: ["kimga", "kim uchun", "mo'ljallangan", "tadbirkor", "kichik biznes",
+        "men uchun"],
+    a: "Kichik va o'rta biznes egalari, tadbirkorlar, moliyachi va buxgalterlar "
+      + "uchun. Korxonangiz moliyaviy holatini tez va tushunarli bilmoqchi bo'lsangiz "
+      + "— bu siz uchun.",
+  },
+  // 19 — Buxgalter / bilim kerakmi?
+  {
+    k: ["buxgalter kerak", "o'zim qila", "bilim kerak", "tushunmasam", "moliyani bilm",
+        "murakkab"],
+    a: "Yo'q, maxsus moliyaviy bilim shart emas. Siz faqat 1C fayllarini yuborasiz "
+      + "— qolganini AI bajaradi va natijani oddiy, tushunarli tilda izohlaydi. "
+      + "Buxgalteringiz fayllarni chiqarishda yordam berishi mumkin.",
+  },
+  // 20 — Aniqmi / ishonsa bo'ladimi?
+  {
+    k: ["aniqmi", "ishonch", "ishonsa", "to'g'rimi", "xato qil", "qanchalik aniq",
+        "haqiqiymi"],
+    a: "Tahlil sizning haqiqiy hisobot raqamlaringizga va xalqaro moliyaviy "
+      + "modellarga (Altman Z, likvidlik, rentabellik) asoslanadi — natija "
+      + "ishonchli. Ammo yakuniy qaror sizniki; AI maslahat beradi, o'rningizga "
+      + "qaror qilmaydi.",
+  },
+  // 21 — Bog'lanish / yordam
+  {
+    k: ["bog'lan", "boglan", "aloqa", "operator", "murojaat", "kontakt", "yordam kerak"],
     a: "Biz bilan Telegram bot orqali bog'lanishingiz mumkin: "
       + "@Moliyaviy_Tahlilchi_bot. Murakkab savollar bo'yicha mutaxassisimiz ham "
       + "yordam beradi.",
   },
+  // 22 — To'lov usullari
+  {
+    k: ["to'lov usul", "qanday to'lay", "karta", "click", "payme", "naqd", "to'lash"],
+    a: "To'lov shartlari va usullari individual kelishiladi — mutaxassisimiz qulay "
+      + "variantni aytadi. Bog'lanish: @Moliyaviy_Tahlilchi_bot.",
+  },
+  // 23 — Bir nechta kompaniya / davr
+  {
+    k: ["bir nechta", "ko'p kompaniya", "har oy", "har chorak", "dinamika", "muntazam",
+        "bir necha davr"],
+    a: "Ha. Turli davrlar (oy, chorak, yil) fayllarini yuborib, korxona "
+      + "dinamikasini kuzatishingiz mumkin. Premium tarifda bir nechta kompaniya "
+      + "va doimiy monitoring imkoniyati bor.",
+  },
+  // 24 — Fayl xato bo'lsa
+  {
+    k: ["xato", "qabul qilmadi", "ishlamadi", "noto'g'ri", "muammo bo'ld", "fayl xato"],
+    a: "Xavotir olmang — fayl formati noto'g'ri bo'lsa, bot buni aytadi va to'g'ri "
+      + "namunani ko'rsatadi. 1C'dan Forma 1 va Forma 2 ni .xlsx ko'rinishida qayta "
+      + "yuboring yoki men yordam beraman.",
+  },
+  // 25 — Telegram botga qanday kiraman?
+  {
+    k: ["botga kir", "qanday kira", "telegram bot", "botingiz", "bot manzili",
+        "botga qanday", "botdan foydalan"],
+    a: "Telegram'da @Moliyaviy_Tahlilchi_bot ni qidiring yoki saytdagi 'Boshlash' "
+      + "tugmasini bosing. Botni oching → /start → tilni tanlang → telefon "
+      + "raqamingizni ulang.",
+  },
+  // — Rahmat (suhbat)
   {
     k: ["rahmat", "tashakkur", "thanks", "spasibo"],
     a: "Arzimaydi! 🙂 Yana savollaringiz bo'lsa — bemalol yozing. Sizga yordam "
@@ -93,12 +215,14 @@ const FALLBACK =
   + "ham tanlashingiz mumkin 👇";
 
 const QUICK = [
-  "Telefon raqami nega kerak?",
+  "Digital CFO nima?",
+  "Qanday boshlayman?",
   "Qanday fayl yuborishim kerak?",
   "Hisobot qancha vaqtda tayyor bo'ladi?",
+  "Hisobotda nimalar bo'ladi?",
   "Premium nima beradi?",
   "Narxi qancha?",
-  "Qanday boshlayman?",
+  "Bepulmi?",
 ];
 
 const GREETING =
@@ -107,15 +231,26 @@ const GREETING =
 
 // Matnni normallashtirib, bilim bazasidan eng mos javobni topadi.
 const normalize = (s) =>
-  s.toLowerCase().replace(/['’`ʻ]/g, "'").replace(/[^\p{L}\p{N}\s']/gu, " ");
+  s.toLowerCase().replace(/['’`ʻ]/g, "'").replace(/[^\p{L}\p{N}\s']/gu, " ").trim();
+
+// Kalit so'z mosligi:
+//  • ko'p so'zli kalit ("qancha turadi") -> butun ibora substring sifatida
+//  • bitta so'zli kalit -> so'z BOSHI bilan (prefiks) — o'zbekcha qo'shimchalar
+//    uchun ("narxi"~"narx", "telefoningiz"~"telefon"), ammo "bepulmi"≠"pul".
+function matchKw(words, t, kw) {
+  if (kw.includes(" ")) return t.includes(kw);        // ko'p so'zli -> ibora
+  if (kw.length <= 2) return words.includes(kw);       // juda qisqa (hi, 1c) -> aniq so'z
+  return words.some((w) => w.startsWith(kw));          // prefiks (qo'shimchaga bardosh)
+}
 
 function answerFor(text) {
   const t = normalize(text);
+  const words = t.split(/\s+/).filter(Boolean);
   let best = null;
   let bestScore = 0;
   for (const item of KB) {
     let score = 0;
-    for (const kw of item.k) if (t.includes(normalize(kw))) score += 1;
+    for (const kw of item.k) if (matchKw(words, t, normalize(kw))) score += 1;
     if (score > bestScore) {
       bestScore = score;
       best = item;
