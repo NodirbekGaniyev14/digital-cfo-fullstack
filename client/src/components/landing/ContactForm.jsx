@@ -275,7 +275,7 @@ function FileDrop({ id, name, label, value, onChange }) {
       <Label htmlFor={id}>{label}</Label>
       <label
         htmlFor={id}
-        className="flex cursor-pointer items-center gap-3 rounded-xl border border-dashed border-navy/20 bg-white/60 px-4 py-3.5 text-sm text-slate-500 transition-colors hover:border-azure hover:bg-azure/[.03]"
+        className="flex cursor-pointer items-center gap-3 rounded-xl border border-dashed border-navy/20 bg-white/60 dark:bg-white/5 px-4 py-3.5 text-sm text-slate-500 transition-colors hover:border-azure hover:bg-azure/[.03]"
       >
         <span className="flex h-9 w-9 flex-none items-center justify-center rounded-[10px] bg-azure/10 text-azure">
           <Upload className="h-[18px] w-[18px]" />

@@ -101,11 +101,12 @@ body {
 .dark .bg-softbg {
   background-color: var(--page) !important;
 }
-.dark .bg-white\/95 {
-  background-color: rgba(13, 24, 43, 0.95) !important;
-}
 .dark .bg-navy {
   background-color: #131f38 !important;
+}
+/* Navy ramkalar dark fonda ko'rinmay qoladi — yorug' qilamiz */
+.dark [class*="border-navy/"] {
+  border-color: rgba(255, 255, 255, 0.12) !important;
 }
 .dark .text-navy {
   color: var(--ink) !important;

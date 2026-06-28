@@ -264,7 +264,7 @@ export default function InstantAnalysis() {
                       </div>
                     ))}
                   </div>
-                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-white/50 px-6 text-center backdrop-blur-[2px]">
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-white/50 dark:bg-[#0b1424]/70 px-6 text-center backdrop-blur-[2px]">
                     <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-navy/[.06] text-navy">
                       <Lock className="h-6 w-6" />
                     </div>
@@ -333,7 +333,7 @@ function FileDrop({ id, label, file, onPick, onClear }) {
       <Label htmlFor={id}>{label}</Label>
       <label
         htmlFor={id}
-        className="flex cursor-pointer items-center gap-3 rounded-xl border-2 border-dashed border-navy/15 bg-white/50 px-4 py-5 text-sm text-slate-500 transition-colors hover:border-azure hover:bg-azure/[.03]"
+        className="flex cursor-pointer items-center gap-3 rounded-xl border-2 border-dashed border-navy/15 bg-white/50 dark:bg-white/5 px-4 py-5 text-sm text-slate-500 transition-colors hover:border-azure hover:bg-azure/[.03]"
       >
         <span className="flex h-10 w-10 flex-none items-center justify-center rounded-xl bg-azure/10 text-azure">
           <UploadCloud className="h-[20px] w-[20px]" />

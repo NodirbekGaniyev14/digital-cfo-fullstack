@@ -51,7 +51,7 @@ export default function HeroSection() {
             initial="hidden"
             animate="show"
             variants={fadeUpDelay(0)}
-            className="inline-flex items-center gap-2.5 rounded-full border border-emerald-500/30 bg-white/70 px-[15px] py-2 text-[13px] font-semibold text-emerald-700 backdrop-blur-md"
+            className="inline-flex items-center gap-2.5 rounded-full border border-emerald-500/30 bg-white/70 dark:bg-white/[.06] px-[15px] py-2 text-[13px] font-semibold text-emerald-700 dark:text-emerald-300 backdrop-blur-md"
           >
             <span className="pulse-dot h-2.5 w-2.5 rounded-full bg-emerald-500" />
             AI-powered moliyaviy tahlil
