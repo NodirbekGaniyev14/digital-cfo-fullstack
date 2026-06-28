@@ -30,6 +30,12 @@ export default function HeroSection() {
       id="hero"
       className="hero-gradient relative overflow-hidden px-6 pb-[90px] pt-[140px]"
     >
+      {/* Aurora — animatsiyali rangli fon */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="aurora-blob absolute -left-24 top-8 h-72 w-72 bg-azure/30" />
+        <div className="aurora-blob absolute -right-10 top-36 h-80 w-80 bg-emerald-500/25 [animation-delay:-7s]" />
+        <div className="aurora-blob absolute bottom-0 left-1/3 h-64 w-64 bg-azure/20 [animation-delay:-13s]" />
+      </div>
       <div
         className="pointer-events-none absolute inset-0 [mask-image:radial-gradient(70%_60%_at_50%_30%,#000,transparent)]"
         style={{

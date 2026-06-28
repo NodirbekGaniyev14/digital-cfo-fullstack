@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import {
   Users,
@@ -123,7 +123,7 @@ export default function DashboardPreview() {
                     <s.Icon className="h-[18px] w-[18px] text-azure" />
                   </div>
                   <div className="font-mono text-[28px] font-bold text-white">
-                    {Number(s.value).toLocaleString("uz-UZ")}
+                    <CountUp value={s.value} />
                   </div>
                 </div>
               ))}
@@ -193,8 +193,38 @@ function Row({ Icon, bg, color, text, value }) {
       </div>
       <span className="flex-1 text-[13.5px] text-slate-300">{text}</span>
       <span className="font-mono text-[15px] font-bold text-white">
-        {Number(value).toLocaleString("uz-UZ")}
+        <CountUp value={value} />
       </span>
     </div>
   );
+}
+
+// Ko'rinishga kelganda 0 dan qiymatgacha sanab ko'tariladigan raqam.
+function CountUp({ value }) {
+  const [n, setN] = useState(0);
+  const ref = useRef(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const target = Number(value) || 0;
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (!e.isIntersecting) return;
+        io.disconnect();
+        const dur = 1100;
+        const start = performance.now();
+        const tick = (now) => {
+          const p = Math.min((now - start) / dur, 1);
+          const eased = 1 - Math.pow(1 - p, 3);
+          setN(Math.round(target * eased));
+          if (p < 1) requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+      },
+      { threshold: 0.4 }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [value]);
+  return <span ref={ref}>{Number(n).toLocaleString("uz-UZ")}</span>;
 }

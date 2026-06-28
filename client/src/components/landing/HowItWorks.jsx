@@ -17,7 +17,7 @@ export default function HowItWorks() {
       className="px-6 py-[90px]"
       style={{
         background:
-          "radial-gradient(50% 50% at 80% 0%, rgba(59,130,246,.1), transparent 60%), #F8FAFC",
+          "radial-gradient(50% 50% at 80% 0%, rgba(59,130,246,.1), transparent 60%), var(--page)",
       }}
     >
       <div className="mx-auto max-w-[1000px]">

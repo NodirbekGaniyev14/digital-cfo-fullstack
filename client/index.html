@@ -6,6 +6,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#0F172A" />
     <meta name="robots" content="index,follow" />
+
+    <!-- Dark mode: render'dan oldin mavzuni o'rnatamiz (miltillashning oldini olish) -->
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem("theme");
+          if (t === "dark" || (!t && matchMedia("(prefers-color-scheme: dark)").matches))
+            document.documentElement.classList.add("dark");
+        } catch (e) {}
+      })();
+    </script>
     <title>Digital CFO — AI moliyaviy tahlil va hisobot</title>
     <meta
       name="description"

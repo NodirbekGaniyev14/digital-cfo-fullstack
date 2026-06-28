@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { BarChart3, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import ThemeToggle from "@/components/ThemeToggle";
 import { cn } from "@/lib/utils";
 
 const NAV_LINKS = [
@@ -58,6 +59,7 @@ export default function Navbar() {
         </div>
 
         <div className="hidden items-center gap-3 lg:flex">
+          <ThemeToggle />
           <Button asChild variant="ghost" size="sm">
             <a href="#dashboard">Demo</a>
           </Button>
@@ -66,13 +68,16 @@ export default function Navbar() {
           </Button>
         </div>
 
-        <button
-          onClick={() => setOpen((v) => !v)}
-          className="flex h-[42px] w-[42px] items-center justify-center rounded-[11px] bg-navy text-white lg:hidden"
-          aria-label="Menyu"
-        >
-          {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </button>
+        <div className="flex items-center gap-2 lg:hidden">
+          <ThemeToggle />
+          <button
+            onClick={() => setOpen((v) => !v)}
+            className="flex h-[42px] w-[42px] items-center justify-center rounded-[11px] bg-navy text-white"
+            aria-label="Menyu"
+          >
+            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
+        </div>
       </div>
 
       <AnimatePresence>

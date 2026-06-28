@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: "class",
   content: ["./index.html", "./src/**/*.{js,jsx}"],
   theme: {
     extend: {
@@ -27,11 +28,26 @@ export default {
           "0%,100%": { opacity: "1", transform: "scale(1)" },
           "50%": { opacity: ".35", transform: "scale(.8)" },
         },
+        aurora: {
+          "0%,100%": { transform: "translate(0,0) scale(1)" },
+          "33%": { transform: "translate(40px,-30px) scale(1.12)" },
+          "66%": { transform: "translate(-30px,24px) scale(.92)" },
+        },
+        shimmer: {
+          to: { backgroundPosition: "200% center" },
+        },
+        floatSlow: {
+          "0%,100%": { transform: "translateY(0) rotate(0deg)" },
+          "50%": { transform: "translateY(-10px) rotate(2deg)" },
+        },
       },
       animation: {
         floaty: "floaty 6s ease-in-out infinite",
         "pulse-glow": "pulseGlow 2.4s ease-in-out infinite",
         "pulse-dot": "pulseDot 1.6s ease-in-out infinite",
+        aurora: "aurora 20s ease-in-out infinite",
+        shimmer: "shimmer 6s linear infinite",
+        "float-slow": "floatSlow 7s ease-in-out infinite",
       },
     },
   },

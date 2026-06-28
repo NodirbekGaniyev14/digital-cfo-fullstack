@@ -1,14 +1,18 @@
 import { MotionConfig } from "framer-motion";
 import { Toaster } from "sonner";
 import Home from "./pages/Home.jsx";
+import ScrollProgress from "./components/ScrollProgress.jsx";
+import TelegramFAB from "./components/TelegramFAB.jsx";
 
 // Single route "/" -> Home. All navigation is in-page anchor scrolling.
 // MotionConfig reducedMotion="user" — animatsiyalar OS sozlamasiga bo'ysunadi.
 export default function App() {
   return (
     <MotionConfig reducedMotion="user">
+      <ScrollProgress />
       <Home />
-      <Toaster position="bottom-right" richColors closeButton />
+      <TelegramFAB />
+      <Toaster position="top-center" richColors closeButton />
     </MotionConfig>
   );
 }

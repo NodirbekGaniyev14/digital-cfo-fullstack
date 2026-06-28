@@ -29,7 +29,7 @@ export default function Services() {
       className="px-6 py-[90px]"
       style={{
         background:
-          "radial-gradient(50% 50% at 15% 10%, rgba(16,185,129,.1), transparent 60%), #F8FAFC",
+          "radial-gradient(50% 50% at 15% 10%, rgba(16,185,129,.1), transparent 60%), var(--page)",
       }}
     >
       <div className="mx-auto max-w-[1200px]">

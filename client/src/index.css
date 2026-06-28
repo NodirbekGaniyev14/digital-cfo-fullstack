@@ -4,6 +4,20 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --page: #f8fafc;
+  --ink: #0f172a;
+  --card: rgba(255, 255, 255, 0.7);
+  --card-border: rgba(255, 255, 255, 0.5);
+}
+.dark {
+  --page: #070b16;
+  --ink: #e6edf6;
+  --card: rgba(18, 27, 45, 0.62);
+  --card-border: rgba(255, 255, 255, 0.08);
+  color-scheme: dark;
+}
+
 html {
   scroll-behavior: smooth;
   scroll-padding-top: 84px;
@@ -11,14 +25,18 @@ html {
 body {
   margin: 0;
   font-family: "Plus Jakarta Sans", system-ui, sans-serif;
-  color: #0f172a;
-  background: #f8fafc;
+  color: var(--ink);
+  background: var(--page);
   -webkit-font-smoothing: antialiased;
+  transition: background-color 0.4s ease, color 0.4s ease;
 }
 
 @layer components {
   .glass-card {
-    @apply bg-white/70 backdrop-blur-xl border border-white/40;
+    background: var(--card);
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--card-border);
   }
   .dark-glass {
     @apply bg-navy/80 backdrop-blur-xl border border-white/10;
@@ -27,10 +45,12 @@ body {
 
 @layer utilities {
   .gradient-text {
-    background: linear-gradient(135deg, #3b82f6, #10b981);
+    background: linear-gradient(110deg, #3b82f6, #10b981, #3b82f6);
+    background-size: 200% auto;
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
+    animation: shimmer 6s linear infinite;
   }
   .hero-gradient {
     background: radial-gradient(
@@ -39,7 +59,7 @@ body {
         transparent 62%
       ),
       radial-gradient(50% 50% at 92% 22%, rgba(16, 185, 129, 0.13), transparent 60%),
-      #f8fafc;
+      var(--page);
   }
   .section-divider {
     height: 1px;
@@ -59,6 +79,12 @@ body {
   .pulse-dot {
     animation: pulseDot 1.6s ease-in-out infinite;
   }
+  .aurora-blob {
+    border-radius: 9999px;
+    filter: blur(60px);
+    will-change: transform;
+    animation: aurora 20s ease-in-out infinite;
+  }
   .no-scrollbar::-webkit-scrollbar {
     height: 8px;
   }
@@ -66,6 +92,41 @@ body {
     background: rgba(15, 23, 42, 0.15);
     border-radius: 99px;
   }
+}
+
+/* --- Dark mavzu: mavjud utility klasslarini moslash --- */
+.dark .bg-white {
+  background-color: #0d182b !important;
+}
+.dark .bg-softbg {
+  background-color: var(--page) !important;
+}
+.dark .bg-white\/95 {
+  background-color: rgba(13, 24, 43, 0.95) !important;
+}
+.dark .bg-navy {
+  background-color: #131f38 !important;
+}
+.dark .text-navy {
+  color: var(--ink) !important;
+}
+.dark .text-slate-900 {
+  color: #e6edf6 !important;
+}
+.dark .text-slate-800 {
+  color: #dbe4ee !important;
+}
+.dark .text-slate-700 {
+  color: #c6d0dc !important;
+}
+.dark .text-slate-600 {
+  color: #aab6c4 !important;
+}
+.dark .text-slate-500 {
+  color: #8b97a6 !important;
+}
+.dark .text-slate-400 {
+  color: #707d8c !important;
 }
 
 @keyframes floaty {
@@ -95,6 +156,23 @@ body {
   50% {
     opacity: 0.35;
     transform: scale(0.8);
+  }
+}
+@keyframes shimmer {
+  to {
+    background-position: 200% center;
+  }
+}
+@keyframes aurora {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(40px, -30px) scale(1.12);
+  }
+  66% {
+    transform: translate(-30px, 24px) scale(0.92);
   }
 }
 
