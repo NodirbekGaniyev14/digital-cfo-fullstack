@@ -17,7 +17,7 @@ export default function TelegramFAB() {
       target="_blank"
       rel="noreferrer"
       aria-label="Telegram bot"
-      className={`group fixed bottom-5 right-5 z-[250] flex items-center gap-2.5 rounded-full bg-azure px-4 py-3.5 text-white shadow-[0_14px_34px_rgba(59,130,246,.5)] transition-all duration-300 hover:scale-105 ${
+      className={`group fixed bottom-[88px] right-5 z-[250] flex items-center gap-2.5 rounded-full bg-azure px-4 py-3.5 text-white shadow-[0_14px_34px_rgba(59,130,246,.5)] transition-all duration-300 hover:scale-105 ${
         show ? "pointer-events-auto translate-y-0 opacity-100" : "pointer-events-none translate-y-4 opacity-0"
       }`}
     >
