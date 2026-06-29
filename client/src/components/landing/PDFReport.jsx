@@ -15,6 +15,25 @@ const REPORT_ITEMS = [
   "AI tavsiyalari va xulosalar",
 ];
 
+// PDF'ni ishonchli yuklab olish: blob orqali (brauzer inline ochib qo'ymasligi uchun).
+async function downloadSample() {
+  try {
+    const res = await fetch(SAMPLE_PDF);
+    if (!res.ok) throw new Error("not found");
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "Namuna_Moliyaviy_Hisobot.pdf";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  } catch {
+    window.open(SAMPLE_PDF, "_blank", "noopener"); // zaxira yo'l
+  }
+}
+
 export default function PDFReport() {
   return (
     <section id="pdf-report" className="bg-white px-6 py-[90px]">
@@ -108,10 +127,8 @@ export default function PDFReport() {
                 <FileSpreadsheetIcon /> Namuna ko'rish
               </a>
             </Button>
-            <Button asChild variant="emerald-outline" size="lg">
-              <a href={SAMPLE_PDF} download="Namuna_Moliyaviy_Hisobot.pdf">
-                <Download className="h-[17px] w-[17px]" /> Namunani yuklab olish
-              </a>
+            <Button variant="emerald-outline" size="lg" onClick={downloadSample}>
+              <Download className="h-[17px] w-[17px]" /> Namunani yuklab olish
             </Button>
           </div>
         </motion.div>
