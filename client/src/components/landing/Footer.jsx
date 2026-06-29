@@ -1,22 +1,18 @@
 import { BarChart3, Mail, Phone, MapPin, Send, MessageCircle } from "lucide-react";
+import { useApp } from "@/lib/i18n";
 
 const NAV_LINKS = [
-  { label: "Bosh sahifa", href: "#hero" },
-  { label: "Qanday ishlaydi", href: "#how-it-works" },
-  { label: "Xizmatlar", href: "#services" },
-  { label: "KPI Tahlil", href: "#kpi" },
-  { label: "Narxlar", href: "#pricing" },
-  { label: "FAQ", href: "#faq" },
-];
-const SERVICES = [
-  "Moliyaviy tahlil",
-  "KPI Dashboard",
-  "AI hisobot",
-  "Risk diagnostika",
-  "Konsalting",
+  { key: "nav.home", href: "#hero" },
+  { key: "nav.how", href: "#how-it-works" },
+  { key: "nav.services", href: "#services" },
+  { key: "nav.kpi", href: "#kpi" },
+  { key: "nav.pricing", href: "#pricing" },
+  { key: "nav.faq", href: "#faq" },
 ];
 
 export default function Footer() {
+  const { t } = useApp();
+  const SERVICES = t("ft.services");
   return (
     <footer className="bg-[#0b1220] px-6 pb-[30px] pt-16 text-slate-300">
       <div className="mx-auto max-w-[1200px]">
@@ -31,24 +27,23 @@ export default function Footer() {
               </span>
             </div>
             <p className="max-w-[260px] text-[14px] leading-relaxed text-slate-400">
-              AI yordamida moliyaviy tahlil va hisobot — biznesingiz uchun
-              raqamli moliyaviy direktor.
+              {t("ft.about")}
             </p>
           </div>
 
           <div>
-            <h4 className="mb-4 font-heading text-[15px] font-bold text-white">Havolalar</h4>
+            <h4 className="mb-4 font-heading text-[15px] font-bold text-white">{t("ft.links")}</h4>
             <div className="flex flex-col gap-2.5">
               {NAV_LINKS.map((l) => (
                 <a key={l.href} href={l.href} className="text-[14px] text-slate-400 transition-colors hover:text-white">
-                  {l.label}
+                  {t(l.key)}
                 </a>
               ))}
             </div>
           </div>
 
           <div>
-            <h4 className="mb-4 font-heading text-[15px] font-bold text-white">Xizmatlar</h4>
+            <h4 className="mb-4 font-heading text-[15px] font-bold text-white">{t("ft.servicesTitle")}</h4>
             <div className="flex flex-col gap-2.5">
               {SERVICES.map((s) => (
                 <span key={s} className="text-[14px] text-slate-400">{s}</span>
@@ -57,7 +52,7 @@ export default function Footer() {
           </div>
 
           <div>
-            <h4 className="mb-4 font-heading text-[15px] font-bold text-white">Aloqa</h4>
+            <h4 className="mb-4 font-heading text-[15px] font-bold text-white">{t("ft.contactTitle")}</h4>
             <div className="flex flex-col gap-[11px] text-[14px] text-slate-400">
               <a href="mailto:n.ganiyev2007@gmail.com" className="flex items-center gap-2.5 hover:text-white">
                 <Mail className="h-4 w-4" /> n.ganiyev2007@gmail.com
@@ -93,10 +88,10 @@ export default function Footer() {
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-3.5 pt-6 text-[13px] text-slate-500">
-          <span>© 2026 Digital CFO. Barcha huquqlar himoyalangan.</span>
+          <span>{t("ft.rights")}</span>
           <div className="flex gap-5">
-            <a href="/maxfiylik.html" className="hover:text-white">Maxfiylik siyosati</a>
-            <a href="/shartlar.html" className="hover:text-white">Foydalanish shartlari</a>
+            <a href="/maxfiylik.html" className="hover:text-white">{t("ft.privacy")}</a>
+            <a href="/shartlar.html" className="hover:text-white">{t("ft.terms")}</a>
           </div>
         </div>
       </div>

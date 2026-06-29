@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { base44Client } from "@/api/base44Client";
 import { fadeUp, viewportOnce } from "@/lib/motion";
+import { useApp } from "@/lib/i18n";
 
 // Namuna (ma'lumot kelmaguncha ko'rsatiladi)
 const SAMPLE = {
@@ -49,6 +50,7 @@ function fmtTashkent(iso) {
 }
 
 export default function DashboardPreview() {
+  const { t } = useApp();
   const [stats, setStats] = useState(null);
 
   useEffect(() => {
@@ -63,36 +65,35 @@ export default function DashboardPreview() {
   }, []);
 
   const live = !!stats;
-  const cards = live
-    ? [
-        { label: "Foydalanuvchilar", value: stats.users, Icon: Users },
-        { label: "Murojaatlar", value: stats.visits, Icon: MessageSquare },
-        { label: "Tahlillar", value: stats.reports, Icon: FileText },
-        { label: "Bugun faol", value: stats.today_active, Icon: Activity },
-      ]
-    : SAMPLE.cards;
-  const bars = live
-    ? [
-        { label: "Telefon ulashgan", pct: pct(stats.with_phone, stats.users), color: "#3B82F6" },
-        { label: "Premium foydalanuvchilar", pct: pct(stats.premium, stats.users), color: "#10B981" },
-      ]
-    : SAMPLE.bars;
+  const cardVals = live
+    ? [stats.users, stats.visits, stats.reports, stats.today_active]
+    : SAMPLE.cards.map((c) => c.value);
+  const cards = [
+    { label: t("db.users"), value: cardVals[0], Icon: Users },
+    { label: t("db.visits"), value: cardVals[1], Icon: MessageSquare },
+    { label: t("db.reports"), value: cardVals[2], Icon: FileText },
+    { label: t("db.todayActive"), value: cardVals[3], Icon: Activity },
+  ];
+  const bars = [
+    { label: t("db.phoneShared"), pct: live ? pct(stats.with_phone, stats.users) : SAMPLE.bars[0].pct, color: "#3B82F6" },
+    { label: t("db.premiumUsers"), pct: live ? pct(stats.premium, stats.users) : SAMPLE.bars[1].pct, color: "#10B981" },
+  ];
 
   // AI Sotuv agenti metrikalari (faqat bot yuborgan bo'lsa ko'rinadi)
   const agent = live && stats.agent ? stats.agent : null;
   const funnel = agent
     ? [
-        { label: "Start → Telefon", pct: agent.conversions?.start_phone ?? 0, color: "#3B82F6" },
-        { label: "Telefon → Hisobot", pct: agent.conversions?.phone_report ?? 0, color: "#8B5CF6" },
-        { label: "Hisobot → Premium", pct: agent.conversions?.report_premium ?? 0, color: "#10B981" },
+        { label: t("db.fStartPhone"), pct: agent.conversions?.start_phone ?? 0, color: "#3B82F6" },
+        { label: t("db.fPhoneReport"), pct: agent.conversions?.phone_report ?? 0, color: "#8B5CF6" },
+        { label: t("db.fReportPremium"), pct: agent.conversions?.report_premium ?? 0, color: "#10B981" },
       ]
     : [];
   const aiActivity = agent
     ? [
-        { label: "Suhbatlar", value: agent.today?.conversations ?? 0, Icon: MessageSquare },
-        { label: "AI xabarlari", value: agent.today?.messages ?? 0, Icon: Bot },
-        { label: "Videolar", value: agent.today?.videos ?? 0, Icon: Video },
-        { label: "Eslatmalar", value: agent.today?.reminders ?? 0, Icon: Bell },
+        { label: t("db.aConversations"), value: agent.today?.conversations ?? 0, Icon: MessageSquare },
+        { label: t("db.aMessages"), value: agent.today?.messages ?? 0, Icon: Bot },
+        { label: t("db.aVideos"), value: agent.today?.videos ?? 0, Icon: Video },
+        { label: t("db.aReminders"), value: agent.today?.reminders ?? 0, Icon: Bell },
       ]
     : [];
 
@@ -107,16 +108,14 @@ export default function DashboardPreview() {
           className="mx-auto mb-11 max-w-[680px] text-center"
         >
           <div className="font-mono text-[13px] font-semibold uppercase tracking-[0.08em] text-emerald-300">
-            Statistika
+            {t("db.eyebrow")}
           </div>
           <h2 className="mt-3 font-heading text-[clamp(30px,4vw,44px)] font-bold tracking-[-0.02em] text-white">
-            Boshqaruv paneli
+            {t("db.title")}
           </h2>
           <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[.06] px-3.5 py-1.5 text-[12px] font-medium text-slate-300">
             <span className={`h-1.5 w-1.5 rounded-full ${live ? "bg-emerald-400 pulse-dot" : "bg-slate-400"}`} />
-            {live
-              ? `Jonli statistika · har kuni 03:00 da yangilanadi`
-              : `Interfeys namunasi — tez orada jonli statistika`}
+            {live ? t("db.live") : t("db.sampleStatus")}
           </div>
         </motion.div>
 
@@ -155,7 +154,7 @@ export default function DashboardPreview() {
               {/* Faollik darajasi */}
               <div className="rounded-[14px] border border-white/[.07] bg-white/[.03] p-5">
                 <div className="mb-[18px] font-heading text-[15px] font-bold text-white">
-                  Foydalanuvchilar tarkibi
+                  {t("db.composition")}
                 </div>
                 <div className="flex flex-col gap-4">
                   {bars.map((b) => (
@@ -182,20 +181,20 @@ export default function DashboardPreview() {
               {/* Qisqacha ma'lumot */}
               <div className="rounded-[14px] border border-white/[.07] bg-white/[.03] p-5">
                 <div className="mb-[18px] font-heading text-[15px] font-bold text-white">
-                  Qisqacha
+                  {t("db.brief")}
                 </div>
                 <div className="flex flex-col gap-3.5">
                   <Row Icon={Phone} bg="bg-azure/15" color="text-azure"
-                    text="Telefon ulashgan" value={live ? stats.with_phone : 18} />
+                    text={t("db.phoneShared")} value={live ? stats.with_phone : 18} />
                   <Row Icon={Star} bg="bg-amber-500/15" color="text-amber-400"
-                    text="Premium foydalanuvchilar" value={live ? stats.premium : 5} />
+                    text={t("db.premiumUsers")} value={live ? stats.premium : 5} />
                   <Row Icon={FileText} bg="bg-emerald-500/15" color="text-emerald-500"
-                    text="Jami tahlillar" value={live ? stats.reports : 86} />
+                    text={t("db.totalReports")} value={live ? stats.reports : 86} />
                   <div className="mt-1 flex items-center gap-1.5 border-t border-white/[.07] pt-3 font-mono text-[11.5px] text-slate-500">
                     <Clock className="h-[13px] w-[13px]" />
                     {live
-                      ? `Oxirgi yangilanish: ${fmtTashkent(stats.updated_at)} (GMT+5)`
-                      : "Statistika har kuni 03:00 da yangilanadi"}
+                      ? `${t("db.lastUpdate")}: ${fmtTashkent(stats.updated_at)} (GMT+5)`
+                      : t("db.updatedDaily")}
                   </div>
                 </div>
               </div>
@@ -207,10 +206,10 @@ export default function DashboardPreview() {
                 <div className="mb-[18px] flex items-center gap-2">
                   <Bot className="h-[18px] w-[18px] text-emerald-400" />
                   <span className="font-heading text-[15px] font-bold text-white">
-                    AI Sotuv agenti
+                    {t("db.agent")}
                   </span>
                   <span className="ml-auto inline-flex items-center gap-1 text-[11.5px] font-medium text-emerald-300">
-                    <TrendingUp className="h-[13px] w-[13px]" /> Konversiya voronkasi
+                    <TrendingUp className="h-[13px] w-[13px]" /> {t("db.funnel")}
                   </span>
                 </div>
 

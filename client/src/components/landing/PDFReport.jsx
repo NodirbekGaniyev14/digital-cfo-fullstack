@@ -2,18 +2,10 @@ import { motion } from "framer-motion";
 import { BarChart3, CircleCheckBig, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { fadeUp, viewportOnce } from "@/lib/motion";
+import { useApp } from "@/lib/i18n";
 
 // Sample report lives in /public and is served statically.
 const SAMPLE_PDF = "/Namuna_Moliyaviy_Hisobot.pdf";
-
-const REPORT_ITEMS = [
-  "Boshqaruv xulosasi (Executive Summary)",
-  "Asosiy KPI ko'rsatkichlari jadvali",
-  "Likvidlik va to'lov qobiliyati tahlili",
-  "Rentabellik va foyda dinamikasi",
-  "Risk diagnostikasi va baholash",
-  "AI tavsiyalari va xulosalar",
-];
 
 // PDF'ni ishonchli yuklab olish: blob orqali (brauzer inline ochib qo'ymasligi uchun).
 async function downloadSample() {
@@ -35,6 +27,8 @@ async function downloadSample() {
 }
 
 export default function PDFReport() {
+  const { t } = useApp();
+  const REPORT_ITEMS = t("pdf.items");
   return (
     <section id="pdf-report" className="bg-white px-6 py-[90px]">
       <div className="mx-auto grid max-w-[1200px] items-center gap-12 lg:grid-cols-2">
@@ -60,7 +54,7 @@ export default function PDFReport() {
               <span className="font-mono text-[11px] text-slate-400">2026-06-21</span>
             </div>
             <h4 className="mb-3.5 font-heading text-[18px] font-bold">
-              Moliyaviy Tahlil Hisoboti
+              {t("pdf.docTitle")}
             </h4>
             <div className="mb-5 flex flex-col gap-2">
               {["100%", "88%", "94%", "70%"].map((w, i) => (
@@ -98,14 +92,13 @@ export default function PDFReport() {
           variants={fadeUp}
         >
           <div className="font-mono text-[13px] font-semibold uppercase tracking-[0.08em] text-azure">
-            PDF Hisobot
+            {t("pdf.eyebrow")}
           </div>
           <h2 className="mb-2.5 mt-3 font-heading text-[clamp(28px,3.6vw,40px)] font-bold tracking-[-0.02em]">
-            Professional hisobot tarkibi
+            {t("pdf.title")}
           </h2>
           <p className="mb-6 text-[16px] leading-relaxed text-slate-600">
-            Har bir hisobot tahlilchi tomonidan tayyorlangandek aniq va to'liq —
-            bir tugma bilan yuklab oling.
+            {t("pdf.subtitle")}
           </p>
           <div className="mb-7 flex flex-col gap-3">
             {REPORT_ITEMS.map((t, i) => (
@@ -124,11 +117,11 @@ export default function PDFReport() {
           <div className="flex flex-wrap gap-3">
             <Button asChild variant="navy" size="lg">
               <a href={SAMPLE_PDF} target="_blank" rel="noreferrer">
-                <FileSpreadsheetIcon /> Namuna ko'rish
+                <FileSpreadsheetIcon /> {t("pdf.view")}
               </a>
             </Button>
             <Button variant="emerald-outline" size="lg" onClick={downloadSample}>
-              <Download className="h-[17px] w-[17px]" /> Namunani yuklab olish
+              <Download className="h-[17px] w-[17px]" /> {t("pdf.download")}
             </Button>
           </div>
         </motion.div>

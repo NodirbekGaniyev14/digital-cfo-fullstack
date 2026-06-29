@@ -2,25 +2,14 @@ import { motion } from "framer-motion";
 import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { fadeUp, viewportOnce } from "@/lib/motion";
-
-const PLAN = {
-  name: "Bir martalik tahlil",
-  oldPrice: "249 000",
-  price: "0",
-  per: "1 ta tahlil uchun",
-  note: "🎉 Aksiya narxi",
-  badge: "Aksiya",
-  features: [
-    "Moliyaviy fayl tahlili",
-    "To'liq KPI hisoblash",
-    "AI CFO hisoboti",
-    "Risk diagnostikasi",
-    "Professional PDF hisobot",
-  ],
-  cta: "Hoziroq boshlash",
-};
+import { useApp } from "@/lib/i18n";
 
 export default function Pricing() {
+  const { t } = useApp();
+  const PLAN = {
+    name: t("pr.name"), oldPrice: "249 000", price: "0", per: t("pr.per"),
+    note: t("pr.note"), badge: t("pr.badge"), features: t("pr.features"), cta: t("pr.cta"),
+  };
   return (
     <section
       id="pricing"
@@ -39,10 +28,10 @@ export default function Pricing() {
           className="mx-auto mb-[50px] max-w-[680px] text-center"
         >
           <div className="font-mono text-[13px] font-semibold uppercase tracking-[0.08em] text-azure">
-            Narxlar
+            {t("pr.eyebrow")}
           </div>
           <h2 className="mt-3 font-heading text-[clamp(30px,4vw,44px)] font-bold tracking-[-0.02em]">
-            Sizga mos tarif
+            {t("pr.title")}
           </h2>
         </motion.div>
 
@@ -61,13 +50,13 @@ export default function Pricing() {
             <h3 className="font-heading text-[22px] font-bold">{PLAN.name}</h3>
 
             <div className="mt-4 font-mono text-[17px] text-slate-400 line-through decoration-red-500">
-              {PLAN.oldPrice} so'm
+              {PLAN.oldPrice} {t("pr.sum")}
             </div>
             <div className="mb-2.5 mt-1.5 flex items-end gap-2">
               <span className="font-mono text-[44px] font-bold leading-none text-emerald-500">
                 {PLAN.price}
               </span>
-              <span className="mb-1.5 text-base font-semibold text-slate-600">so'm</span>
+              <span className="mb-1.5 text-base font-semibold text-slate-600">{t("pr.sum")}</span>
             </div>
             <div className="mb-2.5 text-[13.5px] text-slate-400">{PLAN.per}</div>
             <div className="mb-6 inline-block rounded-full bg-emerald-500/10 px-3.5 py-1 text-[12.5px] font-bold text-emerald-700">

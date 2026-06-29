@@ -1,16 +1,15 @@
 import { motion } from "framer-motion";
 import { Upload, ShieldCheck, BarChart3, Brain, FileText } from "lucide-react";
 import { fadeUp, viewportOnce } from "@/lib/motion";
+import { useApp } from "@/lib/i18n";
 
-const STEPS = [
-  { num: "01", Icon: Upload, title: "Faylni yuklang", desc: "Excel yoki CSV moliyaviy faylingizni tizimga yuklang." },
-  { num: "02", Icon: ShieldCheck, title: "Validatsiya", desc: "Tizim ma'lumotlarni avtomatik tekshiradi va tozalaydi." },
-  { num: "03", Icon: BarChart3, title: "KPI hisoblash", desc: "Barcha asosiy moliyaviy ko'rsatkichlar hisoblanadi." },
-  { num: "04", Icon: Brain, title: "AI tahlil", desc: "Sun'iy intellekt natijalarni chuqur tahlil qiladi." },
-  { num: "05", Icon: FileText, title: "PDF hisobot", desc: "Tayyor professional hisobotni yuklab oling." },
-];
+const STEP_ICONS = [Upload, ShieldCheck, BarChart3, Brain, FileText];
 
 export default function HowItWorks() {
+  const { t } = useApp();
+  const STEPS = t("how.steps").map((s, i) => ({
+    ...s, num: String(i + 1).padStart(2, "0"), Icon: STEP_ICONS[i],
+  }));
   return (
     <section
       id="how-it-works"
@@ -29,13 +28,13 @@ export default function HowItWorks() {
           className="mx-auto mb-14 max-w-[680px] text-center"
         >
           <div className="font-mono text-[13px] font-semibold uppercase tracking-[0.08em] text-emerald-500">
-            Jarayon
+            {t("how.eyebrow")}
           </div>
           <h2 className="mt-3 font-heading text-[clamp(30px,4vw,44px)] font-bold tracking-[-0.02em]">
-            Qanday ishlaydi
+            {t("how.title")}
           </h2>
           <p className="mt-3.5 text-[17px] text-slate-600">
-            Faylni yuklashdan tayyor hisobotgacha — atigi besh qadam.
+            {t("how.subtitle")}
           </p>
         </motion.div>
 

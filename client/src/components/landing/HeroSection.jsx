@@ -9,13 +9,9 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { fadeUpDelay } from "@/lib/motion";
+import { useApp } from "@/lib/i18n";
 
-const TRUST = [
-  { icon: ShieldCheck, label: "Xavfsiz" },
-  { icon: Brain, label: "AI tahlil" },
-  { icon: Zap, label: "Tez natija" },
-  { icon: FileText, label: "PDF hisobot" },
-];
+const TRUST_ICONS = [ShieldCheck, Brain, Zap, FileText];
 const HERO_KPIS = [
   { label: "Likvidlik", value: "2.4", color: "#3B82F6" },
   { label: "Risk Score", value: "23", color: "#10B981" },
@@ -24,6 +20,7 @@ const HERO_KPIS = [
 const BARS = [40, 66, 52, 80, 58, 90, 70, 100, 62, 86, 76, 95];
 
 export default function HeroSection() {
+  const { t } = useApp();
   return (
     // Hero — yuqori qism: sarlavha, CTA va dashboard mockup
     <section
@@ -54,7 +51,7 @@ export default function HeroSection() {
             className="inline-flex items-center gap-2.5 rounded-full border border-emerald-500/30 bg-white/70 dark:bg-white/[.06] px-[15px] py-2 text-[13px] font-semibold text-emerald-700 dark:text-emerald-300 backdrop-blur-md"
           >
             <span className="pulse-dot h-2.5 w-2.5 rounded-full bg-emerald-500" />
-            AI-powered moliyaviy tahlil
+            {t("hero.badge")}
           </motion.div>
 
           <motion.h1
@@ -63,8 +60,8 @@ export default function HeroSection() {
             variants={fadeUpDelay(0.05)}
             className="mt-[22px] font-heading text-[clamp(40px,5.4vw,64px)] font-extrabold leading-[1.04] tracking-[-0.03em]"
           >
-            Moliyaviy Kelajagingizni{" "}
-            <span className="gradient-text">AI Boshqaruviga</span> Topshiring
+            {t("hero.titleA")}
+            <span className="gradient-text">{t("hero.titleB")}</span>{t("hero.titleC")}
           </motion.h1>
 
           <motion.p
@@ -73,9 +70,7 @@ export default function HeroSection() {
             variants={fadeUpDelay(0.12)}
             className="mt-[22px] max-w-[520px] text-[18px] leading-relaxed text-slate-600"
           >
-            Balans va moliyaviy hisobotingizni yuboring — biz ularni chuqur
-            tahlil qilib, KPI'lar va amaliy tavsiyalar bilan tayyor CFO
-            darajasidagi hisobotni qaytaramiz.
+            {t("hero.subtitle")}
           </motion.p>
 
           <motion.div
@@ -86,11 +81,11 @@ export default function HeroSection() {
           >
             <Button asChild variant="navy" size="lg">
               <a href="https://t.me/Moliyaviy_Tahlilchi_bot" target="_blank" rel="noreferrer">
-                Bepul boshlash <ArrowRight className="h-[17px] w-[17px]" />
+                {t("hero.ctaStart")} <ArrowRight className="h-[17px] w-[17px]" />
               </a>
             </Button>
             <Button asChild variant="outline" size="lg">
-              <a href="#dashboard">Demo ko'rish</a>
+              <a href="#dashboard">{t("hero.ctaDemo")}</a>
             </Button>
           </motion.div>
 
@@ -100,15 +95,15 @@ export default function HeroSection() {
             variants={fadeUpDelay(0.26)}
             className="mt-[34px] flex flex-wrap gap-[22px]"
           >
-            {TRUST.map((t) => (
+            {TRUST_ICONS.map((Icon, i) => (
               <div
-                key={t.label}
+                key={i}
                 className="flex items-center gap-2 text-[13px] font-medium text-slate-600"
               >
                 <div className="flex h-[30px] w-[30px] items-center justify-center rounded-[9px] bg-azure/10 text-azure">
-                  <t.icon className="h-4 w-4" />
+                  <Icon className="h-4 w-4" />
                 </div>
-                {t.label}
+                {t("hero.trust")[i]}
               </div>
             ))}
           </motion.div>
@@ -130,7 +125,7 @@ export default function HeroSection() {
                 Digital CFO Dashboard
               </span>
               <span className="ml-auto rounded-full bg-white/10 px-2.5 py-0.5 font-mono text-[10px] font-medium text-slate-300">
-                Namuna
+                {t("hero.sample")}
               </span>
             </div>
             <div className="mb-4 grid grid-cols-3 gap-2.5">
@@ -153,7 +148,7 @@ export default function HeroSection() {
             </div>
             <div className="mb-3.5 rounded-[13px] border border-white/[.07] bg-white/[.04] p-4">
               <div className="mb-3 font-mono text-[11px] font-medium text-slate-400">
-                OYLIK DINAMIKA
+                {t("hero.monthly")}
               </div>
               <div className="flex h-24 items-end gap-1.5">
                 {BARS.map((h, i) => (
@@ -168,10 +163,10 @@ export default function HeroSection() {
             <div className="flex items-center justify-between rounded-[11px] border border-emerald-500/25 bg-emerald-500/10 px-3.5 py-[11px]">
               <div className="flex items-center gap-2 text-[13px] font-semibold text-emerald-300">
                 <span className="pulse-dot h-2 w-2 rounded-full bg-emerald-500" />
-                AI tahlil tugallandi
+                {t("hero.aiDone")}
               </div>
               <div className="flex items-center gap-1.5 font-mono text-xs text-slate-300">
-                <FileText className="h-3.5 w-3.5" /> PDF tayyor
+                <FileText className="h-3.5 w-3.5" /> {t("hero.pdfReady")}
               </div>
             </div>
           </div>
@@ -181,8 +176,8 @@ export default function HeroSection() {
               <Brain className="h-[17px] w-[17px]" />
             </div>
             <div>
-              <div className="text-xs font-bold">AI Tahlil</div>
-              <div className="text-[10.5px] text-slate-500">Real vaqtda</div>
+              <div className="text-xs font-bold">{t("hero.aiCard")}</div>
+              <div className="text-[10.5px] text-slate-500">{t("hero.aiCardSub")}</div>
             </div>
           </div>
           <div className="float-animation absolute -bottom-4 -left-3 flex items-center gap-2.5 rounded-[14px] bg-white px-[15px] py-[11px] shadow-[0_16px_34px_rgba(15,23,42,.16)] [animation-delay:.8s]">
@@ -190,9 +185,9 @@ export default function HeroSection() {
               <FileCheck2 className="h-[17px] w-[17px]" />
             </div>
             <div>
-              <div className="text-xs font-bold">PDF Hisobot</div>
+              <div className="text-xs font-bold">{t("hero.pdfCard")}</div>
               <div className="text-[10.5px] text-slate-500">
-                Yuklab olishga tayyor
+                {t("hero.pdfCardSub")}
               </div>
             </div>
           </div>

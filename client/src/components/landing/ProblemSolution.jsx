@@ -1,24 +1,12 @@
 import { motion } from "framer-motion";
 import { CircleAlert, Sparkles, X, Check } from "lucide-react";
 import { fadeUp, staggerContainer, viewportOnce } from "@/lib/motion";
-
-const PROBLEMS = [
-  "Murakkab va tushunarsiz moliyaviy hisobotlar",
-  "Tahlil juda ko'p vaqt talab qiladi",
-  "Qo'lda hisoblashda xatoliklar ko'p",
-  "Malakali CFO tahliliga erishish qiyin va qimmat",
-  "Qaror qabul qilish jarayoni sekin",
-];
-const SOLUTIONS = [
-  "Faylni bir necha soniyada yuklash",
-  "Avtomatik tekshiruv va validatsiya",
-  "Aniq KPI ko'rsatkichlarini hisoblash",
-  "AI tomonidan chuqur moliyaviy tahlil",
-  "Tayyor professional PDF hisobot",
-  "Amaliy va aniq tavsiyalar",
-];
+import { useApp } from "@/lib/i18n";
 
 export default function ProblemSolution() {
+  const { t } = useApp();
+  const PROBLEMS = t("ps.problems");
+  const SOLUTIONS = t("ps.solutions");
   return (
     <section className="px-6 py-[90px]">
       <div className="mx-auto max-w-[1200px]">
@@ -30,10 +18,10 @@ export default function ProblemSolution() {
           className="mx-auto mb-[50px] max-w-[680px] text-center"
         >
           <div className="font-mono text-[13px] font-semibold uppercase tracking-[0.08em] text-azure">
-            Nega Digital CFO
+            {t("ps.eyebrow")}
           </div>
           <h2 className="mt-3 font-heading text-[clamp(30px,4vw,44px)] font-bold tracking-[-0.02em]">
-            Eski usullarni unuting
+            {t("ps.title")}
           </h2>
         </motion.div>
 
@@ -51,7 +39,7 @@ export default function ProblemSolution() {
                 <CircleAlert className="h-[23px] w-[23px]" />
               </div>
               <h3 className="font-heading text-[22px] font-bold">
-                Hozirgi muammolar
+                {t("ps.problemsTitle")}
               </h3>
             </motion.div>
             <div className="flex flex-col gap-3.5">
@@ -81,7 +69,7 @@ export default function ProblemSolution() {
                 <Sparkles className="h-[23px] w-[23px]" />
               </div>
               <h3 className="font-heading text-[22px] font-bold">
-                Digital CFO yechimi
+                {t("ps.solutionsTitle")}
               </h3>
             </motion.div>
             <div className="flex flex-col gap-3.5">

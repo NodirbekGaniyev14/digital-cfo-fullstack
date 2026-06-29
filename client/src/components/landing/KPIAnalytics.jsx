@@ -1,16 +1,18 @@
 import { motion } from "framer-motion";
 import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { fadeUp, staggerContainer, viewportOnce } from "@/lib/motion";
+import { useApp } from "@/lib/i18n";
 
-const KPIS = [
-  { label: "Current Ratio", value: "2.41", bench: "YAXSHI", tone: "good", Trend: TrendingUp, desc: "Joriy likvidlik me'yordan yuqori." },
-  { label: "Quick Ratio", value: "1.83", bench: "YAXSHI", tone: "good", Trend: TrendingUp, desc: "Tezkor likvidlik barqaror." },
-  { label: "Debt Ratio", value: "0.38", bench: "YAXSHI", tone: "good", Trend: Minus, desc: "Qarz darajasi past va xavfsiz." },
-  { label: "Net Profit Margin", value: "18.5%", bench: "YAXSHI", tone: "good", Trend: TrendingUp, desc: "Sof foyda marjasi o'smoqda." },
-  { label: "Operating Margin", value: "24.2%", bench: "YAXSHI", tone: "good", Trend: TrendingUp, desc: "Operatsion samaradorlik yuqori." },
-  { label: "Cash Flow Stress", value: "12.3%", bench: "DIQQAT", tone: "warn", Trend: TrendingDown, desc: "Pul oqimida ozgina bosim bor." },
-  { label: "Risk Score", value: "23", bench: "YAXSHI", tone: "good", Trend: TrendingDown, desc: "Umumiy risk darajasi past." },
-  { label: "Financial Health", value: "87", bench: "A'LO", tone: "good", Trend: TrendingUp, desc: "100 balldan moliyaviy salomatlik." },
+// Raqam/ikonka/ohang sobit; matn (bench, desc) t() dan keladi.
+const KPI_META = [
+  { label: "Current Ratio", value: "2.41", tone: "good", Trend: TrendingUp },
+  { label: "Quick Ratio", value: "1.83", tone: "good", Trend: TrendingUp },
+  { label: "Debt Ratio", value: "0.38", tone: "good", Trend: Minus },
+  { label: "Net Profit Margin", value: "18.5%", tone: "good", Trend: TrendingUp },
+  { label: "Operating Margin", value: "24.2%", tone: "good", Trend: TrendingUp },
+  { label: "Cash Flow Stress", value: "12.3%", tone: "warn", Trend: TrendingDown },
+  { label: "Risk Score", value: "23", tone: "good", Trend: TrendingDown },
+  { label: "Financial Health", value: "87", tone: "good", Trend: TrendingUp },
 ];
 
 const TONE = {
@@ -19,6 +21,9 @@ const TONE = {
 };
 
 export default function KPIAnalytics() {
+  const { t } = useApp();
+  const items = t("kpi.items");
+  const KPIS = KPI_META.map((k, i) => ({ ...k, bench: items[i].bench, desc: items[i].desc }));
   return (
     <section id="kpi" className="relative overflow-hidden bg-navy px-6 py-[90px]">
       <div
@@ -37,18 +42,17 @@ export default function KPIAnalytics() {
           className="mx-auto mb-[50px] max-w-[700px] text-center"
         >
           <div className="font-mono text-[13px] font-semibold uppercase tracking-[0.08em] text-emerald-300">
-            KPI Tahlil
+            {t("kpi.eyebrow")}
           </div>
           <h2 className="mt-3 font-heading text-[clamp(30px,4vw,44px)] font-bold tracking-[-0.02em] text-white">
-            Avtomatik hisoblangan ko'rsatkichlar
+            {t("kpi.title")}
           </h2>
           <p className="mt-3.5 text-[17px] text-slate-400">
-            AI har bir moliyaviy nisbatni hisoblaydi va benchmark bilan
-            solishtiradi.
+            {t("kpi.subtitle")}
           </p>
           <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[.06] px-3.5 py-1.5 text-[12px] font-medium text-slate-300">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-            Namuna ma'lumotlar — haqiqiy ko'rsatkichlar sizning faylingiz asosida hisoblanadi
+            {t("kpi.sample")}
           </div>
         </motion.div>
 

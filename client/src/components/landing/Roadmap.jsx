@@ -11,16 +11,17 @@ import {
   Dot,
 } from "lucide-react";
 import { fadeUp, viewportOnce } from "@/lib/motion";
+import { useApp } from "@/lib/i18n";
 
-const PHASES = [
-  { Icon: LayoutGrid, phase: "01-bosqich", title: "Asos", items: ["Arxitektura", "UI dizayn", "Ma'lumotlar bazasi"], tint: "azure" },
-  { Icon: UploadCloud, phase: "02-bosqich", title: "Yuklash tizimi", items: ["Fayl yuklash", "Format tekshirish", "Saqlash"], tint: "emerald" },
-  { Icon: CreditCard, phase: "03-bosqich", title: "To'lov", items: ["Payme / Click", "Tariflar", "Cheklar"], tint: "azure" },
-  { Icon: Calculator, phase: "04-bosqich", title: "KPI Engine", items: ["Likvidlik", "Rentabellik", "Risk hisob"], tint: "emerald" },
-  { Icon: Brain, phase: "05-bosqich", title: "AI Engine", items: ["Tahlil modeli", "Tavsiyalar", "Benchmark"], tint: "azure" },
-  { Icon: FileText, phase: "06-bosqich", title: "PDF Hisobot", items: ["Shablon", "Grafiklar", "Eksport"], tint: "emerald" },
-  { Icon: FlaskConical, phase: "07-bosqich", title: "Sinov", items: ["Beta test", "Xatolar", "Optimallash"], tint: "azure" },
-  { Icon: Rocket, phase: "08-bosqich", title: "Ishga tushirish", items: ["Marketing", "Qo'llab-quvvatlash", "Kengaytirish"], tint: "emerald" },
+const PHASE_META = [
+  { Icon: LayoutGrid, tint: "azure" },
+  { Icon: UploadCloud, tint: "emerald" },
+  { Icon: CreditCard, tint: "azure" },
+  { Icon: Calculator, tint: "emerald" },
+  { Icon: Brain, tint: "azure" },
+  { Icon: FileText, tint: "emerald" },
+  { Icon: FlaskConical, tint: "azure" },
+  { Icon: Rocket, tint: "emerald" },
 ];
 
 const TINT = {
@@ -29,6 +30,8 @@ const TINT = {
 };
 
 export default function Roadmap() {
+  const { t } = useApp();
+  const PHASES = t("rm.phases").map((p, i) => ({ ...p, ...PHASE_META[i] }));
   return (
     <section id="roadmap" className="bg-white px-6 py-[90px]">
       <div className="mx-auto max-w-[1200px]">
@@ -40,10 +43,10 @@ export default function Roadmap() {
           className="mb-10"
         >
           <div className="font-mono text-[13px] font-semibold uppercase tracking-[0.08em] text-azure">
-            Yo'l xaritasi
+            {t("rm.eyebrow")}
           </div>
           <h2 className="mt-3 font-heading text-[clamp(30px,4vw,44px)] font-bold tracking-[-0.02em]">
-            Mahsulot bosqichlari
+            {t("rm.title")}
           </h2>
         </motion.div>
 
@@ -56,17 +59,17 @@ export default function Roadmap() {
         >
           <div className="flex min-w-max gap-[18px]">
             {PHASES.map((p) => {
-              const t = TINT[p.tint];
+              const tint = TINT[p.tint];
               return (
                 <div
-                  key={p.phase}
-                  className={`w-[236px] flex-none rounded-[18px] border ${t.border} ${t.bg} p-[22px]`}
+                  key={p.label}
+                  className={`w-[236px] flex-none rounded-[18px] border ${tint.border} ${tint.bg} p-[22px]`}
                 >
-                  <div className={`mb-4 flex h-[42px] w-[42px] items-center justify-center rounded-xl ${t.iconBg} ${t.text}`}>
+                  <div className={`mb-4 flex h-[42px] w-[42px] items-center justify-center rounded-xl ${tint.iconBg} ${tint.text}`}>
                     <p.Icon className="h-[21px] w-[21px]" />
                   </div>
-                  <div className={`font-mono text-[11.5px] font-semibold uppercase tracking-[0.06em] ${t.text}`}>
-                    {p.phase}
+                  <div className={`font-mono text-[11.5px] font-semibold uppercase tracking-[0.06em] ${tint.text}`}>
+                    {p.label}
                   </div>
                   <h3 className="mb-3.5 mt-1.5 font-heading text-[18px] font-bold">
                     {p.title}

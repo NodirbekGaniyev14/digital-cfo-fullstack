@@ -1,31 +1,18 @@
 import { motion } from "framer-motion";
 import { Quote, Star } from "lucide-react";
 import { fadeUp, staggerContainer, viewportOnce } from "@/lib/motion";
+import { useApp } from "@/lib/i18n";
 
-// NAMUNA sharhlar — ishga tushirishdan oldin haqiqiy mijoz sharhlari bilan
-// almashtiring (ism, lavozim, kompaniya va matnni real qiling).
-const REVIEWS = [
-  {
-    name: "Dilshod R.",
-    role: "Direktor, savdo kompaniyasi",
-    text: "Avval hisobotlarni tushunish uchun buxgalterga murojaat qilardik. Endi faylni yuklasak — KPI va tavsiyalar tayyor. Vaqtni juda tejadik.",
-    initial: "D",
-  },
-  {
-    name: "Nigora A.",
-    role: "Moliyaviy menejer, ishlab chiqarish",
-    text: "Likvidlik va risk ko'rsatkichlari aniq ko'rsatilgan. Rahbariyatga taqdimot qilish ancha osonlashdi.",
-    initial: "N",
-  },
-  {
-    name: "Sardor M.",
-    role: "Tadbirkor, xizmat ko'rsatish",
-    text: "PDF hisobot professional ko'rinishda chiqadi. Investorlar bilan suhbatda aynan shu hujjat yordam berdi.",
-    initial: "S",
-  },
+// Ism/initsial sobit; lavozim va matn t() dan keladi (3 til).
+const REVIEW_META = [
+  { name: "Dilshod R.", initial: "D" },
+  { name: "Nigora A.", initial: "N" },
+  { name: "Sardor M.", initial: "S" },
 ];
 
 export default function Testimonials() {
+  const { t } = useApp();
+  const REVIEWS = t("tm.reviews").map((r, i) => ({ ...REVIEW_META[i], ...r }));
   return (
     <section id="testimonials" className="bg-white px-6 py-[90px]">
       <div className="mx-auto max-w-[1200px]">
@@ -37,14 +24,14 @@ export default function Testimonials() {
           className="mx-auto mb-[50px] max-w-[680px] text-center"
         >
           <div className="font-mono text-[13px] font-semibold uppercase tracking-[0.08em] text-azure">
-            Sharhlar
+            {t("tm.eyebrow")}
           </div>
           <h2 className="mt-3 font-heading text-[clamp(30px,4vw,44px)] font-bold tracking-[-0.02em]">
-            Mijozlarimiz fikri
+            {t("tm.title")}
           </h2>
           <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-navy/10 bg-navy/[.03] px-3.5 py-1.5 text-[12px] font-medium text-slate-500">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-            Namuna sharhlar — tez orada haqiqiy mijoz fikrlari bilan to'ldiriladi
+            {t("tm.sample")}
           </div>
         </motion.div>
 

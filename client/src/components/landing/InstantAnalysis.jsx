@@ -15,27 +15,20 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { analyzeFile } from "@/api/base44Client";
 import { fadeUp, viewportOnce } from "@/lib/motion";
+import { useApp } from "@/lib/i18n";
 
 const ACCEPT = ".xlsx,.xls";
 const MAX_SIZE = 15 * 1024 * 1024;
 const FREE_KEY = "cfo_free_used"; // saytda bir marta bepul tahlil
 const BOT_URL = "https://t.me/Moliyaviy_Tahlilchi_bot";
 
+// Ranglar sobit; status yorlig'i t() dan (ia.good/warn/bad) keladi.
 const ST = {
-  good: { t: "text-emerald-700", b: "bg-emerald-500/12", label: "Yaxshi" },
-  warn: { t: "text-amber-700", b: "bg-amber-500/12", label: "Chegaraviy" },
-  bad: { t: "text-red-700", b: "bg-red-500/12", label: "Past" },
-  na: { t: "text-slate-400", b: "bg-slate-400/10", label: "—" },
+  good: { t: "text-emerald-700", b: "bg-emerald-500/12", k: "ia.good" },
+  warn: { t: "text-amber-700", b: "bg-amber-500/12", k: "ia.warn" },
+  bad: { t: "text-red-700", b: "bg-red-500/12", k: "ia.bad" },
+  na: { t: "text-slate-400", b: "bg-slate-400/10", k: null },
 };
-
-const LOCKED_NAMES = [
-  "Tezkor likvidlik",
-  "Avtonomiya koeffitsienti",
-  "Sof rentabellik (ROS)",
-  "Aktivlar aylanuvchanligi",
-  "Debitorlik aylanishi (kun)",
-  "Sotuv o'sish sur'ati",
-];
 
 function fmtVal(v, unit) {
   if (v === null || v === undefined) return "—";
@@ -51,6 +44,7 @@ function scoreColor(s) {
 }
 
 export default function InstantAnalysis() {
+  const { t } = useApp();
   const [balans, setBalans] = useState(null);
   const [moliyaviy, setMoliyaviy] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -65,15 +59,15 @@ export default function InstantAnalysis() {
 
   function pick(setter, f) {
     if (!f) return;
-    if (!/\.(xlsx|xls)$/i.test(f.name)) return toast.error("Faqat .xlsx yoki .xls qabul qilinadi");
-    if (f.size > MAX_SIZE) return toast.error("Fayl 15 MB dan oshmasligi kerak");
+    if (!/\.(xlsx|xls)$/i.test(f.name)) return toast.error(t("ia.tOnlyExcel"));
+    if (f.size > MAX_SIZE) return toast.error(t("ia.tMax"));
     setter(f);
     setResult(null);
   }
 
   async function run() {
     const files = [balans, moliyaviy].filter(Boolean);
-    if (!files.length) return toast.error("Avval fayl(lar)ni tanlang");
+    if (!files.length) return toast.error(t("ia.tPickFirst"));
     setLoading(true);
     setResult(null);
     try {
@@ -83,9 +77,9 @@ export default function InstantAnalysis() {
         localStorage.setItem(FREE_KEY, String(Date.now()));
       } catch {}
       setUsed(true);
-      toast.success("Asosiy ko'rsatkichlar tayyor!");
+      toast.success(t("ia.tReady"));
     } catch (err) {
-      toast.error(err.message || "Tahlil amalga oshmadi");
+      toast.error(err.message || t("ia.tFail"));
     } finally {
       setLoading(false);
     }
@@ -116,16 +110,15 @@ export default function InstantAnalysis() {
           className="mx-auto mb-9 max-w-[700px] text-center"
         >
           <div className="font-mono text-[13px] font-semibold uppercase tracking-[0.08em] text-emerald-500">
-            Bepul tahlil
+            {t("ia.eyebrow")}
           </div>
           <h2 className="mt-3 font-heading text-[clamp(28px,3.6vw,40px)] font-bold tracking-[-0.02em]">
-            Faylingizni hoziroq sinab ko'ring
+            {t("ia.title")}
           </h2>
           <p className="mt-3.5 text-[16px] leading-relaxed text-slate-600">
-            Balans va Moliyaviy hisobotni yuklang — umumiy ball va{" "}
-            <span className="font-semibold text-navy">5 ta asosiy ko'rsatkich</span> bepul
-            ko'rinadi. To'liq tahlil (~50 ko'rsatkich + PDF hisobot) Telegram botda.
-            <span className="block text-emerald-600">Saytda bir marta bepul · faylingiz saqlanmaydi.</span>
+            {t("ia.subA")}
+            <span className="font-semibold text-navy">{t("ia.subBold")}</span>{t("ia.subB")}
+            <span className="block text-emerald-600">{t("ia.subFree")}</span>
           </p>
         </motion.div>
 
@@ -139,9 +132,9 @@ export default function InstantAnalysis() {
             className="glass-card rounded-[22px] p-6 shadow-[0_10px_30px_rgba(15,23,42,.07)] sm:p-8"
           >
             <div className="grid gap-4 sm:grid-cols-2">
-              <FileDrop id="ia-balans" label="1. Balans (Shakl 1)" file={balans}
+              <FileDrop id="ia-balans" label={t("ia.balans")} file={balans}
                 onPick={(f) => pick(setBalans, f)} onClear={() => setBalans(null)} />
-              <FileDrop id="ia-moliyaviy" label="2. Moliyaviy natijalar (Shakl 2)" file={moliyaviy}
+              <FileDrop id="ia-moliyaviy" label={t("ia.moliyaviy")} file={moliyaviy}
                 onPick={(f) => pick(setMoliyaviy, f)} onClear={() => setMoliyaviy(null)} />
             </div>
             <div className="mt-5 flex justify-center">
@@ -150,10 +143,10 @@ export default function InstantAnalysis() {
                 {loading ? (
                   <>
                     <Loader2 className="h-[18px] w-[18px] animate-spin" />
-                    Tahlil qilinmoqda...
+                    {t("ia.analyzing")}
                   </>
                 ) : (
-                  "Tahlil qilish"
+                  t("ia.analyze")
                 )}
               </Button>
             </div>
@@ -163,10 +156,7 @@ export default function InstantAnalysis() {
         {/* Bepul limit tugagan va natija yo'q — botga taklif */}
         {used && !result && (
           <motion.div initial="hidden" whileInView="show" viewport={viewportOnce} variants={fadeUp}>
-            <BotCTA
-              heading="Bepul tahlildan foydalandingiz"
-              text="Saytdagi bepul tahlil bir martalik. Cheksiz tahlil, barcha ~50 ko'rsatkich va to'liq PDF hisobotlar uchun Telegram botimizdan foydalaning."
-            />
+            <BotCTA heading={t("ia.usedHead")} text={t("ia.usedText")} />
           </motion.div>
         )}
 
@@ -199,22 +189,22 @@ export default function InstantAnalysis() {
                     <div className="flex items-center justify-center gap-2 sm:justify-start">
                       <ShieldCheck className="h-5 w-5 text-emerald-500" />
                       <h3 className="font-heading text-[20px] font-bold">
-                        {result.company || "Moliyaviy tahlil"}
+                        {result.company || t("ia.report")}
                       </h3>
                     </div>
                     {period && (
                       <div className="mt-1 font-mono text-[12.5px] text-slate-400">
-                        Davr: {period}
+                        {t("ia.period")}: {period}
                         {result.stir ? ` · STIR: ${result.stir}` : ""}
                       </div>
                     )}
                     <div className="mt-2 inline-flex rounded-md bg-navy/[.05] px-3 py-1 text-[13px] font-semibold text-navy">
-                      Umumiy baho: «{result.verdict}»
+                      {t("ia.verdict")}: «{result.verdict}»
                     </div>
                     <div className="mt-3 flex flex-wrap justify-center gap-2 sm:justify-start">
-                      <Cnt n={result.counts.good} t="Yaxshi" c="text-emerald-700 bg-emerald-500/12" />
-                      <Cnt n={result.counts.warn} t="Chegaraviy" c="text-amber-700 bg-amber-500/12" />
-                      <Cnt n={result.counts.bad} t="Past" c="text-red-700 bg-red-500/12" />
+                      <Cnt n={result.counts.good} t={t("ia.good")} c="text-emerald-700 bg-emerald-500/12" />
+                      <Cnt n={result.counts.warn} t={t("ia.warn")} c="text-amber-700 bg-amber-500/12" />
+                      <Cnt n={result.counts.bad} t={t("ia.bad")} c="text-red-700 bg-red-500/12" />
                     </div>
                   </div>
                 </div>
@@ -224,10 +214,10 @@ export default function InstantAnalysis() {
               <div className="overflow-hidden rounded-[18px] border border-navy/[.07] bg-white">
                 <div className="flex items-center justify-between bg-navy px-5 py-3">
                   <span className="font-heading text-[15px] font-bold text-white">
-                    Asosiy ko'rsatkichlar
+                    {t("ia.mainInd")}
                   </span>
                   <span className="rounded-md bg-emerald-500/20 px-2 py-0.5 font-mono text-[11px] font-semibold text-emerald-300">
-                    {result.highlights?.length || 0} / {result.total} ochiq
+                    {result.highlights?.length || 0} / {result.total} {t("ia.open")}
                   </span>
                 </div>
                 <div className="divide-y divide-navy/[.05]">
@@ -243,7 +233,7 @@ export default function InstantAnalysis() {
                           {fmtVal(ind.value, ind.unit)}
                         </span>
                         <span className={`w-[86px] flex-none rounded-md px-2 py-0.5 text-center text-[11.5px] font-semibold ${s.b} ${s.t}`}>
-                          {s.label}
+                          {s.k ? t(s.k) : "—"}
                         </span>
                       </div>
                     );
@@ -255,7 +245,7 @@ export default function InstantAnalysis() {
               {result.locked > 0 && (
                 <div className="relative mt-5 overflow-hidden rounded-[18px] border border-navy/[.08] bg-white">
                   <div aria-hidden className="pointer-events-none select-none blur-[6px]">
-                    {LOCKED_NAMES.map((n, i) => (
+                    {t("ia.lockedNames").map((n, i) => (
                       <div key={i} className={`flex items-center gap-3 px-5 py-3 text-[13.5px] ${i % 2 ? "bg-navy/[.02]" : ""}`}>
                         <span className="w-8 font-mono text-[12px] text-slate-400">··</span>
                         <span className="flex-1 text-slate-600">{n}</span>
@@ -269,16 +259,15 @@ export default function InstantAnalysis() {
                       <Lock className="h-6 w-6" />
                     </div>
                     <p className="font-heading text-[17px] font-bold">
-                      Yana {result.locked} ta ko'rsatkich yopiq
+                      {t("ia.lockedMore", { n: result.locked })}
                     </p>
                     <p className="max-w-[480px] text-[13.5px] leading-relaxed text-slate-600">
-                      Likvidlik, barqarorlik, rentabellik, aylanuvchanlik va o'sishning
-                      barcha ko'rsatkichlari, pul oqimi tahlili, xulosa-tavsiyalar va
-                      <span className="font-semibold"> to'liq PDF hisobot</span> — Telegram botda.
+                      {t("ia.lockedText")}
+                      <span className="font-semibold">{t("ia.fullPdf")}</span>{t("ia.botPart")}
                     </p>
                     <Button asChild variant="navy" size="lg">
                       <a href={BOT_URL} target="_blank" rel="noreferrer">
-                        <Send className="h-[17px] w-[17px]" /> Telegram botda to'liq ko'rish
+                        <Send className="h-[17px] w-[17px]" /> {t("ia.botFull")}
                       </a>
                     </Button>
                   </div>
@@ -288,8 +277,7 @@ export default function InstantAnalysis() {
               {!result.has_pl && (
                 <div className="mt-5 flex items-start gap-2.5 rounded-xl border border-amber-500/30 bg-amber-500/[.06] p-3 text-[13px] text-amber-800">
                   <AlertTriangle className="mt-0.5 h-4 w-4 flex-none" />
-                  Shakl 2 (Moliyaviy natijalar) topilmadi — ba'zi ko'rsatkichlar hisoblanmadi.
-                  To'liq tahlil uchun ikkala shaklni yuklang.
+                  {t("ia.noPl")}
                 </div>
               )}
             </motion.div>
@@ -301,6 +289,7 @@ export default function InstantAnalysis() {
 }
 
 function BotCTA({ heading, text }) {
+  const { t } = useApp();
   return (
     <div className="rounded-[22px] border border-azure/25 bg-gradient-to-b from-azure/[.06] to-emerald-500/[.04] p-7 text-center shadow-[0_8px_24px_rgba(15,23,42,.06)]">
       <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-azure/[.12] text-azure">
@@ -311,7 +300,7 @@ function BotCTA({ heading, text }) {
       <div className="mt-5 flex justify-center">
         <Button asChild variant="navy" size="lg">
           <a href={BOT_URL} target="_blank" rel="noreferrer">
-            <Send className="h-[17px] w-[17px]" /> Telegram botga o'tish
+            <Send className="h-[17px] w-[17px]" /> {t("ia.toGoBot")}
           </a>
         </Button>
       </div>
@@ -328,6 +317,7 @@ function Cnt({ n, t, c }) {
 }
 
 function FileDrop({ id, label, file, onPick, onClear }) {
+  const { t } = useApp();
   return (
     <div>
       <Label htmlFor={id}>{label}</Label>
@@ -349,13 +339,13 @@ function FileDrop({ id, label, file, onPick, onClear }) {
                 onClear();
               }}
               className="ml-auto rounded-md p-1 text-slate-400 hover:bg-navy/[.06] hover:text-navy"
-              aria-label="O'chirish"
+              aria-label={t("ia.pick")}
             >
               <X className="h-4 w-4" />
             </button>
           </span>
         ) : (
-          <span>Faylni tanlang (.xlsx, .xls)</span>
+          <span>{t("ia.pick")}</span>
         )}
         <input id={id} type="file" accept={ACCEPT} className="hidden"
           onChange={(e) => onPick(e.target.files?.[0])} />

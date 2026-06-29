@@ -10,19 +10,13 @@ import {
   Lightbulb,
 } from "lucide-react";
 import { fadeUp, staggerContainer, viewportOnce } from "@/lib/motion";
+import { useApp } from "@/lib/i18n";
 
-const SERVICES = [
-  { Icon: FileSpreadsheet, title: "Moliyaviy fayl tahlili", desc: "Excel va CSV fayllarini avtomatik o'qish va qayta ishlash." },
-  { Icon: LayoutDashboard, title: "KPI Dashboard", desc: "Barcha ko'rsatkichlar bitta interaktiv panelda." },
-  { Icon: Brain, title: "AI CFO hisobot", desc: "Sun'iy intellekt asosida chuqur moliyaviy tahlil." },
-  { Icon: ShieldAlert, title: "Risk diagnostikasi", desc: "Moliyaviy risklarni aniqlash va baholash." },
-  { Icon: FileText, title: "PDF hisobot yaratish", desc: "Professional ko'rinishdagi tayyor hisobotlar." },
-  { Icon: Briefcase, title: "Konsalting", desc: "Tajribali mutaxassislar bilan maslahat." },
-  { Icon: CalendarCheck, title: "Oylik monitoring", desc: "Biznesingizni doimiy kuzatib borish." },
-  { Icon: Lightbulb, title: "Biznes maslahat", desc: "Strategik qarorlar uchun amaliy tavsiyalar." },
-];
+const SERVICE_ICONS = [FileSpreadsheet, LayoutDashboard, Brain, ShieldAlert, FileText, Briefcase, CalendarCheck, Lightbulb];
 
 export default function Services() {
+  const { t } = useApp();
+  const SERVICES = t("sv.services").map((s, i) => ({ ...s, Icon: SERVICE_ICONS[i] }));
   return (
     <section
       id="services"
@@ -41,10 +35,10 @@ export default function Services() {
           className="mx-auto mb-[50px] max-w-[680px] text-center"
         >
           <div className="font-mono text-[13px] font-semibold uppercase tracking-[0.08em] text-emerald-500">
-            Xizmatlar
+            {t("sv.eyebrow")}
           </div>
           <h2 className="mt-3 font-heading text-[clamp(30px,4vw,44px)] font-bold tracking-[-0.02em]">
-            Biz nima taklif qilamiz
+            {t("sv.title")}
           </h2>
         </motion.div>
 
