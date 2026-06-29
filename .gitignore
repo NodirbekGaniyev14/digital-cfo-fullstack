@@ -13,3 +13,5 @@ server/uploads/*
 !server/uploads/.gitkeep
 server/data/stats.json
 server/data/stats.json.tmp
+server/data/arizalar.json
+server/data/arizalar.json.tmp

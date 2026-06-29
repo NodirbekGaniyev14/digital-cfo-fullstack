@@ -1,24 +1,24 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { BarChart3, Menu, X } from "lucide-react";
+import { BarChart3, Menu, X, Globe, ChevronDown, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ThemeToggle from "@/components/ThemeToggle";
+import { useApp, LANGS } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 const NAV_LINKS = [
-  { label: "Bosh sahifa", href: "#hero" },
-  { label: "Qanday ishlaydi", href: "#how-it-works" },
-  { label: "Bepul tahlil", href: "#tahlil" },
-  { label: "Xizmatlar", href: "#services" },
-  { label: "KPI Tahlil", href: "#kpi" },
-  { label: "Narxlar", href: "#pricing" },
-  { label: "FAQ", href: "#faq" },
+  { key: "nav.home", href: "#hero" },
+  { key: "nav.how", href: "#how-it-works" },
+  { key: "nav.free", href: "#tahlil" },
+  { key: "nav.services", href: "#services" },
+  { key: "nav.kpi", href: "#kpi" },
+  { key: "nav.pricing", href: "#pricing" },
+  { key: "nav.faq", href: "#faq" },
+  { key: "nav.demo", href: "#dashboard" },
 ];
 
-// Sotuv CTA'lari kontakt formasi o'rniga Telegram botga yo'naltiriladi.
-const BOT_URL = "https://t.me/Moliyaviy_Tahlilchi_bot";
-
 export default function Navbar() {
+  const { t, lang, setLang, setContactOpen } = useApp();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -53,24 +53,23 @@ export default function Navbar() {
             <a
               key={l.href}
               href={l.href}
-              className="text-[14.5px] font-medium text-slate-600 transition-colors hover:text-navy"
+              className="text-[14.5px] font-medium text-slate-600 transition-colors hover:text-navy dark:text-slate-300 dark:hover:text-white"
             >
-              {l.label}
+              {t(l.key)}
             </a>
           ))}
         </div>
 
-        <div className="hidden items-center gap-3 lg:flex">
+        <div className="hidden items-center gap-2.5 lg:flex">
+          <LangDropdown lang={lang} setLang={setLang} />
           <ThemeToggle />
-          <Button asChild variant="ghost" size="sm">
-            <a href="#dashboard">Demo</a>
-          </Button>
-          <Button asChild variant="navy" size="sm">
-            <a href={BOT_URL} target="_blank" rel="noreferrer">Boshlash</a>
+          <Button variant="navy" size="sm" onClick={() => setContactOpen(true)}>
+            <MessageCircle className="h-[16px] w-[16px]" /> {t("nav.contact")}
           </Button>
         </div>
 
         <div className="flex items-center gap-2 lg:hidden">
+          <LangDropdown lang={lang} setLang={setLang} />
           <ThemeToggle />
           <button
             onClick={() => setOpen((v) => !v)}
@@ -95,19 +94,63 @@ export default function Navbar() {
                 key={l.href}
                 href={l.href}
                 onClick={() => setOpen(false)}
-                className="rounded-[10px] px-3.5 py-3 text-[15px] font-semibold text-navy"
+                className="rounded-[10px] px-3.5 py-3 text-[15px] font-semibold text-navy dark:text-slate-100"
               >
-                {l.label}
+                {t(l.key)}
               </a>
             ))}
-            <Button asChild variant="navy" className="mt-1.5">
-              <a href={BOT_URL} target="_blank" rel="noreferrer" onClick={() => setOpen(false)}>
-                Boshlash
-              </a>
+            <Button variant="navy" className="mt-1.5"
+              onClick={() => { setOpen(false); setContactOpen(true); }}>
+              <MessageCircle className="h-[16px] w-[16px]" /> {t("nav.contact")}
             </Button>
           </motion.div>
         )}
       </AnimatePresence>
     </nav>
+  );
+}
+
+function LangDropdown({ lang, setLang }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  useEffect(() => {
+    const onClick = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener("mousedown", onClick);
+    return () => document.removeEventListener("mousedown", onClick);
+  }, []);
+  const cur = LANGS.find((l) => l.code === lang) || LANGS[0];
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="flex items-center gap-1.5 rounded-[10px] border border-navy/10 px-2.5 py-2 text-[13.5px] font-medium text-slate-600 transition-colors hover:text-navy dark:border-white/15 dark:text-slate-300 dark:hover:text-white"
+        aria-label="Til"
+      >
+        <Globe className="h-[16px] w-[16px]" /> {cur.short}
+        <ChevronDown className={`h-3.5 w-3.5 transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, y: -6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            className="absolute right-0 z-50 mt-1.5 w-[140px] overflow-hidden rounded-xl border border-navy/[.08] bg-white shadow-[0_16px_36px_rgba(15,23,42,.16)] dark:border-white/10 dark:bg-[#0d182b]"
+          >
+            {LANGS.map((l) => (
+              <button
+                key={l.code}
+                onClick={() => { setLang(l.code); setOpen(false); }}
+                className={`flex w-full items-center justify-between px-3.5 py-2.5 text-left text-[14px] transition-colors hover:bg-navy/[.04] dark:hover:bg-white/[.06] ${
+                  l.code === lang ? "font-bold text-azure" : "text-slate-600 dark:text-slate-300"
+                }`}
+              >
+                {l.label} <span className="font-mono text-[11px] opacity-60">{l.short}</span>
+              </button>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }

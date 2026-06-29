@@ -250,6 +250,94 @@ app.post(
   }
 );
 
+// ---- Ariza (Mutaxassis bilan bog'lanish) — #Ariza_N + Telegram --------------
+const arizaFile = path.join(dataDir, "arizalar.json");
+function loadArizalar() {
+  try {
+    return JSON.parse(fs.readFileSync(arizaFile, "utf8"));
+  } catch {
+    return [];
+  }
+}
+function saveArizalar(list) {
+  const tmp = `${arizaFile}.tmp`;
+  fs.writeFileSync(tmp, JSON.stringify(list, null, 2));
+  fs.renameSync(tmp, arizaFile);
+}
+let arizalar = loadArizalar();
+
+async function notifyAriza(a) {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  const chatId = process.env.TELEGRAM_CHAT_ID;
+  if (!token || !chatId) return; // sozlanmagan bo'lsa — jim
+  const text =
+    `🆕 *#Ariza_${a.id}* — Yangi murojaat (CFO.UZ)\n\n` +
+    `👤 *Ism:* ${a.name}\n` +
+    (a.email ? `✉️ *Email:* ${a.email}\n` : "") +
+    (a.phone ? `📞 *Telefon:* ${a.phone}\n` : "") +
+    (a.telegram ? `✈️ *Telegram:* ${a.telegram}\n` : "") +
+    (a.message ? `💬 *Xabar:* ${a.message}\n` : "") +
+    `🕒 ${fmtTashkent(a.createdAt)} (GMT+5)`;
+  try {
+    const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text,
+        parse_mode: "Markdown",
+        disable_web_page_preview: true,
+      }),
+    });
+    if (!res.ok) console.warn("⚠️ Ariza Telegram javobi:", res.status);
+  } catch (err) {
+    console.warn("⚠️ Ariza Telegram yuborilmadi:", err.message);
+  }
+}
+
+const arizaLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 8,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Juda ko'p so'rov. Birozdan so'ng qayta urinib ko'ring." },
+});
+
+app.post("/api/lead-request", arizaLimiter, (req, res) => {
+  // Honeypot
+  if (clean(req.body.website)) return res.json({ ok: true, ref: "" });
+
+  const name = clean(req.body.name, 120);
+  const email = clean(req.body.email, 160);
+  const phone = clean(req.body.phone, 40);
+  let telegram = clean(req.body.telegram, 60);
+  const message = clean(req.body.message, 2000);
+
+  if (!name) return res.status(400).json({ error: "Ism majburiy" });
+  if (!email && !phone && !telegram)
+    return res.status(400).json({ error: "Kamida bitta bog'lanish usulini kiriting" });
+  if (email && !EMAIL_RE.test(email))
+    return res.status(400).json({ error: "Email manzili noto'g'ri" });
+  if (telegram) telegram = "@" + telegram.replace(/^@+/, "");
+
+  const id = (arizalar.length ? arizalar[arizalar.length - 1].id : 0) + 1;
+  const ariza = {
+    id,
+    name,
+    email: email || null,
+    phone: phone || null,
+    telegram: telegram || null,
+    message: message || null,
+    ip: req.ip,
+    createdAt: new Date().toISOString(),
+  };
+  arizalar.push(ariza);
+  saveArizalar(arizalar);
+  console.log(`📩 #Ariza_${id}:`, name, email || phone || telegram || "");
+  notifyAriza(ariza); // fire-and-forget
+  res.json({ ok: true, ticket: id, ref: `#Ariza_${id}` });
+});
+
 // Tahlil endpointi: faylni qabul qiladi, KPI hisoblaydi va natijani qaytaradi.
 const analyzeLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
