@@ -10,7 +10,6 @@ import PDFReport from "@/components/landing/PDFReport";
 import Testimonials from "@/components/landing/Testimonials";
 import Pricing from "@/components/landing/Pricing";
 import FAQ from "@/components/landing/FAQ";
-import ContactForm from "@/components/landing/ContactForm";
 import DashboardPreview from "@/components/landing/DashboardPreview";
 import Footer from "@/components/landing/Footer";
 
@@ -29,7 +28,6 @@ export default function Home() {
       <Testimonials />
       <Pricing />
       <FAQ />
-      <ContactForm />
       <DashboardPreview />
       <Footer />
     </div>

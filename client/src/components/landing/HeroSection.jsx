@@ -85,7 +85,7 @@ export default function HeroSection() {
             className="mt-[30px] flex flex-wrap gap-3"
           >
             <Button asChild variant="navy" size="lg">
-              <a href="#contact">
+              <a href="https://t.me/Moliyaviy_Tahlilchi_bot" target="_blank" rel="noreferrer">
                 Bepul boshlash <ArrowRight className="h-[17px] w-[17px]" />
               </a>
             </Button>

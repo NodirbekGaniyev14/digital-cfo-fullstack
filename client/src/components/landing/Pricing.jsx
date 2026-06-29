@@ -87,7 +87,7 @@ export default function Pricing() {
             </div>
 
             <Button asChild variant="emerald" className="w-full" size="lg">
-              <a href="#contact">{PLAN.cta}</a>
+              <a href="https://t.me/Moliyaviy_Tahlilchi_bot" target="_blank" rel="noreferrer">{PLAN.cta}</a>
             </Button>
           </motion.div>
         </div>

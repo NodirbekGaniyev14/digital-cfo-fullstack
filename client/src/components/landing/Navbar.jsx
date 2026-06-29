@@ -13,8 +13,10 @@ const NAV_LINKS = [
   { label: "KPI Tahlil", href: "#kpi" },
   { label: "Narxlar", href: "#pricing" },
   { label: "FAQ", href: "#faq" },
-  { label: "Aloqa", href: "#contact" },
 ];
+
+// Sotuv CTA'lari kontakt formasi o'rniga Telegram botga yo'naltiriladi.
+const BOT_URL = "https://t.me/Moliyaviy_Tahlilchi_bot";
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -64,7 +66,7 @@ export default function Navbar() {
             <a href="#dashboard">Demo</a>
           </Button>
           <Button asChild variant="navy" size="sm">
-            <a href="#contact">Boshlash</a>
+            <a href={BOT_URL} target="_blank" rel="noreferrer">Boshlash</a>
           </Button>
         </div>
 
@@ -99,7 +101,7 @@ export default function Navbar() {
               </a>
             ))}
             <Button asChild variant="navy" className="mt-1.5">
-              <a href="#contact" onClick={() => setOpen(false)}>
+              <a href={BOT_URL} target="_blank" rel="noreferrer" onClick={() => setOpen(false)}>
                 Boshlash
               </a>
             </Button>

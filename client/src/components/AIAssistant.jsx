@@ -89,8 +89,8 @@ const KB = [
   {
     k: ["narx", "qancha turadi", "narxi", "pul", "price", "qimmat"],
     a: "Narxlar so'rovga qarab individual belgilanadi. To'liq ma'lumot uchun "
-      + "mutaxassisimiz bilan bog'lashingiz mumkin — Telegram botimizda yoki "
-      + "saytdagi 'Aloqa' bo'limida.",
+      + "mutaxassisimiz bilan Telegram botimizda bog'lashingiz mumkin: "
+      + "@Moliyaviy_Tahlilchi_bot.",
   },
   // 11 — Bepulmi?
   {

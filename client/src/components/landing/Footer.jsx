@@ -7,7 +7,6 @@ const NAV_LINKS = [
   { label: "KPI Tahlil", href: "#kpi" },
   { label: "Narxlar", href: "#pricing" },
   { label: "FAQ", href: "#faq" },
-  { label: "Aloqa", href: "#contact" },
 ];
 const SERVICES = [
   "Moliyaviy tahlil",
