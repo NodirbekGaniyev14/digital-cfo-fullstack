@@ -141,8 +141,8 @@ const DICT = {
 
     "faq.eyebrow": "FAQ", "faq.title": "Ko'p so'raladigan savollar",
     "faq.items": [
-      { q: "Qaysi fayl formatlari qabul qilinadi?", a: "Tizim .xlsx, .xls va CSV formatdagi moliyaviy fayllarni qabul qiladi. Fayl avtomatik tekshiriladi va validatsiyadan o'tkaziladi." },
-      { q: "Tahlil qancha vaqt oladi?", a: "Faylingiz murakkabligiga bog'liq. Tahlil tayyor bo'lishi bilan biz siz bilan bog'lanamiz va hisobotni yetkazamiz." },
+      { q: "Qaysi fayl formatlari qabul qilinadi?", a: "Tizim .xlsx va .xls formatdagi moliyaviy fayllarni qabul qiladi. Fayl avtomatik tekshiriladi va validatsiyadan o'tkaziladi." },
+      { q: "Tahlil qancha vaqt oladi?", a: "Tahlilni atigi 1 daqiqada yetkazamiz — faylni yuborishingiz bilan hisobot tayyor bo'ladi." },
       { q: "To'lov qanday amalga oshiriladi?", a: "Payme, Click hamda bank o'tkazmasi orqali qulay tarzda to'lov qilishingiz mumkin." },
       { q: "Tahlil ishonchliligi qanchalik?", a: "Har bir hisobot tajribali mutaxassis nazoratidan o'tadi va natijalar benchmark ko'rsatkichlar bilan solishtirib tekshiriladi." },
       { q: "Hisobotni yuklab olsa bo'ladimi?", a: "Ha, har bir tahlil yakunida professional PDF hisobotni bir tugma bilan yuklab olishingiz mumkin." },
@@ -296,8 +296,8 @@ const DICT = {
 
     "faq.eyebrow": "FAQ", "faq.title": "Часто задаваемые вопросы",
     "faq.items": [
-      { q: "Какие форматы файлов принимаются?", a: "Система принимает финансовые файлы в форматах .xlsx, .xls и CSV. Файл автоматически проверяется и проходит валидацию." },
-      { q: "Сколько времени занимает анализ?", a: "Зависит от сложности вашего файла. Как только анализ готов, мы связываемся с вами и передаём отчёт." },
+      { q: "Какие форматы файлов принимаются?", a: "Система принимает финансовые файлы в форматах .xlsx и .xls. Файл автоматически проверяется и проходит валидацию." },
+      { q: "Сколько времени занимает анализ?", a: "Анализ доставляем всего за 1 минуту — как только вы отправите файл, отчёт будет готов." },
       { q: "Как происходит оплата?", a: "Вы можете удобно оплатить через Payme, Click, а также банковским переводом." },
       { q: "Насколько надёжен анализ?", a: "Каждый отчёт проходит контроль опытного специалиста, а результаты сверяются с эталонными показателями." },
       { q: "Можно ли скачать отчёт?", a: "Да, по завершении каждого анализа вы можете скачать профессиональный PDF-отчёт одной кнопкой." },
@@ -451,8 +451,8 @@ const DICT = {
 
     "faq.eyebrow": "FAQ", "faq.title": "Frequently asked questions",
     "faq.items": [
-      { q: "Which file formats are accepted?", a: "The system accepts financial files in .xlsx, .xls and CSV formats. The file is checked and validated automatically." },
-      { q: "How long does the analysis take?", a: "It depends on the complexity of your file. As soon as the analysis is ready, we contact you and deliver the report." },
+      { q: "Which file formats are accepted?", a: "The system accepts financial files in .xlsx and .xls formats. The file is checked and validated automatically." },
+      { q: "How long does the analysis take?", a: "We deliver the analysis in just 1 minute — as soon as you send the file, the report is ready." },
       { q: "How is payment made?", a: "You can pay conveniently via Payme, Click, or bank transfer." },
       { q: "How reliable is the analysis?", a: "Every report is reviewed by an experienced specialist, and results are checked against benchmark metrics." },
       { q: "Can I download the report?", a: "Yes, at the end of each analysis you can download a professional PDF report with one click." },
