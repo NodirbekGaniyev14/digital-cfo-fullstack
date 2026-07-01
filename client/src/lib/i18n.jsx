@@ -54,7 +54,7 @@ const DICT = {
     "how.eyebrow": "Jarayon", "how.title": "Qanday ishlaydi",
     "how.subtitle": "Faylni yuklashdan tayyor hisobotgacha — atigi besh qadam.",
     "how.steps": [
-      { title: "Faylni yuklang", desc: "Excel yoki CSV moliyaviy faylingizni tizimga yuklang." },
+      { title: "Faylni yuklang", desc: "Excel (.xlsx/.xls) moliyaviy faylingizni tizimga yuklang." },
       { title: "Validatsiya", desc: "Tizim ma'lumotlarni avtomatik tekshiradi va tozalaydi." },
       { title: "KPI hisoblash", desc: "Barcha asosiy moliyaviy ko'rsatkichlar hisoblanadi." },
       { title: "AI tahlil", desc: "Sun'iy intellekt natijalarni chuqur tahlil qiladi." },
@@ -96,7 +96,7 @@ const DICT = {
 
     "sv.eyebrow": "Xizmatlar", "sv.title": "Biz nima taklif qilamiz",
     "sv.services": [
-      { title: "Moliyaviy fayl tahlili", desc: "Excel va CSV fayllarini avtomatik o'qish va qayta ishlash." },
+      { title: "Moliyaviy fayl tahlili", desc: "Excel (.xlsx/.xls) fayllarini avtomatik o'qish va qayta ishlash." },
       { title: "KPI Dashboard", desc: "Barcha ko'rsatkichlar bitta interaktiv panelda." },
       { title: "AI CFO hisobot", desc: "Sun'iy intellekt asosida chuqur moliyaviy tahlil." },
       { title: "Risk diagnostikasi", desc: "Moliyaviy risklarni aniqlash va baholash." },
@@ -209,7 +209,7 @@ const DICT = {
     "how.eyebrow": "Процесс", "how.title": "Как это работает",
     "how.subtitle": "От загрузки файла до готового отчёта — всего пять шагов.",
     "how.steps": [
-      { title: "Загрузите файл", desc: "Загрузите финансовый файл Excel или CSV в систему." },
+      { title: "Загрузите файл", desc: "Загрузите финансовый файл Excel (.xlsx/.xls) в систему." },
       { title: "Валидация", desc: "Система автоматически проверяет и очищает данные." },
       { title: "Расчёт KPI", desc: "Рассчитываются все основные финансовые показатели." },
       { title: "AI анализ", desc: "Искусственный интеллект глубоко анализирует результаты." },
@@ -251,7 +251,7 @@ const DICT = {
 
     "sv.eyebrow": "Услуги", "sv.title": "Что мы предлагаем",
     "sv.services": [
-      { title: "Анализ финансовых файлов", desc: "Автоматическое чтение и обработка Excel и CSV." },
+      { title: "Анализ финансовых файлов", desc: "Автоматическое чтение и обработка файлов Excel (.xlsx/.xls)." },
       { title: "KPI Dashboard", desc: "Все показатели на одной интерактивной панели." },
       { title: "AI CFO отчёт", desc: "Глубокий финансовый анализ на базе AI." },
       { title: "Диагностика рисков", desc: "Выявление и оценка финансовых рисков." },
@@ -364,7 +364,7 @@ const DICT = {
     "how.eyebrow": "Process", "how.title": "How it works",
     "how.subtitle": "From uploading a file to a ready report — just five steps.",
     "how.steps": [
-      { title: "Upload the file", desc: "Upload your Excel or CSV financial file to the system." },
+      { title: "Upload the file", desc: "Upload your Excel (.xlsx/.xls) financial file to the system." },
       { title: "Validation", desc: "The system automatically checks and cleans the data." },
       { title: "KPI calculation", desc: "All key financial metrics are computed." },
       { title: "AI analysis", desc: "AI analyzes the results in depth." },
@@ -406,7 +406,7 @@ const DICT = {
 
     "sv.eyebrow": "Services", "sv.title": "What we offer",
     "sv.services": [
-      { title: "Financial file analysis", desc: "Automatic reading and processing of Excel and CSV." },
+      { title: "Financial file analysis", desc: "Automatic reading and processing of Excel (.xlsx/.xls) files." },
       { title: "KPI Dashboard", desc: "All metrics on one interactive panel." },
       { title: "AI CFO report", desc: "Deep financial analysis powered by AI." },
       { title: "Risk diagnostics", desc: "Identify and assess financial risks." },
