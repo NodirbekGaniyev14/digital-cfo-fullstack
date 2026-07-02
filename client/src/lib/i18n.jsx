@@ -126,6 +126,9 @@ const DICT = {
     "pdf.view": "Namuna ko'rish", "pdf.download": "Namunani yuklab olish",
     "pdf.docTitle": "Moliyaviy Tahlil Hisoboti",
 
+    "demo.title": "Namunaviy hisobot", "demo.close": "Yopish",
+    "demo.fallback": "Brauzeringiz PDF'ni shu yerda ko'rsata olmadi — namunaviy hisobotni yuklab olib ko'ring.",
+
     "tm.eyebrow": "Sharhlar", "tm.title": "Mijozlarimiz fikri",
     "tm.sample": "Namuna sharhlar — tez orada haqiqiy mijoz fikrlari bilan to'ldiriladi",
     "tm.reviews": [
@@ -281,6 +284,9 @@ const DICT = {
     "pdf.view": "Смотреть образец", "pdf.download": "Скачать образец",
     "pdf.docTitle": "Отчёт финансового анализа",
 
+    "demo.title": "Образец отчёта", "demo.close": "Закрыть",
+    "demo.fallback": "Ваш браузер не может показать PDF здесь — скачайте образец отчёта.",
+
     "tm.eyebrow": "Отзывы", "tm.title": "Мнения наших клиентов",
     "tm.sample": "Образцы отзывов — скоро будут заполнены реальными мнениями клиентов",
     "tm.reviews": [
@@ -435,6 +441,9 @@ const DICT = {
     "pdf.items": ["Executive Summary", "Key KPI metrics table", "Liquidity and solvency analysis", "Profitability and profit dynamics", "Risk diagnostics and assessment", "AI recommendations and conclusions"],
     "pdf.view": "View sample", "pdf.download": "Download sample",
     "pdf.docTitle": "Financial Analysis Report",
+
+    "demo.title": "Sample report", "demo.close": "Close",
+    "demo.fallback": "Your browser can't display the PDF here — download the sample report instead.",
 
     "tm.eyebrow": "Reviews", "tm.title": "What our clients say",
     "tm.sample": "Sample reviews — to be filled with real client feedback soon",

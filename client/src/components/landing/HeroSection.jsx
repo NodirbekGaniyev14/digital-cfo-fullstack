@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 import {
   ArrowRight,
@@ -10,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { fadeUpDelay } from "@/lib/motion";
 import { useApp } from "@/lib/i18n";
+import DemoReportModal from "@/components/DemoReportModal";
 
 const TRUST_ICONS = [ShieldCheck, Brain, Zap, FileText];
 const HERO_KPIS = [
@@ -21,6 +23,7 @@ const BARS = [40, 66, 52, 80, 58, 90, 70, 100, 62, 86, 76, 95];
 
 export default function HeroSection() {
   const { t } = useApp();
+  const [demoOpen, setDemoOpen] = useState(false);
   return (
     // Hero — yuqori qism: sarlavha, CTA va dashboard mockup
     <section
@@ -84,8 +87,8 @@ export default function HeroSection() {
                 {t("hero.ctaStart")} <ArrowRight className="h-[17px] w-[17px]" />
               </a>
             </Button>
-            <Button asChild variant="outline" size="lg">
-              <a href="#dashboard">{t("hero.ctaDemo")}</a>
+            <Button variant="outline" size="lg" onClick={() => setDemoOpen(true)}>
+              {t("hero.ctaDemo")}
             </Button>
           </motion.div>
 
@@ -193,6 +196,9 @@ export default function HeroSection() {
           </div>
         </motion.div>
       </div>
+
+      {/* Demo ko'rish -> namunaviy PDF hisobot sayt ichida */}
+      <DemoReportModal open={demoOpen} onClose={() => setDemoOpen(false)} />
     </section>
   );
 }
