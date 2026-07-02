@@ -143,10 +143,19 @@ def compute_indicators(fd: FinancialData) -> list[Indicator]:
     avg_eq = _avg(EQ, fd.equity_begin)
 
     # ===== A. LIKVIDLIK =====
+    # MUHIM: yuqori likvidlik to'lov xavfi EMAS. Normadan OSHSA — "warn"
+    # (ortiqcha mablag' samarasiz band) va alohida izoh (ck). "bad" faqat
+    # PAST tomonda (haqiqiy to'lov xavfi).
     v = _safe_div(CA, CL)
-    add("A1", v, "x", _band(v, (1.0, 2.5), (0.8, 1.0)))
+    if v is not None and v > 2.5:
+        add("A1", v, "x", "warn", ck="a1_high")
+    else:
+        add("A1", v, "x", _band(v, (1.0, 2.5), (0.8, 1.0)))
     v = _safe_div((CA - fd.inventories), CL)
-    add("A2", v, "x", _band(v, (0.7, 1.5), (0.5, 0.7)))
+    if v is not None and v > 1.5:
+        add("A2", v, "x", "warn", ck="a2_high")
+    else:
+        add("A2", v, "x", _band(v, (0.7, 1.5), (0.5, 0.7)))
     v = _safe_div((fd.cash + fd.short_term_investments), CL)
     add("A3", v, "x", _band(v, (0.2, 1.0), (0.1, 0.2)))
     wc = CA - CL
@@ -171,8 +180,12 @@ def compute_indicators(fd: FinancialData) -> list[Indicator]:
     add("B2", v, "x", _band(v, (0.0, 0.5), (0.5, 0.7)))
     v = _safe_div(TL, EQ)
     add("B3", v, "x", _band(v, (0.0, 1.0), (1.0, 1.5)))
+    # B4 ham ikki tomonlama: yuqori manyovrlik "immobilizatsiya" emas.
     v = _safe_div(own_wc, EQ)
-    add("B4", v, "x", _band(v, (0.2, 0.6), (0.0, 0.2)))
+    if v is not None and v > 0.6:
+        add("B4", v, "x", "warn", ck="b4_high")
+    else:
+        add("B4", v, "x", _band(v, (0.2, 0.6), (0.0, 0.2)))
     v = _safe_div(fd.long_term_liabilities, (EQ + fd.long_term_liabilities))
     add("B5", v, "x", _band(v, (0.0, 0.4), (0.4, 0.6)))
     v = _safe_div(fd.non_current_assets, EQ)
