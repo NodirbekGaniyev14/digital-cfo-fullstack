@@ -156,8 +156,12 @@ def compute_indicators(fd: FinancialData) -> list[Indicator]:
         add("A2", v, "x", "warn", ck="a2_high")
     else:
         add("A2", v, "x", _band(v, (0.7, 1.5), (0.5, 0.7)))
+    # A3 ham: naqd qarzdan ko'p (>1.0) — "tanqis" emas, ortiqcha zaxira (warn).
     v = _safe_div((fd.cash + fd.short_term_investments), CL)
-    add("A3", v, "x", _band(v, (0.2, 1.0), (0.1, 0.2)))
+    if v is not None and v > 1.0:
+        add("A3", v, "x", "warn", ck="a3_high")
+    else:
+        add("A3", v, "x", _band(v, (0.2, 1.0), (0.1, 0.2)))
     wc = CA - CL
     add("A4", wc, "x", "good" if wc > 0 else "bad")
     v = _safe_div(TA, TL)
@@ -197,7 +201,8 @@ def compute_indicators(fd: FinancialData) -> list[Indicator]:
     v = _safe_div(fd.long_term_liabilities, EQ)
     add("B9", v, "x", _band(v, (0.0, 0.5), (0.5, 1.0)))
     v = _safe_div((EQ + fd.long_term_liabilities), TA)
-    add("B10", v, "x", _band(v, (0.6, 0.95), (0.5, 0.6)))
+    # B10: yuqori barqarorlik "bad" emas — yuqori chegara yo'q.
+    add("B10", v, "x", _band(v, (0.6, 1e9), (0.5, 0.6)))
 
     # ===== C. RENTABELLIK =====
     v = _safe_div(fd.net_profit, avg_ta)
