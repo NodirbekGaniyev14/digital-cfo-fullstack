@@ -152,12 +152,25 @@ def _cf_chart(cf: dict, money_unit: str, CF, font: str, font_b: str):
         d.add(Rect(x0, yc - bar_h / 2, abs(bw), bar_h, fillColor=color, strokeColor=None))
         d.add(String(0, yc - 3, CF(key), fontName=font_b, fontSize=8, fillColor=colors.black))
         val_str = f"{v:,.0f}".replace(",", " ") + " " + money_unit
+        # Yozuv joyi: ustun uchi yonida. SIG'MASA (uzun ustun) — nol chizig'ining
+        # bo'sh tomoniga o'tkazamiz, aks holda nomlar/chetga kirib ketadi.
+        tw = pdfmetrics.stringWidth(val_str, font, 7.5)
         if v >= 0:
-            d.add(String(x0 + abs(bw) + 3, yc - 3, val_str, fontName=font, fontSize=7.5,
-                         fillColor=GREY))
+            tx = x0 + abs(bw) + 3
+            if tx + tw > W - 1:   # o'ngga sig'maydi -> nolning chap (bo'sh) tomoniga
+                d.add(String(zero_x - 3, yc - 3, val_str, fontName=font, fontSize=7.5,
+                             fillColor=GREY, textAnchor="end"))
+            else:
+                d.add(String(tx, yc - 3, val_str, fontName=font, fontSize=7.5,
+                             fillColor=GREY))
         else:
-            d.add(String(x0 - 3, yc - 3, val_str, fontName=font, fontSize=7.5,
-                         fillColor=GREY, textAnchor="end"))
+            tx = x0 - 3
+            if tx - tw < chart_l + 1:  # nom ustuniga kiradi -> nolning o'ng (bo'sh) tomoniga
+                d.add(String(zero_x + 3, yc - 3, val_str, fontName=font, fontSize=7.5,
+                             fillColor=GREY))
+            else:
+                d.add(String(tx, yc - 3, val_str, fontName=font, fontSize=7.5,
+                             fillColor=GREY, textAnchor="end"))
     return d
 
 
