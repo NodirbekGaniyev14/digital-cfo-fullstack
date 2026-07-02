@@ -167,6 +167,73 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const clean = (v, max = 500) =>
   typeof v === "string" ? v.trim().slice(0, max) : "";
 
+// ---- Kunlik ma'lumot zaxirasi (leads/arizalar/stats -> Telegram) --------------
+// VPS diski yagona nusxa edi — endi har kuni 03:30 (Toshkent) da JSON fayllar
+// admin chatiga hujjat sifatida yuboriladi. Token yo'q bo'lsa — jim o'tadi.
+// Server TZ'idan qat'i nazar to'g'ri ishlaydi (Intl orqali Toshkent vaqti).
+function tashkentDate() {
+  return new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Tashkent" }); // YYYY-MM-DD
+}
+function tashkentHM() {
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Asia/Tashkent", hour: "2-digit", minute: "2-digit", hour12: false,
+  }).formatToParts(new Date());
+  const get = (t) => Number(parts.find((p) => p.type === t)?.value || 0);
+  return { hour: get("hour"), minute: get("minute") };
+}
+
+async function backupDataToTelegram() {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  const chatId = process.env.TELEGRAM_CHAT_ID;
+  if (!token || !chatId) return false;
+  const targets = [
+    path.join(__dirname, "leads.json"),
+    path.join(dataDir, "arizalar.json"),
+    path.join(dataDir, "stats.json"),
+  ].filter((f) => fs.existsSync(f));
+  if (!targets.length) return false;
+
+  const stamp = tashkentDate();
+  let ok = true;
+  for (const f of targets) {
+    try {
+      const fd = new FormData();
+      fd.append("chat_id", chatId);
+      fd.append("caption", `💾 Sayt zaxirasi — ${path.basename(f)} · ${stamp}`);
+      fd.append(
+        "document",
+        new Blob([fs.readFileSync(f)]),
+        `${stamp}_site_${path.basename(f)}`
+      );
+      const res = await fetch(
+        `https://api.telegram.org/bot${token}/sendDocument`,
+        { method: "POST", body: fd }
+      );
+      if (!res.ok) {
+        ok = false;
+        console.warn("⚠️ Zaxira yuborilmadi:", path.basename(f), res.status);
+      }
+    } catch (err) {
+      ok = false;
+      console.warn("⚠️ Zaxira xatosi:", path.basename(f), err.message);
+    }
+  }
+  if (ok) console.log("💾 Sayt ma'lumotlari zaxirasi yuborildi:", stamp);
+  return ok;
+}
+
+// Har 10 daqiqada tekshiramiz: Toshkent vaqti 03:30 dan keyin bo'lsa va bugun
+// hali yuborilmagan bo'lsa — zaxira. (PM2 restartlarida ham barqaror.)
+let lastBackupDate = "";
+setInterval(() => {
+  const { hour, minute } = tashkentHM();
+  const today = tashkentDate();
+  if (hour === 3 && minute >= 30 && lastBackupDate !== today) {
+    lastBackupDate = today;
+    backupDataToTelegram();
+  }
+}, 10 * 60 * 1000);
+
 // ---- Routes -------------------------------------------------------------------
 app.get("/api/health", (_req, res) => res.json({ ok: true }));
 
