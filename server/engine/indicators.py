@@ -143,23 +143,24 @@ def compute_indicators(fd: FinancialData) -> list[Indicator]:
     avg_eq = _avg(EQ, fd.equity_begin)
 
     # ===== A. LIKVIDLIK =====
-    # MUHIM: yuqori likvidlik to'lov xavfi EMAS. Normadan OSHSA — "warn"
-    # (ortiqcha mablag' samarasiz band) va alohida izoh (ck). "bad" faqat
-    # PAST tomonda (haqiqiy to'lov xavfi).
+    # MUHIM: yuqori likvidlik to'lov xavfi EMAS — bu SOG'LOM holat, "Yaxshi".
+    # Normadan OSHSA — baho "good" va alohida izoh (ck) ortiqcha mablag'ni
+    # samarali ishlatish bo'yicha maslahat beradi. "bad" faqat PAST tomonda
+    # (haqiqiy to'lov xavfi).
     v = _safe_div(CA, CL)
     if v is not None and v > 2.5:
-        add("A1", v, "x", "warn", ck="a1_high")
+        add("A1", v, "x", "good", ck="a1_high")
     else:
         add("A1", v, "x", _band(v, (1.0, 2.5), (0.8, 1.0)))
     v = _safe_div((CA - fd.inventories), CL)
     if v is not None and v > 1.5:
-        add("A2", v, "x", "warn", ck="a2_high")
+        add("A2", v, "x", "good", ck="a2_high")
     else:
         add("A2", v, "x", _band(v, (0.7, 1.5), (0.5, 0.7)))
-    # A3 ham: naqd qarzdan ko'p (>1.0) — "tanqis" emas, ortiqcha zaxira (warn).
+    # A3 ham: naqd qarzdan ko'p (>1.0) — "tanqis" emas, sog'lom zaxira ("good").
     v = _safe_div((fd.cash + fd.short_term_investments), CL)
     if v is not None and v > 1.0:
-        add("A3", v, "x", "warn", ck="a3_high")
+        add("A3", v, "x", "good", ck="a3_high")
     else:
         add("A3", v, "x", _band(v, (0.2, 1.0), (0.1, 0.2)))
     wc = CA - CL
@@ -184,10 +185,11 @@ def compute_indicators(fd: FinancialData) -> list[Indicator]:
     add("B2", v, "x", _band(v, (0.0, 0.5), (0.5, 0.7)))
     v = _safe_div(TL, EQ)
     add("B3", v, "x", _band(v, (0.0, 1.0), (1.0, 1.5)))
-    # B4 ham ikki tomonlama: yuqori manyovrlik "immobilizatsiya" emas.
+    # B4 ham ikki tomonlama: yuqori manyovrlik "immobilizatsiya" emas —
+    # aksincha kapital aylanmada, bu ijobiy. Oshsa "good" + to'g'ri izoh.
     v = _safe_div(own_wc, EQ)
     if v is not None and v > 0.6:
-        add("B4", v, "x", "warn", ck="b4_high")
+        add("B4", v, "x", "good", ck="b4_high")
     else:
         add("B4", v, "x", _band(v, (0.2, 0.6), (0.0, 0.2)))
     v = _safe_div(fd.long_term_liabilities, (EQ + fd.long_term_liabilities))
