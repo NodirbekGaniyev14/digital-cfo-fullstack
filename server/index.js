@@ -702,8 +702,8 @@ if (fs.existsSync(clientDist)) {
     }
   });
 
-  // Ro'yxat sahifasi.
-  app.get("/maqolalar", (_req, res, next) => {
+  // Ro'yxat sahifasi — /blog.
+  app.get("/blog", (_req, res, next) => {
     if (!hasTemplate()) return next();
     try {
       res.type("html").send(renderList(Articles.listPublished()));
@@ -713,23 +713,25 @@ if (fs.existsSync(clientDist)) {
     }
   });
 
-  // Texnik talabdagi /maqolalar/<slug> — asosiy /article/<slug> ga yo'naltiramiz.
-  app.get("/maqolalar/:slug", (req, res) =>
-    res.redirect(301, `/article/${req.params.slug}`)
-  );
-
-  // Bitta maqola sahifasi.
-  app.get("/article/:slug", (req, res, next) => {
+  // Bitta maqola sahifasi — /blog/<slug>.
+  app.get("/blog/:slug", (req, res, next) => {
     if (!hasTemplate()) return next();
     const a = Articles.getPublishedBySlug(req.params.slug);
     if (!a) return next(); // topilmasa — SPA 404 sahifasi ko'rsatadi
     try {
+      // FAQ'larni biriktiramiz (FAQ Schema uchun).
+      a.faqs = Articles.getFaqs(a.id);
       res.type("html").send(renderArticle(a));
     } catch (e) {
       console.warn("⚠️ SSR (maqola) xatosi:", e.message);
       next();
     }
   });
+
+  // --- Eski URL'lardan 301 redirect (SEO uzluksizligi) ---
+  app.get("/maqolalar", (_req, res) => res.redirect(301, "/blog"));
+  app.get("/maqolalar/:slug", (req, res) => res.redirect(301, `/blog/${req.params.slug}`));
+  app.get("/article/:slug", (req, res) => res.redirect(301, `/blog/${req.params.slug}`));
 
   // extensions:["html"] — toza URL beradi (maxfiylik.html, shartlar.html).
   app.use(express.static(clientDist, { extensions: ["html"] }));

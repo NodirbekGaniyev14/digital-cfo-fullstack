@@ -25,7 +25,7 @@ export default function ArticlesIndex() {
       <Seo
         title="Maqolalar — moliyaviy tahlil bo'yicha qo'llanmalar"
         description="Moliyaviy tahlil, likvidlik, rentabellik, Altman Z-Score va 1C hisobotlari bo'yicha amaliy maqolalar — Digital CFO ekspertlaridan."
-        canonical="/maqolalar"
+        canonical="/blog"
         jsonLd={articles ? articlesListJsonLd(articles) : null}
       />
       <Navbar />

@@ -65,7 +65,7 @@ export default function Article() {
       <Seo
         title={article.title}
         description={article.excerpt || article.title}
-        canonical={`/article/${article.slug}`}
+        canonical={`/blog/${article.slug}`}
         image={article.cover_image || undefined}
         type="article"
         jsonLd={articleJsonLd(article)}
@@ -77,7 +77,7 @@ export default function Article() {
           <nav aria-label="Breadcrumb" className="mb-6 flex flex-wrap items-center gap-1.5 text-[13px] text-slate-400">
             <Link to="/" className="hover:text-azure">Bosh sahifa</Link>
             <ChevronRight className="h-3.5 w-3.5" />
-            <Link to="/maqolalar" className="hover:text-azure">Maqolalar</Link>
+            <Link to="/blog" className="hover:text-azure">Maqolalar</Link>
             {article.category && (
               <>
                 <ChevronRight className="h-3.5 w-3.5" />

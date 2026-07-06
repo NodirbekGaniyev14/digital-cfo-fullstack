@@ -81,7 +81,7 @@ export default function AdminList() {
               <div className="flex items-center gap-1">
                 {a.status === "published" && (
                   <a
-                    href={`/article/${a.slug}`}
+                    href={`/blog/${a.slug}`}
                     target="_blank"
                     rel="noreferrer"
                     title="Saytda ochish"

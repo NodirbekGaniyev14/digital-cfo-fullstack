@@ -8,7 +8,7 @@ const NAV_LINKS = [
   { key: "nav.services", href: "#services" },
   { key: "nav.kpi", href: "#kpi" },
   { key: "nav.pricing", href: "#pricing" },
-  { key: "nav.articles", to: "/maqolalar" },
+  { key: "nav.articles", to: "/blog" },
   { key: "nav.faq", href: "#faq" },
 ];
 

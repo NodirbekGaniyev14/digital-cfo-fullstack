@@ -35,15 +35,86 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_articles_slug ON articles(slug);
 `);
 
+// --- Schema v2 migratsiyasi (idempotent) — mavjud DB'ni buzmasdan kengaytiradi ---
+function _cols(table) {
+  return new Set(db.prepare(`PRAGMA table_info(${table})`).all().map((c) => c.name));
+}
+function _addCol(table, name, ddl) {
+  if (!_cols(table).has(name)) db.exec(`ALTER TABLE ${table} ADD COLUMN ${ddl}`);
+}
+// articles — yangi ustunlar (SEO, featured image, publish, hisoblagichlar)
+_addCol("articles", "seo_title", "seo_title TEXT DEFAULT ''");
+_addCol("articles", "seo_description", "seo_description TEXT DEFAULT ''");
+_addCol("articles", "focus_keyword", "focus_keyword TEXT DEFAULT ''");
+_addCol("articles", "canonical_url", "canonical_url TEXT DEFAULT ''");
+_addCol("articles", "robots_index", "robots_index INTEGER DEFAULT 1");
+_addCol("articles", "robots_follow", "robots_follow INTEGER DEFAULT 1");
+_addCol("articles", "cover_alt", "cover_alt TEXT DEFAULT ''");
+_addCol("articles", "cover_caption", "cover_caption TEXT DEFAULT ''");
+_addCol("articles", "author_id", "author_id INTEGER");
+_addCol("articles", "category_id", "category_id INTEGER");
+_addCol("articles", "views", "views INTEGER DEFAULT 0");
+_addCol("articles", "is_featured", "is_featured INTEGER DEFAULT 0");
+_addCol("articles", "published_at", "published_at TEXT");
+_addCol("articles", "reading_minutes", "reading_minutes INTEGER DEFAULT 0");
+
+// Yangi jadvallar: mualliflar, kategoriyalar, teglar (M2M), FAQ
+db.exec(`
+  CREATE TABLE IF NOT EXISTS authors (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL, slug TEXT NOT NULL UNIQUE,
+    avatar TEXT DEFAULT '', bio TEXT DEFAULT '', created_at TEXT NOT NULL
+  );
+  CREATE TABLE IF NOT EXISTS categories (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL, slug TEXT NOT NULL UNIQUE, created_at TEXT NOT NULL
+  );
+  CREATE TABLE IF NOT EXISTS tags (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL, slug TEXT NOT NULL UNIQUE
+  );
+  CREATE TABLE IF NOT EXISTS article_tags (
+    article_id INTEGER NOT NULL, tag_id INTEGER NOT NULL,
+    PRIMARY KEY (article_id, tag_id)
+  );
+  CREATE TABLE IF NOT EXISTS article_faqs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    article_id INTEGER NOT NULL, question TEXT NOT NULL,
+    answer TEXT DEFAULT '', position INTEGER DEFAULT 0
+  );
+  CREATE INDEX IF NOT EXISTS idx_faqs_article ON article_faqs(article_id);
+  CREATE INDEX IF NOT EXISTS idx_atags_article ON article_tags(article_id);
+`);
+
 // --- HTML tozalash (stored-XSS himoyasi) — admin matni bazaga yozilishdan oldin ---
 const SANITIZE_OPTS = {
-  allowedTags: sanitizeHtml.defaults.allowedTags.concat(["img", "h1", "h2", "figure", "figcaption"]),
+  // TipTap chiqishini qo'llab-quvvatlaydi: sarlavhalar, jadval, kod, video embed.
+  allowedTags: sanitizeHtml.defaults.allowedTags.concat([
+    "img", "h1", "h2", "figure", "figcaption", "iframe",
+    "u", "s", "sup", "sub", "mark", "hr", "span",
+  ]),
   allowedAttributes: {
     a: ["href", "name", "target", "rel"],
-    img: ["src", "alt", "width", "height", "loading"],
-    "*": ["class"],
+    img: ["src", "alt", "title", "width", "height", "loading"],
+    iframe: ["src", "width", "height", "frameborder", "allow", "allowfullscreen"],
+    td: ["colspan", "rowspan"],
+    th: ["colspan", "rowspan"],
+    code: ["class"],
+    span: ["class"],
+    "*": ["class", "style"],
+  },
+  // Faqat inline style'da xavfsiz xossalar (CSS injection'ni cheklaydi).
+  allowedStyles: {
+    "*": {
+      "text-align": [/^left$|^right$|^center$|^justify$/],
+    },
   },
   allowedSchemes: ["http", "https", "mailto", "tel"],
+  // Video embed faqat ishonchli platformalardan.
+  allowedIframeHostnames: [
+    "www.youtube.com", "youtube.com", "www.youtube-nocookie.com",
+    "player.vimeo.com",
+  ],
   transformTags: {
     // Tashqi havolalarga xavfsizlik atributlari.
     a: (tagName, attribs) => {
@@ -101,6 +172,10 @@ export const Articles = {
     db.prepare(`SELECT ${LIST_COLS} FROM articles ORDER BY datetime(created_at) DESC`).all(),
   getById: (id) => db.prepare("SELECT * FROM articles WHERE id=?").get(id),
   getBySlug: (slug) => db.prepare("SELECT * FROM articles WHERE slug=?").get(slug),
+
+  // Maqolaga biriktirilgan FAQ'lar (tartib bilan).
+  getFaqs: (articleId) =>
+    db.prepare("SELECT question, answer FROM article_faqs WHERE article_id=? ORDER BY position, id").all(articleId),
 
   insert: (a) => {
     const now = new Date().toISOString();

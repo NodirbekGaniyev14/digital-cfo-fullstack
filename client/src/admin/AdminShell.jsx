@@ -23,7 +23,7 @@ export default function AdminShell({ children }) {
           </Link>
           <div className="flex items-center gap-2">
             <a
-              href="/maqolalar"
+              href="/blog"
               target="_blank"
               rel="noreferrer"
               className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-[13.5px] font-medium text-slate-500 transition-colors hover:text-navy dark:text-slate-300 dark:hover:text-white"

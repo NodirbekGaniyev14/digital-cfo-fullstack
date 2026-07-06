@@ -15,7 +15,7 @@ const ORG = {
 
 // Bitta maqola uchun: BlogPosting + BreadcrumbList (API shakli: created_at/excerpt).
 export function articleJsonLd(a) {
-  const url = `${SITE_URL}/article/${a.slug}`;
+  const url = `${SITE_URL}/blog/${a.slug}`;
   return {
     "@context": "https://schema.org",
     "@graph": [
@@ -37,7 +37,7 @@ export function articleJsonLd(a) {
         "@type": "BreadcrumbList",
         itemListElement: [
           { "@type": "ListItem", position: 1, name: "Bosh sahifa", item: `${SITE_URL}/` },
-          { "@type": "ListItem", position: 2, name: "Maqolalar", item: `${SITE_URL}/maqolalar` },
+          { "@type": "ListItem", position: 2, name: "Maqolalar", item: `${SITE_URL}/blog` },
           { "@type": "ListItem", position: 3, name: a.title, item: url },
         ],
       },
@@ -47,7 +47,7 @@ export function articleJsonLd(a) {
 
 // Maqolalar ro'yxati sahifasi uchun: CollectionPage + ItemList.
 export function articlesListJsonLd(articles) {
-  const url = `${SITE_URL}/maqolalar`;
+  const url = `${SITE_URL}/blog`;
   return {
     "@context": "https://schema.org",
     "@graph": [
@@ -65,7 +65,7 @@ export function articlesListJsonLd(articles) {
         itemListElement: articles.map((a, i) => ({
           "@type": "ListItem",
           position: i + 1,
-          url: `${SITE_URL}/article/${a.slug}`,
+          url: `${SITE_URL}/blog/${a.slug}`,
           name: a.title,
         })),
       },

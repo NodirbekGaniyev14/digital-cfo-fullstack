@@ -130,7 +130,7 @@ export default function AdminEditor() {
             />
           </Field>
 
-          <Field label="Slug (URL)" hint="/article/… — bo'sh qoldirsangiz sarlavhadan avtomatik">
+          <Field label="Slug (URL)" hint="/blog/… — bo'sh qoldirsangiz sarlavhadan avtomatik">
             <input
               value={form.slug}
               onChange={(e) => { slugTouched.current = true; set("slug", e.target.value); }}

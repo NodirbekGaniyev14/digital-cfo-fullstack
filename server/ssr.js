@@ -67,7 +67,7 @@ const WEBSITE = {
   publisher: { "@id": `${SITE_URL}/#org` },
 };
 
-function buildPage({ title, description, canonical, ogType, pageJsonLd, rootHtml }) {
+function buildPage({ title, description, canonical, ogType, pageJsonLd, rootHtml, robots, image }) {
   let html = template();
   const fullTitle = title.includes("Digital CFO") ? title : `${title} — Digital CFO`;
   const rep = (re, val, label) => {
@@ -76,11 +76,16 @@ function buildPage({ title, description, canonical, ogType, pageJsonLd, rootHtml
   };
   rep(/<title>[\s\S]*?<\/title>/, `<title>${escHtml(fullTitle)}</title>`, "title");
   rep(/<meta\s+name="description"[\s\S]*?\/>/, `<meta name="description" content="${escAttr(description)}" />`, "description");
+  rep(/<meta name="robots"[^>]*>/, `<meta name="robots" content="${robots || "index,follow"}" />`, "robots");
   rep(/<link rel="canonical"[^>]*>/, `<link rel="canonical" href="${canonical}" />`, "canonical");
   rep(/<meta property="og:url"[^>]*>/, `<meta property="og:url" content="${canonical}" />`, "og:url");
   rep(/<meta property="og:title"[^>]*>/, `<meta property="og:title" content="${escAttr(fullTitle)}" />`, "og:title");
   rep(/<meta\s+property="og:description"[\s\S]*?\/>/, `<meta property="og:description" content="${escAttr(description)}" />`, "og:description");
   rep(/<meta property="og:type"[^>]*>/, `<meta property="og:type" content="${ogType}" />`, "og:type");
+  if (image) {
+    rep(/<meta property="og:image"[^>]*>/, `<meta property="og:image" content="${escAttr(image)}" />`, "og:image");
+    rep(/<meta name="twitter:image"[^>]*>/, `<meta name="twitter:image" content="${escAttr(image)}" />`, "twitter:image");
+  }
   rep(/<meta name="twitter:title"[^>]*>/, `<meta name="twitter:title" content="${escAttr(fullTitle)}" />`, "twitter:title");
   rep(/<meta\s+name="twitter:description"[\s\S]*?\/>/, `<meta name="twitter:description" content="${escAttr(description)}" />`, "twitter:description");
   rep(
@@ -93,61 +98,81 @@ function buildPage({ title, description, canonical, ogType, pageJsonLd, rootHtml
 }
 
 const SHELL_HEADER = `<header style="max-width:820px;margin:0 auto;padding:20px 24px"><a href="/" style="font-weight:800;font-size:20px;color:#0f172a;text-decoration:none">Digital <span style="color:#3b82f6">CFO</span></a></header>`;
-const SHELL_FOOTER = `<footer style="max-width:820px;margin:24px auto;padding:24px;color:#64748b;font-size:14px"><a href="/" style="color:#3b82f6">Bosh sahifa</a> · <a href="/maqolalar" style="color:#3b82f6">Barcha maqolalar</a></footer>`;
+const SHELL_FOOTER = `<footer style="max-width:820px;margin:24px auto;padding:24px;color:#64748b;font-size:14px"><a href="/" style="color:#3b82f6">Bosh sahifa</a> · <a href="/blog" style="color:#3b82f6">Barcha maqolalar</a></footer>`;
+
+// cover_image'ni mutlaq URL'ga aylantiradi (og:image / schema uchun).
+function absUrl(u) {
+  if (!u) return "";
+  return u.startsWith("http") ? u : `${SITE_URL}${u}`;
+}
 
 // Bitta maqola sahifasi HTML'i.
 export function renderArticle(a) {
-  const canonical = `${SITE_URL}/article/${a.slug}`;
-  const pageJsonLd = {
-    "@context": "https://schema.org",
-    "@graph": [
-      {
-        "@type": "BlogPosting",
-        "@id": `${canonical}#article`,
-        headline: a.title,
-        description: a.excerpt,
-        inLanguage: "uz",
-        datePublished: a.created_at,
-        dateModified: a.updated_at || a.created_at,
-        author: { "@type": a.author && a.author !== "Digital CFO" ? "Person" : "Organization", name: a.author || "Digital CFO" },
-        publisher: ORG,
-        mainEntityOfPage: { "@type": "WebPage", "@id": canonical },
-        articleSection: a.category,
-        image: a.cover_image || `${SITE_URL}/og-image.svg`,
-      },
-      {
-        "@type": "BreadcrumbList",
-        itemListElement: [
-          { "@type": "ListItem", position: 1, name: "Bosh sahifa", item: `${SITE_URL}/` },
-          { "@type": "ListItem", position: 2, name: "Maqolalar", item: `${SITE_URL}/maqolalar` },
-          { "@type": "ListItem", position: 3, name: a.title, item: canonical },
-        ],
-      },
-    ],
-  };
+  const canonical = a.canonical_url || `${SITE_URL}/blog/${a.slug}`;
+  const title = a.seo_title || a.title;
+  const description = a.seo_description || a.excerpt || a.title;
+  const robots = `${a.robots_index === 0 ? "noindex" : "index"},${a.robots_follow === 0 ? "nofollow" : "follow"}`;
+  const image = absUrl(a.cover_image) || `${SITE_URL}/og-image.svg`;
+
+  const graph = [
+    {
+      "@type": "BlogPosting",
+      "@id": `${canonical}#article`,
+      headline: a.title,
+      description: a.excerpt || description,
+      inLanguage: "uz",
+      datePublished: a.published_at || a.created_at,
+      dateModified: a.updated_at || a.created_at,
+      author: { "@type": a.author && a.author !== "Digital CFO" ? "Person" : "Organization", name: a.author || "Digital CFO" },
+      publisher: ORG,
+      mainEntityOfPage: { "@type": "WebPage", "@id": canonical },
+      articleSection: a.category,
+      image,
+      wordCount: String(a.content || "").replace(/<[^>]+>/g, " ").trim().split(/\s+/).length,
+    },
+    {
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Bosh sahifa", item: `${SITE_URL}/` },
+        { "@type": "ListItem", position: 2, name: "Maqolalar", item: `${SITE_URL}/blog` },
+        { "@type": "ListItem", position: 3, name: a.title, item: canonical },
+      ],
+    },
+  ];
+  // FAQ Schema (agar maqolaga FAQ biriktirilgan bo'lsa).
+  if (Array.isArray(a.faqs) && a.faqs.length) {
+    graph.push({
+      "@type": "FAQPage",
+      mainEntity: a.faqs.map((f) => ({
+        "@type": "Question",
+        name: f.question,
+        acceptedAnswer: { "@type": "Answer", text: f.answer },
+      })),
+    });
+  }
+  const pageJsonLd = { "@context": "https://schema.org", "@graph": graph };
+
   const cover = a.cover_image
-    ? `<img src="${escAttr(a.cover_image)}" alt="${escAttr(a.title)}" style="width:100%;max-height:280px;object-fit:cover;border-radius:16px;margin:0 0 24px" />`
+    ? `<img src="${escAttr(a.cover_image)}" alt="${escAttr(a.cover_alt || a.title)}" style="width:100%;max-height:280px;object-fit:cover;border-radius:16px;margin:0 0 24px" />`
     : `<div style="height:200px;border-radius:16px;margin:0 0 24px;${coverStyle(a.icon_color)}"></div>`;
   const rootHtml =
     `${SHELL_HEADER}<main style="max-width:760px;margin:0 auto;padding:0 24px 40px">` +
-    `<nav style="font-size:13px;color:#64748b;margin-bottom:14px"><a href="/" style="color:#64748b">Bosh sahifa</a> › <a href="/maqolalar" style="color:#64748b">Maqolalar</a> › ${escHtml(a.category)}</nav>` +
+    `<nav style="font-size:13px;color:#64748b;margin-bottom:14px"><a href="/" style="color:#64748b">Bosh sahifa</a> › <a href="/blog" style="color:#64748b">Maqolalar</a> › ${escHtml(a.category)}</nav>` +
     `<article class="article-prose"><h1 style="font-size:34px;font-weight:800;line-height:1.2;color:#0f172a;margin:0 0 10px">${escHtml(a.title)}</h1>` +
-    `<p style="color:#64748b;font-size:14px;margin:0 0 20px">${escHtml(a.author || "Digital CFO")} · ${formatDateUz(a.created_at)} · ${timeAgoUz(a.created_at)}</p>` +
+    `<p style="color:#64748b;font-size:14px;margin:0 0 20px">${escHtml(a.author || "Digital CFO")} · ${formatDateUz(a.published_at || a.created_at)} · ${timeAgoUz(a.published_at || a.created_at)}</p>` +
     `${cover}${a.content}</article></main>${SHELL_FOOTER}`;
 
   return buildPage({
-    title: a.title,
-    description: a.excerpt || a.title,
-    canonical,
+    title, description, canonical, robots, image,
     ogType: "article",
     pageJsonLd,
     rootHtml,
   });
 }
 
-// /maqolalar ro'yxat sahifasi HTML'i.
+// /blog ro'yxat sahifasi HTML'i.
 export function renderList(list) {
-  const canonical = `${SITE_URL}/maqolalar`;
+  const canonical = `${SITE_URL}/blog`;
   const pageJsonLd = {
     "@context": "https://schema.org",
     "@graph": [
@@ -162,7 +187,7 @@ export function renderList(list) {
       {
         "@type": "ItemList",
         itemListElement: list.map((a, i) => ({
-          "@type": "ListItem", position: i + 1, url: `${SITE_URL}/article/${a.slug}`, name: a.title,
+          "@type": "ListItem", position: i + 1, url: `${SITE_URL}/blog/${a.slug}`, name: a.title,
         })),
       },
     ],
@@ -170,7 +195,7 @@ export function renderList(list) {
   const items = list
     .map(
       (a) =>
-        `<li style="margin-bottom:18px"><span style="color:#64748b;font-size:13px">${timeAgoUz(a.created_at)} · ${escHtml(a.category)}</span><br><a href="/article/${a.slug}" style="font-size:19px;font-weight:700;color:#0f172a;text-decoration:none">${escHtml(a.title)}</a><p style="color:#475569;margin:6px 0 0">${escHtml(a.excerpt)}</p></li>`
+        `<li style="margin-bottom:18px"><span style="color:#64748b;font-size:13px">${timeAgoUz(a.published_at || a.created_at)} · ${escHtml(a.category)}</span><br><a href="/blog/${a.slug}" style="font-size:19px;font-weight:700;color:#0f172a;text-decoration:none">${escHtml(a.title)}</a><p style="color:#475569;margin:6px 0 0">${escHtml(a.excerpt)}</p></li>`
     )
     .join("");
   const rootHtml =
@@ -193,12 +218,12 @@ export function renderList(list) {
 export function buildSitemap(list) {
   const staticUrls = [
     { loc: `${SITE_URL}/`, changefreq: "weekly", priority: "1.0" },
-    { loc: `${SITE_URL}/maqolalar`, changefreq: "weekly", priority: "0.9" },
+    { loc: `${SITE_URL}/blog`, changefreq: "weekly", priority: "0.9" },
     { loc: `${SITE_URL}/maxfiylik.html`, changefreq: "yearly", priority: "0.3" },
     { loc: `${SITE_URL}/shartlar.html`, changefreq: "yearly", priority: "0.3" },
   ];
   const articleUrls = list.map((a) => ({
-    loc: `${SITE_URL}/article/${a.slug}`,
+    loc: `${SITE_URL}/blog/${a.slug}`,
     lastmod: (a.updated_at || a.created_at || "").slice(0, 10),
     changefreq: "monthly",
     priority: "0.8",

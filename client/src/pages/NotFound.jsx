@@ -27,7 +27,7 @@ export default function NotFound() {
             Bosh sahifa
           </Link>
           <Link
-            to="/maqolalar"
+            to="/blog"
             className="rounded-xl border-[1.5px] border-navy/20 px-6 py-3 font-semibold text-navy transition-colors hover:border-navy dark:border-white/20 dark:text-white"
           >
             Maqolalar

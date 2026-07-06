@@ -1,5 +1,5 @@
 import { useEffect, lazy, Suspense } from "react";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useParams } from "react-router-dom";
 import { MotionConfig } from "framer-motion";
 import { Toaster } from "sonner";
 import Home from "./pages/Home.jsx";
@@ -32,6 +32,12 @@ function ScrollManager() {
   return null;
 }
 
+// Eski /article/:slug -> /blog/:slug (slug saqlanadi).
+function RedirectToBlog() {
+  const { slug } = useParams();
+  return <Navigate to={`/blog/${slug}`} replace />;
+}
+
 // Public elementlar (FAB, chatbot, kontakt modal) — admin sahifalarida ko'rinmasin.
 function PublicChrome() {
   const { pathname } = useLocation();
@@ -57,8 +63,11 @@ export default function App() {
             <ScrollProgress />
             <Routes>
               <Route path="/" element={<Home />} />
-              <Route path="/maqolalar" element={<ArticlesIndex />} />
-              <Route path="/article/:slug" element={<Article />} />
+              <Route path="/blog" element={<ArticlesIndex />} />
+              <Route path="/blog/:slug" element={<Article />} />
+              {/* Eski URL'lar -> yangi (/blog) */}
+              <Route path="/maqolalar" element={<Navigate to="/blog" replace />} />
+              <Route path="/article/:slug" element={<RedirectToBlog />} />
               <Route
                 path="/admin/*"
                 element={
