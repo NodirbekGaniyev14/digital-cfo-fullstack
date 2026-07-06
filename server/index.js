@@ -1,3 +1,4 @@
+import "./load-env.js"; // ENG BIRINCHI — .env ni auth.js/ssr.js dan oldin yuklaydi
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
