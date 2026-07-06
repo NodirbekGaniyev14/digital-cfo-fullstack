@@ -1,31 +1,72 @@
+import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Clock, ChevronRight, Send } from "lucide-react";
+import { Clock, ChevronRight, Send, Loader2, User } from "lucide-react";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
-import ArticleCard, { ArticleIcon, ArticleCover } from "@/components/ArticleCard";
+import ArticleCard, { ArticleCover } from "@/components/ArticleCard";
 import Seo from "@/lib/seo";
 import NotFound from "@/pages/NotFound";
-import { ARTICLES, getArticle, formatDateUz, timeAgoUz, BOT_URL } from "@/data/articles";
+import { formatDateUz, timeAgoUz, BOT_URL } from "@/data/articles";
 import { articleJsonLd } from "@/lib/schema";
+import { getArticle, getArticles } from "@/lib/api";
 
-// /article/:slug — bitta maqola sahifasi.
+// Matndan (HTML) taxminiy o'qish vaqtini hisoblash (~200 so'z/daqiqa).
+function readingMinutes(html) {
+  const words = String(html || "").replace(/<[^>]+>/g, " ").trim().split(/\s+/).length;
+  return Math.max(1, Math.round(words / 200));
+}
+
+// /article/:slug — bitta maqola. API'dan slug bo'yicha yuklanadi.
 export default function Article() {
   const { slug } = useParams();
-  const article = getArticle(slug);
+  const [article, setArticle] = useState(undefined); // undefined=yuklanmoqda, null=topilmadi
+  const [related, setRelated] = useState([]);
 
-  if (!article) return <NotFound />;
+  useEffect(() => {
+    let alive = true;
+    setArticle(undefined);
+    window.scrollTo(0, 0);
+    getArticle(slug)
+      .then((a) => alive && setArticle(a || null))
+      .catch(() => alive && setArticle(null));
+    return () => { alive = false; };
+  }, [slug]);
 
-  const related = (article.relatedSlugs || [])
-    .map((s) => getArticle(s))
-    .filter(Boolean)
-    .slice(0, 3);
+  useEffect(() => {
+    if (!article) return;
+    let alive = true;
+    getArticles()
+      .then((list) => {
+        if (!alive) return;
+        const same = list.filter((x) => x.slug !== article.slug && x.category === article.category);
+        const pool = same.length ? same : list.filter((x) => x.slug !== article.slug);
+        setRelated(pool.slice(0, 3));
+      })
+      .catch(() => {});
+    return () => { alive = false; };
+  }, [article]);
+
+  if (article === undefined) {
+    return (
+      <div className="flex min-h-screen flex-col bg-white dark:bg-[#070b16]">
+        <Navbar />
+        <div className="flex flex-1 items-center justify-center text-slate-400">
+          <Loader2 className="h-7 w-7 animate-spin" />
+        </div>
+      </div>
+    );
+  }
+  if (article === null) return <NotFound />;
+
+  const mins = readingMinutes(article.content);
 
   return (
     <div className="overflow-x-hidden bg-white dark:bg-[#070b16]">
       <Seo
         title={article.title}
-        description={article.description}
+        description={article.excerpt || article.title}
         canonical={`/article/${article.slug}`}
+        image={article.cover_image || undefined}
         type="article"
         jsonLd={articleJsonLd(article)}
       />
@@ -33,76 +74,44 @@ export default function Article() {
 
       <article className="px-6 pt-28">
         <div className="mx-auto max-w-[760px]">
-          {/* Breadcrumb */}
-          <nav
-            aria-label="Breadcrumb"
-            className="mb-6 flex flex-wrap items-center gap-1.5 text-[13px] text-slate-400"
-          >
+          <nav aria-label="Breadcrumb" className="mb-6 flex flex-wrap items-center gap-1.5 text-[13px] text-slate-400">
             <Link to="/" className="hover:text-azure">Bosh sahifa</Link>
             <ChevronRight className="h-3.5 w-3.5" />
             <Link to="/maqolalar" className="hover:text-azure">Maqolalar</Link>
-            <ChevronRight className="h-3.5 w-3.5" />
-            <span className="text-slate-500 dark:text-slate-300">{article.category}</span>
+            {article.category && (
+              <>
+                <ChevronRight className="h-3.5 w-3.5" />
+                <span className="text-slate-500 dark:text-slate-300">{article.category}</span>
+              </>
+            )}
           </nav>
 
           <header className="mb-8">
-            <div className="mb-4 flex items-center gap-3">
-              <div className="flex h-12 w-12 flex-none items-center justify-center rounded-xl bg-navy text-emerald-400">
-                <ArticleIcon name={article.icon} className="h-6 w-6" />
-              </div>
-              <span className="rounded-full bg-azure/10 px-3 py-1 text-[13px] font-semibold text-azure">
+            {article.category && (
+              <span className="mb-4 inline-block rounded-full bg-azure/10 px-3 py-1 text-[13px] font-semibold text-azure">
                 {article.category}
               </span>
-            </div>
+            )}
             <h1 className="font-heading text-[30px] font-extrabold leading-tight tracking-tight text-navy dark:text-white sm:text-[40px]">
               {article.title}
             </h1>
             <div className="mt-4 flex flex-wrap items-center gap-4 text-[13.5px] text-slate-400">
-              <time dateTime={article.datePublished}>{formatDateUz(article.datePublished)}</time>
+              <span className="flex items-center gap-1.5"><User className="h-4 w-4" /> {article.author || "Digital CFO"}</span>
+              <time dateTime={article.created_at}>{formatDateUz(article.created_at)}</time>
               <span>·</span>
-              <span>{timeAgoUz(article.datePublished)}</span>
-              <span className="flex items-center gap-1.5">
-                <Clock className="h-4 w-4" /> {article.readingMinutes} daqiqa o'qish
-              </span>
+              <span>{timeAgoUz(article.created_at)}</span>
+              <span className="flex items-center gap-1.5"><Clock className="h-4 w-4" /> {mins} daqiqa o'qish</span>
             </div>
           </header>
 
-          {/* Qopqoq banneri */}
           <ArticleCover
             article={article}
             className="mb-8 h-[180px] w-full rounded-2xl sm:h-[240px]"
             iconClassName="h-16 w-16 opacity-90"
           />
 
-          {/* Maqola matni (SEO uchun HTML) */}
-          <div
-            className="article-prose"
-            dangerouslySetInnerHTML={{ __html: article.body }}
-          />
-
-          {/* FAQ */}
-          {article.faq?.length > 0 && (
-            <section className="mt-14">
-              <h2 className="mb-6 font-heading text-[24px] font-bold text-navy dark:text-white">
-                Ko'p so'raladigan savollar
-              </h2>
-              <div className="flex flex-col gap-3">
-                {article.faq.map((f) => (
-                  <details
-                    key={f.q}
-                    className="group rounded-xl border border-navy/[.08] bg-softbg/60 px-5 py-4 dark:border-white/[.08] dark:bg-white/[.03]"
-                  >
-                    <summary className="cursor-pointer list-none font-heading text-[16px] font-semibold text-navy marker:hidden dark:text-white">
-                      {f.q}
-                    </summary>
-                    <p className="mt-3 text-[15px] leading-relaxed text-slate-600 dark:text-slate-300">
-                      {f.a}
-                    </p>
-                  </details>
-                ))}
-              </div>
-            </section>
-          )}
+          {/* Maqola matni — serverda sanitizatsiya qilingan HTML */}
+          <div className="article-prose" dangerouslySetInnerHTML={{ __html: article.content }} />
 
           {/* Telegram CTA */}
           <div className="mt-14 rounded-2xl bg-navy px-7 py-8 text-center text-white">
@@ -123,7 +132,6 @@ export default function Article() {
         </div>
       </article>
 
-      {/* O'xshash maqolalar */}
       {related.length > 0 && (
         <section className="mt-20 border-t border-navy/[.06] bg-softbg px-6 py-16 dark:border-white/[.06] dark:bg-[#0a1020]">
           <div className="mx-auto max-w-[1200px]">

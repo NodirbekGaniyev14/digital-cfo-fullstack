@@ -13,44 +13,36 @@ const ORG = {
   logo: `${SITE_URL}/og-image.svg`,
 };
 
-// Bitta maqola uchun: BlogPosting + BreadcrumbList (+ FAQ bo'lsa FAQPage).
+// Bitta maqola uchun: BlogPosting + BreadcrumbList (API shakli: created_at/excerpt).
 export function articleJsonLd(a) {
   const url = `${SITE_URL}/article/${a.slug}`;
-  const graph = [
-    {
-      "@type": "BlogPosting",
-      "@id": `${url}#article`,
-      headline: a.title,
-      description: a.description,
-      inLanguage: "uz",
-      datePublished: a.datePublished,
-      dateModified: a.dateModified || a.datePublished,
-      author: ORG,
-      publisher: ORG,
-      mainEntityOfPage: { "@type": "WebPage", "@id": url },
-      articleSection: a.category,
-      image: `${SITE_URL}/og-image.svg`,
-    },
-    {
-      "@type": "BreadcrumbList",
-      itemListElement: [
-        { "@type": "ListItem", position: 1, name: "Bosh sahifa", item: `${SITE_URL}/` },
-        { "@type": "ListItem", position: 2, name: "Maqolalar", item: `${SITE_URL}/maqolalar` },
-        { "@type": "ListItem", position: 3, name: a.title, item: url },
-      ],
-    },
-  ];
-  if (a.faq && a.faq.length) {
-    graph.push({
-      "@type": "FAQPage",
-      mainEntity: a.faq.map((f) => ({
-        "@type": "Question",
-        name: f.q,
-        acceptedAnswer: { "@type": "Answer", text: f.a },
-      })),
-    });
-  }
-  return { "@context": "https://schema.org", "@graph": graph };
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "BlogPosting",
+        "@id": `${url}#article`,
+        headline: a.title,
+        description: a.excerpt,
+        inLanguage: "uz",
+        datePublished: a.created_at,
+        dateModified: a.updated_at || a.created_at,
+        author: { "@type": "Organization", name: a.author || "Digital CFO" },
+        publisher: ORG,
+        mainEntityOfPage: { "@type": "WebPage", "@id": url },
+        articleSection: a.category,
+        image: a.cover_image || `${SITE_URL}/og-image.svg`,
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Bosh sahifa", item: `${SITE_URL}/` },
+          { "@type": "ListItem", position: 2, name: "Maqolalar", item: `${SITE_URL}/maqolalar` },
+          { "@type": "ListItem", position: 3, name: a.title, item: url },
+        ],
+      },
+    ],
+  };
 }
 
 // Maqolalar ro'yxati sahifasi uchun: CollectionPage + ItemList.

@@ -15,3 +15,12 @@ server/data/stats.json
 server/data/stats.json.tmp
 server/data/arizalar.json
 server/data/arizalar.json.tmp
+
+# Maqolalar DB (SQLite) — runtime holati, deploy'da saqlanmaydi
+server/data/articles.db
+server/data/articles.db-shm
+server/data/articles.db-wal
+
+# Admin yuklagan muqova rasmlari — runtime
+server/media/*
+!server/media/.gitkeep

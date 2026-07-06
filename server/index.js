@@ -8,6 +8,9 @@ import fs from "node:fs";
 import { fileURLToPath } from "node:url";
 import { execFile } from "node:child_process";
 import { timingSafeEqual } from "node:crypto";
+import db, { Articles, cleanHtml, uniqueSlug } from "./db.js";
+import { loginHandler, requireAdmin } from "./auth.js";
+import { renderArticle, renderList, buildSitemap, hasTemplate } from "./ssr.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 4000;
@@ -40,6 +43,31 @@ fs.mkdirSync(uploadDir, { recursive: true });
 const dataDir = path.join(__dirname, "data");
 fs.mkdirSync(dataDir, { recursive: true });
 const statsFile = path.join(dataDir, "stats.json");
+
+// Maqola muqova rasmlari (admin yuklaydi) — /media orqali ochiq beriladi.
+// Excel yuklamalaridan (uploads/, PII) ALOHIDA papka — mijoz fayllari oshkor bo'lmaydi.
+const mediaDir = path.join(__dirname, "media");
+fs.mkdirSync(mediaDir, { recursive: true });
+app.use("/media", express.static(mediaDir));
+
+const imageStorage = multer.diskStorage({
+  destination: (_req, _file, cb) => cb(null, mediaDir),
+  filename: (_req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase().slice(0, 8);
+    cb(null, `${Date.now()}-${Math.random().toString(36).slice(2, 8)}${ext}`);
+  },
+});
+const IMG_EXT = [".jpg", ".jpeg", ".png", ".webp", ".gif", ".svg"];
+const imageUpload = multer({
+  storage: imageStorage,
+  limits: { fileSize: 5 * 1024 * 1024, files: 1 },
+  fileFilter: (_req, file, cb) => {
+    const ok =
+      IMG_EXT.includes(path.extname(file.originalname).toLowerCase()) &&
+      file.mimetype.startsWith("image/");
+    cb(ok ? null : new Error("Faqat rasm fayllari (jpg, png, webp)"), ok);
+  },
+});
 
 const storage = multer.diskStorage({
   destination: (_req, _file, cb) => cb(null, uploadDir),
@@ -186,10 +214,13 @@ async function backupDataToTelegram() {
   const token = process.env.TELEGRAM_BOT_TOKEN;
   const chatId = process.env.TELEGRAM_CHAT_ID;
   if (!token || !chatId) return false;
+  // WAL'ni asosiy .db fayliga yozamiz — zaxira nusxasi izchil bo'lishi uchun.
+  try { db.pragma("wal_checkpoint(TRUNCATE)"); } catch { /* ignore */ }
   const targets = [
     path.join(__dirname, "leads.json"),
     path.join(dataDir, "arizalar.json"),
     path.join(dataDir, "stats.json"),
+    path.join(dataDir, "articles.db"),
   ].filter((f) => fs.existsSync(f));
   if (!targets.length) return false;
 
@@ -550,6 +581,99 @@ app.post("/api/stats", (req, res) => {
   res.json({ ok: true });
 });
 
+// ==============================================================================
+//  MAQOLALAR — public API + admin CRUD (SQLite)
+// ==============================================================================
+
+// ---- Public: faqat chop etilgan maqolalar ------------------------------------
+app.get("/api/articles", (_req, res) => {
+  res.json({ articles: Articles.listPublished() });
+});
+
+app.get("/api/articles/:slug", (req, res) => {
+  const a = Articles.getPublishedBySlug(req.params.slug);
+  if (!a) return res.status(404).json({ error: "Maqola topilmadi" });
+  res.json({ article: a });
+});
+
+// ---- Admin login (rate-limit bilan) ------------------------------------------
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Juda ko'p urinish. Birozdan so'ng qayta urinib ko'ring." },
+});
+app.post("/api/admin/login", loginLimiter, loginHandler);
+
+// ---- Admin CRUD (JWT himoyasida) ---------------------------------------------
+const VALID_STATUS = ["draft", "published"];
+
+// Kiruvchi maqola ma'lumotlarini tekshirish va tozalash.
+function parseArticleInput(body, { forId = null } = {}) {
+  const title = clean(body.title, 200);
+  if (!title) return { error: "Sarlavha majburiy" };
+  const status = VALID_STATUS.includes(body.status) ? body.status : "draft";
+  const slugBase = clean(body.slug, 200) || title;
+  const slug = uniqueSlug(slugBase, forId);
+  return {
+    data: {
+      title,
+      slug,
+      excerpt: clean(body.excerpt, 400),
+      content: cleanHtml(body.content || ""),
+      category: clean(body.category, 80),
+      icon: clean(body.icon, 40) || "book",
+      icon_color: clean(body.icon_color, 40) || "blue",
+      cover_image: clean(body.cover_image, 500),
+      author: clean(body.author, 120) || "Digital CFO",
+      status,
+    },
+  };
+}
+
+app.get("/api/admin/articles", requireAdmin, (_req, res) => {
+  res.json({ articles: Articles.listAll() });
+});
+
+app.get("/api/admin/articles/:id", requireAdmin, (req, res) => {
+  const a = Articles.getById(Number(req.params.id));
+  if (!a) return res.status(404).json({ error: "Maqola topilmadi" });
+  res.json({ article: a });
+});
+
+app.post("/api/admin/articles", requireAdmin, (req, res) => {
+  const { data, error } = parseArticleInput(req.body || {});
+  if (error) return res.status(400).json({ error });
+  const created = Articles.insert(data);
+  console.log("📝 Yangi maqola:", created.slug, `(${created.status})`);
+  res.json({ ok: true, article: created });
+});
+
+app.put("/api/admin/articles/:id", requireAdmin, (req, res) => {
+  const id = Number(req.params.id);
+  if (!Articles.getById(id)) return res.status(404).json({ error: "Maqola topilmadi" });
+  const { data, error } = parseArticleInput(req.body || {}, { forId: id });
+  if (error) return res.status(400).json({ error });
+  const updated = Articles.update(id, data);
+  console.log("✏️ Maqola tahrirlandi:", updated.slug, `(${updated.status})`);
+  res.json({ ok: true, article: updated });
+});
+
+app.delete("/api/admin/articles/:id", requireAdmin, (req, res) => {
+  const id = Number(req.params.id);
+  if (!Articles.getById(id)) return res.status(404).json({ error: "Maqola topilmadi" });
+  Articles.remove(id);
+  console.log("🗑️ Maqola o'chirildi:", id);
+  res.json({ ok: true });
+});
+
+// ---- Rasm yuklash (maqola muqovasi) ------------------------------------------
+app.post("/api/admin/upload", requireAdmin, imageUpload.single("image"), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: "Rasm yuklanmadi" });
+  res.json({ ok: true, url: `/media/${req.file.filename}` });
+});
+
 // ---- Multer/umumiy xatolarni chiroyli qaytarish ------------------------------
 app.use((err, _req, res, _next) => {
   if (err) {
@@ -565,8 +689,48 @@ app.use((err, _req, res, _next) => {
 // ---- Production'da tayyor client'ni serve qilish ------------------------------
 const clientDist = path.join(__dirname, "..", "client", "dist");
 if (fs.existsSync(clientDist)) {
-  // extensions:["html"] — toza URL beradi: /maqolalar -> maqolalar.html,
-  // /article/<slug> -> article/<slug>.html (prerender qilingan SEO sahifalar).
+  // --- SEO: maqola sahifalarini DB'dan server-side render qilamiz -------------
+  // (static'dan OLDIN — robotlar to'liq matnni JS'siz ko'radi).
+
+  // Dinamik sitemap — DB'dagi published maqolalar bilan.
+  app.get("/sitemap.xml", (_req, res) => {
+    try {
+      res.type("application/xml").send(buildSitemap(Articles.listPublished()));
+    } catch {
+      res.sendFile(path.join(clientDist, "sitemap.xml"));
+    }
+  });
+
+  // Ro'yxat sahifasi.
+  app.get("/maqolalar", (_req, res, next) => {
+    if (!hasTemplate()) return next();
+    try {
+      res.type("html").send(renderList(Articles.listPublished()));
+    } catch (e) {
+      console.warn("⚠️ SSR (ro'yxat) xatosi:", e.message);
+      next();
+    }
+  });
+
+  // Texnik talabdagi /maqolalar/<slug> — asosiy /article/<slug> ga yo'naltiramiz.
+  app.get("/maqolalar/:slug", (req, res) =>
+    res.redirect(301, `/article/${req.params.slug}`)
+  );
+
+  // Bitta maqola sahifasi.
+  app.get("/article/:slug", (req, res, next) => {
+    if (!hasTemplate()) return next();
+    const a = Articles.getPublishedBySlug(req.params.slug);
+    if (!a) return next(); // topilmasa — SPA 404 sahifasi ko'rsatadi
+    try {
+      res.type("html").send(renderArticle(a));
+    } catch (e) {
+      console.warn("⚠️ SSR (maqola) xatosi:", e.message);
+      next();
+    }
+  });
+
+  // extensions:["html"] — toza URL beradi (maxfiylik.html, shartlar.html).
   app.use(express.static(clientDist, { extensions: ["html"] }));
   // Qolgan (client-side) yo'llar uchun SPA fallback.
   app.get("*", (_req, res) =>

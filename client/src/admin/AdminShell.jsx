@@ -1,0 +1,45 @@
+import { Link, useNavigate } from "react-router-dom";
+import { BarChart3, LogOut, ExternalLink } from "lucide-react";
+import { auth } from "@/lib/api";
+
+// Admin sahifalari uchun umumiy header + konteyner.
+export default function AdminShell({ children }) {
+  const nav = useNavigate();
+  const logout = () => {
+    auth.clear();
+    nav("/admin/login", { replace: true });
+  };
+  return (
+    <div className="min-h-screen bg-softbg dark:bg-[#070b16]">
+      <header className="sticky top-0 z-50 border-b border-navy/[.08] bg-white/90 backdrop-blur-xl dark:border-white/[.08] dark:bg-[#0b1220]/90">
+        <div className="mx-auto flex max-w-[1100px] items-center justify-between px-5 py-3">
+          <Link to="/admin" className="flex items-center gap-2.5">
+            <div className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-navy text-emerald-400">
+              <BarChart3 className="h-5 w-5" />
+            </div>
+            <span className="font-heading text-[17px] font-bold text-navy dark:text-white">
+              Admin <span className="text-azure">panel</span>
+            </span>
+          </Link>
+          <div className="flex items-center gap-2">
+            <a
+              href="/maqolalar"
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-[13.5px] font-medium text-slate-500 transition-colors hover:text-navy dark:text-slate-300 dark:hover:text-white"
+            >
+              <ExternalLink className="h-4 w-4" /> Saytda ko'rish
+            </a>
+            <button
+              onClick={logout}
+              className="flex items-center gap-1.5 rounded-lg border border-navy/15 px-3 py-2 text-[13.5px] font-medium text-slate-600 transition-colors hover:border-red-400 hover:text-red-500 dark:border-white/15 dark:text-slate-300"
+            >
+              <LogOut className="h-4 w-4" /> Chiqish
+            </button>
+          </div>
+        </div>
+      </header>
+      <main className="mx-auto max-w-[1100px] px-5 py-8">{children}</main>
+    </div>
+  );
+}

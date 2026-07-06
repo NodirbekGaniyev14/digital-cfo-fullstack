@@ -1,33 +1,59 @@
 import { Link } from "react-router-dom";
 import {
-  LineChart, Droplets, ShieldAlert, TrendingUp, Landmark,
-  FileSpreadsheet, Clock, ArrowRight, BookOpen,
+  LineChart, Droplets, ShieldAlert, TrendingUp, Landmark, FileSpreadsheet,
+  BookOpen, PieChart, Coins, Calculator, Percent, Wallet,
+  Clock, ArrowRight,
 } from "lucide-react";
 import { timeAgoUz } from "@/data/articles";
 
-// Maqola ikonkasi (data'dagi `icon` matni → lucide komponenti).
+// Ikonka kaliti (DB'dagi `icon`) → lucide komponenti.
 const ICONS = {
-  LineChart, Droplets, ShieldAlert, TrendingUp, Landmark, FileSpreadsheet,
+  chart: LineChart, droplet: Droplets, shield: ShieldAlert, "trending-up": TrendingUp,
+  bank: Landmark, file: FileSpreadsheet, book: BookOpen, pie: PieChart,
+  coins: Coins, calculator: Calculator, percent: Percent, wallet: Wallet,
 };
+
+// Admin editor uchun ikonka variantlari.
+export const ICON_OPTIONS = [
+  { key: "chart", label: "Grafik" }, { key: "droplet", label: "Tomchi" },
+  { key: "shield", label: "Qalqon" }, { key: "trending-up", label: "O'sish" },
+  { key: "bank", label: "Bank" }, { key: "file", label: "Hujjat" },
+  { key: "book", label: "Kitob" }, { key: "pie", label: "Doira diagramma" },
+  { key: "coins", label: "Tangalar" }, { key: "calculator", label: "Kalkulyator" },
+  { key: "percent", label: "Foiz" }, { key: "wallet", label: "Hamyon" },
+];
+
+// Rang kaliti (DB'dagi `icon_color`) → gradient. Server SSR bilan bir xil palitra.
+const COLORS = {
+  blue: ["#3b82f6", "#2563eb"], sky: ["#06b6d4", "#3b82f6"], red: ["#ef4444", "#f97316"],
+  green: ["#10b981", "#14b8a6"], violet: ["#6366f1", "#8b5cf6"], amber: ["#f59e0b", "#ef4444"],
+  teal: ["#14b8a6", "#0ea5e9"], slate: ["#64748b", "#334155"],
+};
+export const COLOR_OPTIONS = [
+  { key: "blue", label: "Ko'k" }, { key: "sky", label: "Moviy" },
+  { key: "red", label: "Qizil" }, { key: "green", label: "Yashil" },
+  { key: "violet", label: "Binafsha" }, { key: "amber", label: "Sariq" },
+  { key: "teal", label: "Feruza" }, { key: "slate", label: "Kulrang" },
+];
 
 export function ArticleIcon({ name, className }) {
   const Cmp = ICONS[name] || BookOpen;
   return <Cmp className={className} />;
 }
 
-// Kategoriya bo'yicha gradient rang (rasm o'rniga chiroyli, tez yuklanadigan qopqoq).
-const CAT_GRADIENT = {
-  Asoslar: ["#3b82f6", "#10b981"],
-  Likvidlik: ["#06b6d4", "#3b82f6"],
-  Risk: ["#ef4444", "#f97316"],
-  Rentabellik: ["#10b981", "#14b8a6"],
-  Barqarorlik: ["#6366f1", "#8b5cf6"],
-  Amaliyot: ["#0ea5e9", "#3b82f6"],
-};
-
-// Maqola qopqog'i (thumbnail) — gradient fon + kategoriya ikonkasi.
+// Maqola qopqog'i (thumbnail) — gradient fon + ikonka. cover_image bo'lsa — rasm.
 export function ArticleCover({ article, className, iconClassName = "h-7 w-7" }) {
-  const [from, to] = CAT_GRADIENT[article.category] || ["#3b82f6", "#10b981"];
+  if (article.cover_image) {
+    return (
+      <img
+        src={article.cover_image}
+        alt={article.title}
+        loading="lazy"
+        className={`object-cover ${className || ""}`}
+      />
+    );
+  }
+  const [from, to] = COLORS[article.icon_color] || COLORS.blue;
   return (
     <div
       className={`flex items-center justify-center text-white ${className || ""}`}
@@ -39,8 +65,7 @@ export function ArticleCover({ article, className, iconClassName = "h-7 w-7" }) 
   );
 }
 
-// Gorizontal ro'yxat qatori (/maqolalar) — jch.uza.uz uslubi:
-// [rasm] · vaqt + kategoriya, sarlavha, qisqa preview.
+// Gorizontal ro'yxat qatori (/maqolalar) — jch.uza.uz uslubi.
 export function ArticleRow({ article }) {
   return (
     <Link
@@ -54,9 +79,13 @@ export function ArticleRow({ article }) {
       />
       <div className="min-w-0 flex-1">
         <div className="mb-1 flex items-center gap-2 text-[12.5px] text-slate-400">
-          <span>{timeAgoUz(article.datePublished)}</span>
-          <span className="text-slate-300 dark:text-slate-600">·</span>
-          <span className="font-semibold text-azure">{article.category}</span>
+          <span>{timeAgoUz(article.created_at)}</span>
+          {article.category && (
+            <>
+              <span className="text-slate-300 dark:text-slate-600">·</span>
+              <span className="font-semibold text-azure">{article.category}</span>
+            </>
+          )}
         </div>
         <h3 className="line-clamp-2 font-heading text-[16px] font-bold leading-snug text-navy transition-colors group-hover:text-azure dark:text-white sm:text-[17.5px]">
           {article.title}
@@ -80,9 +109,8 @@ export default function ArticleCard({ article }) {
       <ArticleCover article={article} className="h-[120px] w-full" iconClassName="h-9 w-9" />
       <div className="flex flex-1 flex-col p-5">
         <div className="mb-2 flex items-center gap-2 text-[12.5px] text-slate-400">
-          <span>{timeAgoUz(article.datePublished)}</span>
-          <span>·</span>
-          <span className="font-semibold text-azure">{article.category}</span>
+          <span>{timeAgoUz(article.created_at)}</span>
+          {article.category && <><span>·</span><span className="font-semibold text-azure">{article.category}</span></>}
         </div>
         <h3 className="mb-2 line-clamp-2 font-heading text-[17px] font-bold leading-snug text-navy transition-colors group-hover:text-azure dark:text-white">
           {article.title}
@@ -90,9 +118,6 @@ export default function ArticleCard({ article }) {
         <p className="line-clamp-2 flex-1 text-[14px] leading-relaxed text-slate-500 dark:text-slate-400">
           {article.excerpt}
         </p>
-        <div className="mt-4 flex items-center gap-1.5 text-[13px] text-slate-400">
-          <Clock className="h-3.5 w-3.5" /> {article.readingMinutes} daqiqa
-        </div>
       </div>
     </Link>
   );
