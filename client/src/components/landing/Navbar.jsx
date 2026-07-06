@@ -60,8 +60,8 @@ export default function Navbar() {
           : "border-transparent bg-transparent"
       )}
     >
-      <div className="mx-auto flex max-w-[1200px] items-center justify-between gap-5">
-        <Link to="/" className="flex items-center gap-2.5">
+      <div className="mx-auto flex max-w-[1200px] items-center justify-between gap-3">
+        <Link to="/" className="flex flex-none items-center gap-2.5">
           <div className="flex h-10 w-10 flex-none items-center justify-center rounded-[11px] bg-navy text-emerald-500 shadow-[0_6px_16px_rgba(15,23,42,.25)]">
             <BarChart3 className="h-[21px] w-[21px]" />
           </div>
@@ -70,18 +70,18 @@ export default function Navbar() {
           </span>
         </Link>
 
-        <div className="hidden items-center gap-7 lg:flex">
+        <div className="hidden items-center gap-x-[18px] xl:flex">
           {NAV_LINKS.map((l) => (
             <NavItem
               key={l.key}
               link={{ ...l, label: t(l.key) }}
               isHome={isHome}
-              className="text-[14.5px] font-medium text-slate-600 transition-colors hover:text-navy dark:text-slate-300 dark:hover:text-white"
+              className="whitespace-nowrap text-[13.5px] font-medium text-slate-600 transition-colors hover:text-navy dark:text-slate-300 dark:hover:text-white"
             />
           ))}
         </div>
 
-        <div className="hidden items-center gap-2.5 lg:flex">
+        <div className="hidden flex-none items-center gap-2 xl:flex">
           <LangDropdown lang={lang} setLang={setLang} />
           <ThemeToggle />
           <Button variant="navy" size="sm" onClick={() => setContactOpen(true)}>
@@ -89,7 +89,7 @@ export default function Navbar() {
           </Button>
         </div>
 
-        <div className="flex items-center gap-2 lg:hidden">
+        <div className="flex items-center gap-2 xl:hidden">
           <LangDropdown lang={lang} setLang={setLang} />
           <ThemeToggle />
           <button
@@ -108,7 +108,7 @@ export default function Navbar() {
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
-            className="mt-3.5 flex flex-col gap-1 rounded-2xl border border-navy/[.08] bg-white/95 dark:bg-[#0d182b]/95 p-3.5 shadow-[0_20px_40px_rgba(15,23,42,.12)] backdrop-blur-xl lg:hidden"
+            className="mt-3.5 flex flex-col gap-1 rounded-2xl border border-navy/[.08] bg-white/95 dark:bg-[#0d182b]/95 p-3.5 shadow-[0_20px_40px_rgba(15,23,42,.12)] backdrop-blur-xl xl:hidden"
           >
             {NAV_LINKS.map((l) => (
               <NavItem
