@@ -27,6 +27,17 @@ export function formatDateUz(iso) {
   return `${d.getUTCDate()}-${MONTHS_UZ[d.getUTCMonth()]}, ${d.getUTCFullYear()}`;
 }
 
+// "X kun oldin" ko'rinishidagi nisbiy vaqt (jch.uza.uz uslubi).
+export function timeAgoUz(iso) {
+  const days = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
+  if (days <= 0) return "bugun";
+  if (days === 1) return "kecha";
+  if (days < 7) return `${days} kun oldin`;
+  if (days < 30) return `${Math.floor(days / 7)} hafta oldin`;
+  if (days < 365) return `${Math.floor(days / 30)} oy oldin`;
+  return `${Math.floor(days / 365)} yil oldin`;
+}
+
 // CTA — har maqola oxirida takrorlanadigan blok (HTML).
 const CTA = `
 <div class="article-cta">
@@ -48,8 +59,8 @@ export const ARTICLES = [
     ],
     category: "Asoslar",
     icon: "LineChart",
-    datePublished: "2026-01-12",
-    dateModified: "2026-01-12",
+    datePublished: "2026-07-04",
+    dateModified: "2026-07-04",
     readingMinutes: 7,
     excerpt:
       "Moliyaviy tahlil — bu korxona raqamlarini «sog'liq tekshiruvi»ga aylantirish. Nima ekanligini, turlarini va nega har bir biznesga kerakligini tushuntiramiz.",
@@ -124,8 +135,8 @@ ${CTA}
     ],
     category: "Likvidlik",
     icon: "Droplets",
-    datePublished: "2026-01-15",
-    dateModified: "2026-01-15",
+    datePublished: "2026-06-30",
+    dateModified: "2026-06-30",
     readingMinutes: 8,
     excerpt:
       "Likvidlik — korxonaning qarzlarini o'z vaqtida to'lay olish qobiliyati. Uchta asosiy koeffitsient, ularning formulalari va me'yoriy qiymatlari.",
@@ -211,8 +222,8 @@ ${CTA}
     ],
     category: "Risk",
     icon: "ShieldAlert",
-    datePublished: "2026-01-18",
-    dateModified: "2026-01-18",
+    datePublished: "2026-06-24",
+    dateModified: "2026-06-24",
     readingMinutes: 7,
     excerpt:
       "Altman Z-Score — bitta raqam bilan bankrotlik xavfini baholaydigan klassik model. Formulasi, chegaralari va o'qish usuli.",
@@ -284,8 +295,8 @@ ${CTA}
     ],
     category: "Rentabellik",
     icon: "TrendingUp",
-    datePublished: "2026-01-21",
-    dateModified: "2026-01-21",
+    datePublished: "2026-06-19",
+    dateModified: "2026-06-19",
     readingMinutes: 8,
     excerpt:
       "Rentabellik — biznes har bir so'mdan qancha foyda olayotganini ko'rsatadi. ROA, ROE va ROS: formulalar, farqlar va me'yoriy qiymatlar.",
@@ -361,8 +372,8 @@ ${CTA}
     ],
     category: "Barqarorlik",
     icon: "Landmark",
-    datePublished: "2026-01-24",
-    dateModified: "2026-01-24",
+    datePublished: "2026-06-11",
+    dateModified: "2026-06-11",
     readingMinutes: 7,
     excerpt:
       "Moliyaviy barqarorlik — korxona uzoq muddatda qanchalik mustahkam turishini ko'rsatadi. Avtonomiya va qarz koeffitsientlari bilan tanishamiz.",
@@ -439,8 +450,8 @@ ${CTA}
     ],
     category: "Amaliyot",
     icon: "FileSpreadsheet",
-    datePublished: "2026-01-27",
-    dateModified: "2026-01-27",
+    datePublished: "2026-06-03",
+    dateModified: "2026-06-03",
     readingMinutes: 8,
     excerpt:
       "1C dan chiqarilgan Shakl 1 va Shakl 2 hisobotlari — to'liq moliyaviy tahlil uchun yetarli. Ulardan qanday foydalanishni ko'rsatamiz.",

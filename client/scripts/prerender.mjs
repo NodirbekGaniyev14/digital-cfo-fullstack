@@ -15,7 +15,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { ARTICLES, SITE_URL, formatDateUz } from "../src/data/articles.js";
+import { ARTICLES, SITE_URL, formatDateUz, timeAgoUz } from "../src/data/articles.js";
 import { articleJsonLd, articlesListJsonLd } from "../src/lib/schema.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -134,7 +134,7 @@ for (const a of ARTICLES) {
 // --- /maqolalar ro'yxat sahifasi --------------------------------------------
 const listItems = ARTICLES.map(
   (a) =>
-    `<li style="margin-bottom:18px"><a href="/article/${a.slug}" style="font-size:19px;font-weight:700;color:#0f172a;text-decoration:none">${a.title}</a><p style="color:#475569;margin:6px 0 0">${a.excerpt}</p></li>`
+    `<li style="margin-bottom:18px"><span style="color:#64748b;font-size:13px">${timeAgoUz(a.datePublished)} · ${a.category}</span><br><a href="/article/${a.slug}" style="font-size:19px;font-weight:700;color:#0f172a;text-decoration:none">${a.title}</a><p style="color:#475569;margin:6px 0 0">${a.excerpt}</p></li>`
 ).join("");
 const listRoot = `${SHELL_HEADER}<main style="max-width:820px;margin:0 auto;padding:0 24px 40px"><h1 style="font-size:36px;font-weight:800;color:#0f172a">Moliyaviy tahlil bo'yicha maqolalar</h1><p style="color:#475569;font-size:17px;margin:10px 0 28px">Likvidlik, rentabellik, moliyaviy barqarorlik va bankrotlik xavfi bo'yicha amaliy qo'llanmalar — oddiy tilda, formulalar va misollar bilan.</p><ul style="list-style:none;padding:0">${listItems}</ul></main>${SHELL_FOOTER}`;
 

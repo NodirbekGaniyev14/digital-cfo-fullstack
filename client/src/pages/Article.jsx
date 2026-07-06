@@ -2,10 +2,10 @@ import { useParams, Link } from "react-router-dom";
 import { Clock, ChevronRight, Send } from "lucide-react";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
-import ArticleCard, { ArticleIcon } from "@/components/ArticleCard";
+import ArticleCard, { ArticleIcon, ArticleCover } from "@/components/ArticleCard";
 import Seo from "@/lib/seo";
 import NotFound from "@/pages/NotFound";
-import { ARTICLES, getArticle, formatDateUz, BOT_URL } from "@/data/articles";
+import { ARTICLES, getArticle, formatDateUz, timeAgoUz, BOT_URL } from "@/data/articles";
 import { articleJsonLd } from "@/lib/schema";
 
 // /article/:slug — bitta maqola sahifasi.
@@ -59,11 +59,20 @@ export default function Article() {
             </h1>
             <div className="mt-4 flex flex-wrap items-center gap-4 text-[13.5px] text-slate-400">
               <time dateTime={article.datePublished}>{formatDateUz(article.datePublished)}</time>
+              <span>·</span>
+              <span>{timeAgoUz(article.datePublished)}</span>
               <span className="flex items-center gap-1.5">
                 <Clock className="h-4 w-4" /> {article.readingMinutes} daqiqa o'qish
               </span>
             </div>
           </header>
+
+          {/* Qopqoq banneri */}
+          <ArticleCover
+            article={article}
+            className="mb-8 h-[180px] w-full rounded-2xl sm:h-[240px]"
+            iconClassName="h-16 w-16 opacity-90"
+          />
 
           {/* Maqola matni (SEO uchun HTML) */}
           <div
