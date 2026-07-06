@@ -1,3 +1,4 @@
+import { Link, useLocation } from "react-router-dom";
 import { BarChart3, Mail, Phone, MapPin, Send, MessageCircle } from "lucide-react";
 import { useApp } from "@/lib/i18n";
 
@@ -7,11 +8,13 @@ const NAV_LINKS = [
   { key: "nav.services", href: "#services" },
   { key: "nav.kpi", href: "#kpi" },
   { key: "nav.pricing", href: "#pricing" },
+  { key: "nav.articles", to: "/maqolalar" },
   { key: "nav.faq", href: "#faq" },
 ];
 
 export default function Footer() {
   const { t } = useApp();
+  const isHome = useLocation().pathname === "/";
   const SERVICES = t("ft.services");
   return (
     <footer className="bg-[#0b1220] px-6 pb-[30px] pt-16 text-slate-300">
@@ -34,11 +37,17 @@ export default function Footer() {
           <div>
             <h4 className="mb-4 font-heading text-[15px] font-bold text-white">{t("ft.links")}</h4>
             <div className="flex flex-col gap-2.5">
-              {NAV_LINKS.map((l) => (
-                <a key={l.href} href={l.href} className="text-[14px] text-slate-400 transition-colors hover:text-white">
-                  {t(l.key)}
-                </a>
-              ))}
+              {NAV_LINKS.map((l) =>
+                l.to ? (
+                  <Link key={l.key} to={l.to} className="text-[14px] text-slate-400 transition-colors hover:text-white">
+                    {t(l.key)}
+                  </Link>
+                ) : (
+                  <a key={l.key} href={isHome ? l.href : `/${l.href}`} className="text-[14px] text-slate-400 transition-colors hover:text-white">
+                    {t(l.key)}
+                  </a>
+                )
+              )}
             </div>
           </div>
 

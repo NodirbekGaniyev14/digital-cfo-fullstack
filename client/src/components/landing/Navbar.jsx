@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { BarChart3, Menu, X, Globe, ChevronDown, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -6,6 +7,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 import { useApp, LANGS } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
+// `href` — bosh sahifadagi bo'lim (anchor). `to` — alohida route (React Router).
 const NAV_LINKS = [
   { key: "nav.home", href: "#hero" },
   { key: "nav.how", href: "#how-it-works" },
@@ -13,12 +15,32 @@ const NAV_LINKS = [
   { key: "nav.services", href: "#services" },
   { key: "nav.kpi", href: "#kpi" },
   { key: "nav.pricing", href: "#pricing" },
+  { key: "nav.articles", to: "/maqolalar" },
   { key: "nav.faq", href: "#faq" },
-  { key: "nav.demo", href: "#dashboard" },
 ];
+
+// Bo'lim havolasi bosh sahifadan tashqarida ham ishlashi uchun:
+// bosh sahifada — oddiy anchor; boshqa sahifada — "/#bo'lim" ga o'tadi.
+function NavItem({ link, isHome, className, onClick }) {
+  if (link.to) {
+    return (
+      <Link to={link.to} className={className} onClick={onClick}>
+        {link.label}
+      </Link>
+    );
+  }
+  const href = isHome ? link.href : `/${link.href}`;
+  return (
+    <a href={href} className={className} onClick={onClick}>
+      {link.label}
+    </a>
+  );
+}
 
 export default function Navbar() {
   const { t, lang, setLang, setContactOpen } = useApp();
+  const { pathname } = useLocation();
+  const isHome = pathname === "/";
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -39,24 +61,23 @@ export default function Navbar() {
       )}
     >
       <div className="mx-auto flex max-w-[1200px] items-center justify-between gap-5">
-        <a href="#hero" className="flex items-center gap-2.5">
+        <Link to="/" className="flex items-center gap-2.5">
           <div className="flex h-10 w-10 flex-none items-center justify-center rounded-[11px] bg-navy text-emerald-500 shadow-[0_6px_16px_rgba(15,23,42,.25)]">
             <BarChart3 className="h-[21px] w-[21px]" />
           </div>
           <span className="font-heading text-xl font-bold tracking-tight">
             Digital <span className="text-azure">CFO</span>
           </span>
-        </a>
+        </Link>
 
         <div className="hidden items-center gap-7 lg:flex">
           {NAV_LINKS.map((l) => (
-            <a
-              key={l.href}
-              href={l.href}
+            <NavItem
+              key={l.key}
+              link={{ ...l, label: t(l.key) }}
+              isHome={isHome}
               className="text-[14.5px] font-medium text-slate-600 transition-colors hover:text-navy dark:text-slate-300 dark:hover:text-white"
-            >
-              {t(l.key)}
-            </a>
+            />
           ))}
         </div>
 
@@ -90,14 +111,13 @@ export default function Navbar() {
             className="mt-3.5 flex flex-col gap-1 rounded-2xl border border-navy/[.08] bg-white/95 dark:bg-[#0d182b]/95 p-3.5 shadow-[0_20px_40px_rgba(15,23,42,.12)] backdrop-blur-xl lg:hidden"
           >
             {NAV_LINKS.map((l) => (
-              <a
-                key={l.href}
-                href={l.href}
+              <NavItem
+                key={l.key}
+                link={{ ...l, label: t(l.key) }}
+                isHome={isHome}
                 onClick={() => setOpen(false)}
                 className="rounded-[10px] px-3.5 py-3 text-[15px] font-semibold text-navy dark:text-slate-100"
-              >
-                {t(l.key)}
-              </a>
+              />
             ))}
             <Button variant="navy" className="mt-1.5"
               onClick={() => { setOpen(false); setContactOpen(true); }}>

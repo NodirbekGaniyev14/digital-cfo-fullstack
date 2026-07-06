@@ -16,7 +16,8 @@ const DICT = {
   uz: {
     "nav.home": "Bosh sahifa", "nav.how": "Qanday ishlaydi", "nav.free": "Bepul tahlil",
     "nav.services": "Xizmatlar", "nav.kpi": "KPI Tahlil", "nav.pricing": "Narxlar",
-    "nav.faq": "FAQ", "nav.demo": "Demo", "nav.contact": "Biz bilan bog'lanish",
+    "nav.faq": "FAQ", "nav.demo": "Demo", "nav.articles": "Maqolalar",
+    "nav.contact": "Biz bilan bog'lanish",
 
     "modal.title": "Mutaxassis bilan bog'lanish",
     "modal.heroTitle": "Digital CFO — biznesingizning AI moliyaviy direktori.",
@@ -174,7 +175,8 @@ const DICT = {
   ru: {
     "nav.home": "Главная", "nav.how": "Как работает", "nav.free": "Бесплатный анализ",
     "nav.services": "Услуги", "nav.kpi": "KPI анализ", "nav.pricing": "Цены",
-    "nav.faq": "FAQ", "nav.demo": "Демо", "nav.contact": "Связаться с нами",
+    "nav.faq": "FAQ", "nav.demo": "Демо", "nav.articles": "Статьи",
+    "nav.contact": "Связаться с нами",
 
     "modal.title": "Связаться со специалистом",
     "modal.heroTitle": "Digital CFO — AI финансовый директор вашего бизнеса.",
@@ -332,7 +334,8 @@ const DICT = {
   en: {
     "nav.home": "Home", "nav.how": "How it works", "nav.free": "Free analysis",
     "nav.services": "Services", "nav.kpi": "KPI Analysis", "nav.pricing": "Pricing",
-    "nav.faq": "FAQ", "nav.demo": "Demo", "nav.contact": "Contact us",
+    "nav.faq": "FAQ", "nav.demo": "Demo", "nav.articles": "Articles",
+    "nav.contact": "Contact us",
 
     "modal.title": "Contact a specialist",
     "modal.heroTitle": "Digital CFO — the AI financial director for your business.",

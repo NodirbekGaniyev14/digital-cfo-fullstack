@@ -565,7 +565,10 @@ app.use((err, _req, res, _next) => {
 // ---- Production'da tayyor client'ni serve qilish ------------------------------
 const clientDist = path.join(__dirname, "..", "client", "dist");
 if (fs.existsSync(clientDist)) {
-  app.use(express.static(clientDist));
+  // extensions:["html"] — toza URL beradi: /maqolalar -> maqolalar.html,
+  // /article/<slug> -> article/<slug>.html (prerender qilingan SEO sahifalar).
+  app.use(express.static(clientDist, { extensions: ["html"] }));
+  // Qolgan (client-side) yo'llar uchun SPA fallback.
   app.get("*", (_req, res) =>
     res.sendFile(path.join(clientDist, "index.html"))
   );
