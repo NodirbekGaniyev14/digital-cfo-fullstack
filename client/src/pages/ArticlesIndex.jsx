@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { BookOpen, Loader2 } from "lucide-react";
+import { BookOpen, Loader2, Search, Clock, Flame } from "lucide-react";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
 import { ArticleRow } from "@/components/ArticleCard";
@@ -8,9 +8,11 @@ import Seo from "@/lib/seo";
 import { getArticles } from "@/lib/api";
 import { articlesListJsonLd } from "@/lib/schema";
 
-// /maqolalar — barcha (published) maqolalar ro'yxati. API'dan yuklanadi.
+// /blog — barcha (published) maqolalar ro'yxati. Qidiruv + saralash bilan.
 export default function ArticlesIndex() {
   const [articles, setArticles] = useState(null); // null=yuklanmoqda
+  const [query, setQuery] = useState("");
+  const [sort, setSort] = useState("new"); // new | popular
 
   useEffect(() => {
     let alive = true;
@@ -19,6 +21,23 @@ export default function ArticlesIndex() {
       .catch(() => alive && setArticles([]));
     return () => { alive = false; };
   }, []);
+
+  const shown = useMemo(() => {
+    if (!articles) return [];
+    const q = query.trim().toLowerCase();
+    let list = articles;
+    if (q) {
+      list = list.filter((a) =>
+        `${a.title} ${a.excerpt} ${a.category} ${a.author}`.toLowerCase().includes(q)
+      );
+    }
+    // Tanlangan (featured) doim tepada; keyin saralash mezoni bo'yicha.
+    return [...list].sort((a, b) => {
+      if ((b.is_featured || 0) !== (a.is_featured || 0)) return (b.is_featured || 0) - (a.is_featured || 0);
+      if (sort === "popular") return (b.views || 0) - (a.views || 0);
+      return new Date(b.published_at || b.created_at) - new Date(a.published_at || a.created_at);
+    });
+  }, [articles, query, sort]);
 
   return (
     <div className="overflow-x-hidden bg-softbg dark:bg-[#070b16]">
@@ -47,24 +66,34 @@ export default function ArticlesIndex() {
       </header>
 
       <main className="mx-auto max-w-[860px] px-4 pb-24 sm:px-6">
-        <div className="mb-4 flex items-center gap-2.5">
-          <span className="h-5 w-1.5 rounded-full bg-emerald-500" />
-          <h2 className="font-heading text-[15px] font-bold uppercase tracking-wide text-navy dark:text-white">
-            Barcha maqolalar
-          </h2>
+        {/* Qidiruv + saralash */}
+        <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="relative flex-1 sm:max-w-[360px]">
+            <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Maqola qidirish…"
+              className="w-full rounded-xl border border-navy/10 bg-white py-2.5 pl-10 pr-4 text-[14.5px] outline-none focus:border-azure dark:border-white/10 dark:bg-[#0d182b] dark:text-white"
+            />
+          </div>
+          <div className="flex items-center gap-1 rounded-xl border border-navy/10 bg-white p-1 dark:border-white/10 dark:bg-[#0d182b]">
+            <SortBtn active={sort === "new"} onClick={() => setSort("new")} icon={Clock}>Yangi</SortBtn>
+            <SortBtn active={sort === "popular"} onClick={() => setSort("popular")} icon={Flame}>Ommabop</SortBtn>
+          </div>
         </div>
 
         {articles === null ? (
           <div className="flex items-center justify-center py-20 text-slate-400">
             <Loader2 className="h-6 w-6 animate-spin" />
           </div>
-        ) : articles.length === 0 ? (
+        ) : shown.length === 0 ? (
           <div className="rounded-2xl border border-navy/[.08] bg-white p-12 text-center text-slate-500 dark:border-white/[.08] dark:bg-[#0d182b] dark:text-slate-400">
-            Hozircha maqolalar yo'q.
+            {query ? `"${query}" bo'yicha hech narsa topilmadi.` : "Hozircha maqolalar yo'q."}
           </div>
         ) : (
           <div className="divide-y divide-navy/[.06] overflow-hidden rounded-2xl border border-navy/[.08] bg-white shadow-[0_2px_20px_rgba(15,23,42,.05)] dark:divide-white/[.06] dark:border-white/[.08] dark:bg-[#0d182b]">
-            {articles.map((a) => (
+            {shown.map((a) => (
               <ArticleRow key={a.slug} article={a} />
             ))}
           </div>
@@ -79,5 +108,18 @@ export default function ArticlesIndex() {
 
       <Footer />
     </div>
+  );
+}
+
+function SortBtn({ active, onClick, icon: Icon, children }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[13.5px] font-semibold transition-colors ${
+        active ? "bg-navy text-white" : "text-slate-500 hover:text-navy dark:text-slate-300 dark:hover:text-white"
+      }`}
+    >
+      <Icon className="h-4 w-4" /> {children}
+    </button>
   );
 }

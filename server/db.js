@@ -158,7 +158,8 @@ export function uniqueSlug(base, excludeId = null) {
 
 // --- So'rovlar ---
 const LIST_COLS =
-  "id, title, slug, excerpt, category, icon, icon_color, author, status, created_at, updated_at";
+  "id, title, slug, excerpt, category, icon, icon_color, cover_image, author, status, " +
+  "views, is_featured, reading_minutes, published_at, created_at, updated_at";
 
 export const Articles = {
   // Public: faqat chop etilganlar, eng yangisi tepada.

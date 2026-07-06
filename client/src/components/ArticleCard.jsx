@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import {
   LineChart, Droplets, ShieldAlert, TrendingUp, Landmark, FileSpreadsheet,
   BookOpen, PieChart, Coins, Calculator, Percent, Wallet,
-  Clock, ArrowRight,
+  Clock, ArrowRight, Eye, Star,
 } from "lucide-react";
 import { timeAgoUz } from "@/data/articles";
 
@@ -78,12 +78,23 @@ export function ArticleRow({ article }) {
         iconClassName="h-8 w-8"
       />
       <div className="min-w-0 flex-1">
-        <div className="mb-1 flex items-center gap-2 text-[12.5px] text-slate-400">
-          <span>{timeAgoUz(article.created_at)}</span>
+        <div className="mb-1 flex flex-wrap items-center gap-2 text-[12.5px] text-slate-400">
+          {article.is_featured ? (
+            <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 font-semibold text-amber-700 dark:bg-amber-500/15 dark:text-amber-400">
+              <Star className="h-3 w-3 fill-current" /> Tanlangan
+            </span>
+          ) : null}
+          <span>{timeAgoUz(article.published_at || article.created_at)}</span>
           {article.category && (
             <>
               <span className="text-slate-300 dark:text-slate-600">·</span>
               <span className="font-semibold text-azure">{article.category}</span>
+            </>
+          )}
+          {article.views > 0 && (
+            <>
+              <span className="text-slate-300 dark:text-slate-600">·</span>
+              <span className="inline-flex items-center gap-1"><Eye className="h-3.5 w-3.5" /> {article.views}</span>
             </>
           )}
         </div>

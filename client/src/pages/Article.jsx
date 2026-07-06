@@ -1,9 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Clock, ChevronRight, Send, Loader2, User } from "lucide-react";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
 import ArticleCard, { ArticleCover } from "@/components/ArticleCard";
+import ShareButtons from "@/components/ShareButtons";
+import TableOfContents from "@/components/TableOfContents";
 import Seo from "@/lib/seo";
 import NotFound from "@/pages/NotFound";
 import { formatDateUz, timeAgoUz, BOT_URL } from "@/data/articles";
@@ -16,11 +18,18 @@ function readingMinutes(html) {
   return Math.max(1, Math.round(words / 200));
 }
 
+function slugifyHeading(s, i) {
+  const base = String(s || "").toLowerCase().replace(/[^a-z0-9а-яё]+/gi, "-").replace(/^-+|-+$/g, "").slice(0, 60);
+  return `${base || "bolim"}-${i}`;
+}
+
 // /article/:slug — bitta maqola. API'dan slug bo'yicha yuklanadi.
 export default function Article() {
   const { slug } = useParams();
   const [article, setArticle] = useState(undefined); // undefined=yuklanmoqda, null=topilmadi
   const [related, setRelated] = useState([]);
+  const [toc, setToc] = useState([]);
+  const contentRef = useRef(null);
 
   useEffect(() => {
     let alive = true;
@@ -44,6 +53,19 @@ export default function Article() {
       })
       .catch(() => {});
     return () => { alive = false; };
+  }, [article]);
+
+  // Mundarija (TOC): matn render bo'lgach H2/H3 ga id beramiz va ro'yxat quramiz.
+  useEffect(() => {
+    if (!article || !contentRef.current) return setToc([]);
+    const heads = contentRef.current.querySelectorAll("h2, h3");
+    const items = [];
+    heads.forEach((h, i) => {
+      const id = slugifyHeading(h.textContent, i);
+      h.id = id;
+      items.push({ id, text: h.textContent, level: h.tagName === "H3" ? 3 : 2 });
+    });
+    setToc(items);
   }, [article]);
 
   if (article === undefined) {
@@ -73,7 +95,9 @@ export default function Article() {
       <Navbar />
 
       <article className="px-6 pt-28">
-        <div className="mx-auto max-w-[760px]">
+       <div className="mx-auto max-w-[1120px]">
+        <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_240px] lg:gap-12">
+         <div className="mx-auto max-w-[760px] lg:mx-0">
           <nav aria-label="Breadcrumb" className="mb-6 flex flex-wrap items-center gap-1.5 text-[13px] text-slate-400">
             <Link to="/" className="hover:text-azure">Bosh sahifa</Link>
             <ChevronRight className="h-3.5 w-3.5" />
@@ -102,7 +126,18 @@ export default function Article() {
               <span>{timeAgoUz(article.created_at)}</span>
               <span className="flex items-center gap-1.5"><Clock className="h-4 w-4" /> {mins} daqiqa o'qish</span>
             </div>
+            <div className="mt-5 border-t border-navy/[.06] pt-4 dark:border-white/[.06]">
+              <ShareButtons slug={article.slug} title={article.title} />
+            </div>
           </header>
+
+          {/* Mobil mundarija (desktopda yon panelda) */}
+          {toc.length > 0 && (
+            <details className="mb-6 rounded-xl border border-navy/[.08] bg-softbg/60 p-4 dark:border-white/[.08] dark:bg-white/[.03] lg:hidden">
+              <summary className="cursor-pointer font-heading text-[14px] font-bold text-navy dark:text-white">Mundarija</summary>
+              <div className="mt-3"><TableOfContents items={toc} /></div>
+            </details>
+          )}
 
           <figure className="mb-8">
             <ArticleCover
@@ -118,7 +153,7 @@ export default function Article() {
           </figure>
 
           {/* Maqola matni — serverda sanitizatsiya qilingan HTML */}
-          <div className="article-prose" dangerouslySetInnerHTML={{ __html: article.content }} />
+          <div ref={contentRef} className="article-prose" dangerouslySetInnerHTML={{ __html: article.content }} />
 
           {/* FAQ */}
           {article.faqs?.length > 0 && (
@@ -158,7 +193,19 @@ export default function Article() {
               <Send className="h-[18px] w-[18px]" /> Telegram botga o'tish
             </a>
           </div>
+         </div>
+
+         {/* Sticky mundarija + share (desktop) */}
+         <aside className="hidden lg:block">
+           <div className="sticky top-24">
+             <TableOfContents items={toc} />
+             <div className="mt-8 border-t border-navy/[.08] pt-6 dark:border-white/[.08]">
+               <ShareButtons slug={article.slug} title={article.title} />
+             </div>
+           </div>
+         </aside>
         </div>
+       </div>
       </article>
 
       {related.length > 0 && (
