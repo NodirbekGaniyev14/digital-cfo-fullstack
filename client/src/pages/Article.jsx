@@ -104,14 +104,43 @@ export default function Article() {
             </div>
           </header>
 
-          <ArticleCover
-            article={article}
-            className="mb-8 h-[180px] w-full rounded-2xl sm:h-[240px]"
-            iconClassName="h-16 w-16 opacity-90"
-          />
+          <figure className="mb-8">
+            <ArticleCover
+              article={article}
+              className="h-[180px] w-full rounded-2xl sm:h-[240px]"
+              iconClassName="h-16 w-16 opacity-90"
+            />
+            {article.cover_caption && (
+              <figcaption className="mt-2 text-center text-[13px] text-slate-400">
+                {article.cover_caption}
+              </figcaption>
+            )}
+          </figure>
 
           {/* Maqola matni — serverda sanitizatsiya qilingan HTML */}
           <div className="article-prose" dangerouslySetInnerHTML={{ __html: article.content }} />
+
+          {/* FAQ */}
+          {article.faqs?.length > 0 && (
+            <section className="mt-14">
+              <h2 className="mb-6 font-heading text-[24px] font-bold text-navy dark:text-white">
+                Ko'p so'raladigan savollar
+              </h2>
+              <div className="flex flex-col gap-3">
+                {article.faqs.map((f, i) => (
+                  <details key={i} className="group rounded-xl border border-navy/[.08] bg-softbg/60 px-5 py-4 dark:border-white/[.08] dark:bg-white/[.03]">
+                    <summary className="cursor-pointer list-none font-heading text-[16px] font-semibold text-navy marker:hidden dark:text-white">
+                      {f.question}
+                    </summary>
+                    <div
+                      className="mt-3 text-[15px] leading-relaxed text-slate-600 dark:text-slate-300"
+                      dangerouslySetInnerHTML={{ __html: f.answer }}
+                    />
+                  </details>
+                ))}
+              </div>
+            </section>
+          )}
 
           {/* Telegram CTA */}
           <div className="mt-14 rounded-2xl bg-navy px-7 py-8 text-center text-white">

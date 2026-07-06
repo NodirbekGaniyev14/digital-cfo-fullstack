@@ -1,16 +1,17 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { toast } from "sonner";
-import ReactQuill from "react-quill-new";
-import "react-quill-new/dist/quill.snow.css";
-import { ArrowLeft, Loader2, Save, Upload, X } from "lucide-react";
+import {
+  ArrowLeft, Loader2, Save, Upload, X, Plus, Trash2, ChevronDown,
+} from "lucide-react";
 import AdminShell from "./AdminShell";
+import TiptapEditor from "./TiptapEditor";
 import {
   ArticleCover, ArticleIcon, ICON_OPTIONS, COLOR_OPTIONS,
 } from "@/components/ArticleCard";
 import { adminGetArticle, adminCreate, adminUpdate, uploadImage } from "@/lib/api";
 
-const DEFAULT_CATEGORIES = ["Asoslar", "Likvidlik", "Risk", "Rentabellik", "Barqarorlik", "Amaliyot"];
+const DEFAULT_CATEGORIES = ["Asoslar", "Likvidlik", "Risk", "Rentabellik", "Barqarorlik", "Amaliyot", "CFO", "IFRS", "KPI", "Budget", "Case Study"];
 
 // Oddiy slug (server saqlashda baribir unikal qiladi).
 function slugify(s) {
@@ -22,20 +23,12 @@ function slugify(s) {
     .slice(0, 80);
 }
 
-const QUILL_MODULES = {
-  toolbar: [
-    [{ header: [2, 3, false] }],
-    ["bold", "italic", "underline"],
-    [{ list: "ordered" }, { list: "bullet" }],
-    ["blockquote", "link"],
-    ["clean"],
-  ],
-};
-
 const empty = {
   title: "", slug: "", excerpt: "", content: "", category: "",
-  icon: "chart", icon_color: "blue", cover_image: "", author: "Digital CFO",
-  status: "draft",
+  icon: "chart", icon_color: "blue", cover_image: "", cover_alt: "", cover_caption: "",
+  author: "Digital CFO", status: "draft", published_at: "", is_featured: 0,
+  seo_title: "", seo_description: "", focus_keyword: "", canonical_url: "",
+  robots_index: 1, robots_follow: 1, tags: "", faqs: [],
 };
 
 // /admin/articles/new va /admin/articles/:id/edit
@@ -86,9 +79,18 @@ export default function AdminEditor() {
     }
   };
 
+  // FAQ builder
+  const addFaq = () => set("faqs", [...(form.faqs || []), { question: "", answer: "" }]);
+  const updateFaq = (i, k, v) =>
+    set("faqs", form.faqs.map((f, idx) => (idx === i ? { ...f, [k]: v } : f)));
+  const removeFaq = (i) => set("faqs", form.faqs.filter((_, idx) => idx !== i));
+
   const save = async (statusOverride) => {
     if (!form.title.trim()) return toast.error("Sarlavha majburiy");
     const payload = { ...form, status: statusOverride || form.status };
+    if (payload.status === "scheduled" && !payload.published_at) {
+      return toast.error("Rejalashtirish uchun sana/vaqt tanlang");
+    }
     setBusy(true);
     try {
       if (isEdit) await adminUpdate(Number(id), payload);
@@ -150,16 +152,104 @@ export default function AdminEditor() {
           </Field>
 
           <Field label="Matn">
-            <div className="admin-quill rounded-xl border border-navy/15 dark:border-white/15">
-              <ReactQuill
-                theme="snow"
-                value={form.content}
-                onChange={(v) => set("content", v)}
-                modules={QUILL_MODULES}
-                placeholder="Maqola matnini yozing…"
-              />
-            </div>
+            <TiptapEditor value={form.content} onChange={(v) => set("content", v)} />
           </Field>
+
+          {/* FAQ builder — Google FAQ Schema uchun */}
+          <div className="rounded-2xl border border-navy/[.08] bg-white p-5 dark:border-white/[.08] dark:bg-[#0d182b]">
+            <div className="mb-3 flex items-center justify-between">
+              <h3 className="font-heading text-[15px] font-bold text-navy dark:text-white">
+                FAQ (savol-javob)
+              </h3>
+              <button
+                type="button"
+                onClick={addFaq}
+                className="flex items-center gap-1.5 rounded-lg bg-navy/[.06] px-3 py-1.5 text-[13px] font-semibold text-navy transition-colors hover:bg-navy/10 dark:bg-white/[.08] dark:text-white"
+              >
+                <Plus className="h-4 w-4" /> Savol qo'shish
+              </button>
+            </div>
+            {(!form.faqs || form.faqs.length === 0) ? (
+              <p className="text-[13px] text-slate-400">
+                FAQ qo'shsangiz, Google qidiruvda "rich results" chiqishi mumkin.
+              </p>
+            ) : (
+              <div className="space-y-3">
+                {form.faqs.map((f, i) => (
+                  <div key={i} className="rounded-xl border border-navy/[.08] p-3 dark:border-white/[.08]">
+                    <div className="flex items-center gap-2">
+                      <input
+                        value={f.question}
+                        onChange={(e) => updateFaq(i, "question", e.target.value)}
+                        placeholder={`Savol ${i + 1}`}
+                        className="flex-1 rounded-lg border border-navy/15 bg-transparent px-3 py-2 text-[14px] font-semibold outline-none focus:border-azure dark:border-white/15 dark:text-white"
+                      />
+                      <button type="button" onClick={() => removeFaq(i)} className="rounded-lg p-2 text-slate-400 hover:text-red-500" title="O'chirish">
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                    <textarea
+                      value={f.answer}
+                      onChange={(e) => updateFaq(i, "answer", e.target.value)}
+                      placeholder="Javob"
+                      rows={2}
+                      className="mt-2 w-full resize-y rounded-lg border border-navy/15 bg-transparent px-3 py-2 text-[14px] outline-none focus:border-azure dark:border-white/15 dark:text-white"
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* SEO */}
+          <div className="rounded-2xl border border-navy/[.08] bg-white p-5 dark:border-white/[.08] dark:bg-[#0d182b]">
+            <h3 className="mb-3 font-heading text-[15px] font-bold text-navy dark:text-white">SEO</h3>
+            <Field label="SEO sarlavha (title)" hint={`${(form.seo_title || form.title).length}/60 — bo'sh bo'lsa sarlavha ishlatiladi`}>
+              <input
+                value={form.seo_title}
+                onChange={(e) => set("seo_title", e.target.value)}
+                className="w-full rounded-xl border border-navy/15 bg-transparent px-4 py-2.5 text-[14px] outline-none focus:border-azure dark:border-white/15 dark:text-white"
+                placeholder="Qidiruvda ko'rinadigan sarlavha"
+              />
+            </Field>
+            <Field label="Meta tavsif (description)" hint={`${(form.seo_description || form.excerpt).length}/160`}>
+              <textarea
+                value={form.seo_description}
+                onChange={(e) => set("seo_description", e.target.value)}
+                rows={2}
+                className="w-full resize-y rounded-xl border border-navy/15 bg-transparent px-4 py-2.5 text-[14px] outline-none focus:border-azure dark:border-white/15 dark:text-white"
+                placeholder="Qidiruv natijasidagi qisqa tavsif"
+              />
+            </Field>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Field label="Focus keyword">
+                <input
+                  value={form.focus_keyword}
+                  onChange={(e) => set("focus_keyword", e.target.value)}
+                  className="w-full rounded-xl border border-navy/15 bg-transparent px-4 py-2.5 text-[14px] outline-none focus:border-azure dark:border-white/15 dark:text-white"
+                  placeholder="masalan: likvidlik"
+                />
+              </Field>
+              <Field label="Canonical URL (ixtiyoriy)">
+                <input
+                  value={form.canonical_url}
+                  onChange={(e) => set("canonical_url", e.target.value)}
+                  className="w-full rounded-xl border border-navy/15 bg-transparent px-4 py-2.5 text-[13px] outline-none focus:border-azure dark:border-white/15 dark:text-white"
+                  placeholder="https://…"
+                />
+              </Field>
+            </div>
+            <div className="mt-1 flex gap-5">
+              <Toggle label="Index (Google'ga ko'rinsin)" on={form.robots_index === 1} onChange={(v) => set("robots_index", v ? 1 : 0)} />
+              <Toggle label="Follow (havolalarga ergashsin)" on={form.robots_follow === 1} onChange={(v) => set("robots_follow", v ? 1 : 0)} />
+            </div>
+            {/* Google snippet preview */}
+            <div className="mt-4 rounded-xl border border-navy/[.08] bg-softbg/60 p-3 dark:border-white/[.08] dark:bg-white/[.03]">
+              <p className="truncate text-[15px] text-[#1a0dab] dark:text-[#8ab4f8]">{form.seo_title || form.title || "Sarlavha"}</p>
+              <p className="truncate text-[12.5px] text-emerald-700 dark:text-emerald-500">digitalcfo.uz › blog › {form.slug || "slug"}</p>
+              <p className="line-clamp-2 text-[12.5px] text-slate-500">{form.seo_description || form.excerpt || "Meta tavsif shu yerda ko'rinadi…"}</p>
+            </div>
+          </div>
         </div>
 
         {/* Yon panel */}
@@ -174,8 +264,24 @@ export default function AdminEditor() {
               >
                 <option value="draft">Qoralama</option>
                 <option value="published">Chop etilgan</option>
+                <option value="scheduled">Rejalashtirilgan</option>
+                <option value="archived">Arxivlangan</option>
               </select>
             </Field>
+            {form.status === "scheduled" && (
+              <Field label="Chop etish vaqti">
+                <input
+                  type="datetime-local"
+                  value={toLocalInput(form.published_at)}
+                  onChange={(e) => set("published_at", e.target.value ? new Date(e.target.value).toISOString() : "")}
+                  className="w-full rounded-xl border border-navy/15 bg-transparent px-3 py-2.5 text-[14px] outline-none focus:border-azure dark:border-white/15 dark:text-white"
+                />
+              </Field>
+            )}
+            <label className="flex cursor-pointer items-center gap-2.5 py-1 text-[13.5px] font-medium text-slate-600 dark:text-slate-300">
+              <input type="checkbox" checked={!!form.is_featured} onChange={(e) => set("is_featured", e.target.checked ? 1 : 0)} className="h-4 w-4 accent-azure" />
+              Tanlangan (featured) — tepada qadab qo'yiladi
+            </label>
             <div className="mt-4 flex flex-col gap-2">
               <button
                 onClick={() => save()}
@@ -219,6 +325,27 @@ export default function AdminEditor() {
                 </label>
               )}
             </Field>
+
+            {form.cover_image && (
+              <>
+                <Field label="Alt text (rasm tavsifi — SEO)">
+                  <input
+                    value={form.cover_alt}
+                    onChange={(e) => set("cover_alt", e.target.value)}
+                    className="w-full rounded-xl border border-navy/15 bg-transparent px-3 py-2 text-[13.5px] outline-none focus:border-azure dark:border-white/15 dark:text-white"
+                    placeholder="Rasmda nima tasvirlangan"
+                  />
+                </Field>
+                <Field label="Izoh (caption)">
+                  <input
+                    value={form.cover_caption}
+                    onChange={(e) => set("cover_caption", e.target.value)}
+                    className="w-full rounded-xl border border-navy/15 bg-transparent px-3 py-2 text-[13.5px] outline-none focus:border-azure dark:border-white/15 dark:text-white"
+                    placeholder="Rasm ostidagi izoh"
+                  />
+                </Field>
+              </>
+            )}
 
             <Field label="Kategoriya">
               <input
@@ -299,4 +426,22 @@ function Field({ label, hint, children }) {
       {hint && <p className="mt-1 text-[12px] text-slate-400">{hint}</p>}
     </div>
   );
+}
+
+function Toggle({ label, on, onChange }) {
+  return (
+    <label className="flex cursor-pointer items-center gap-2 text-[13px] font-medium text-slate-600 dark:text-slate-300">
+      <input type="checkbox" checked={on} onChange={(e) => onChange(e.target.checked)} className="h-4 w-4 accent-emerald-500" />
+      {label}
+    </label>
+  );
+}
+
+// ISO -> datetime-local input qiymati (lokal vaqt).
+function toLocalInput(iso) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (isNaN(d)) return "";
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }

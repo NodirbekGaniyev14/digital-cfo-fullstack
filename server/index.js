@@ -1,5 +1,6 @@
 import "./load-env.js"; // ENG BIRINCHI — .env ni auth.js/ssr.js dan oldin yuklaydi
 import express from "express";
+import sharp from "sharp";
 import cors from "cors";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
@@ -51,17 +52,11 @@ const mediaDir = path.join(__dirname, "media");
 fs.mkdirSync(mediaDir, { recursive: true });
 app.use("/media", express.static(mediaDir));
 
-const imageStorage = multer.diskStorage({
-  destination: (_req, _file, cb) => cb(null, mediaDir),
-  filename: (_req, file, cb) => {
-    const ext = path.extname(file.originalname).toLowerCase().slice(0, 8);
-    cb(null, `${Date.now()}-${Math.random().toString(36).slice(2, 8)}${ext}`);
-  },
-});
 const IMG_EXT = [".jpg", ".jpeg", ".png", ".webp", ".gif", ".svg"];
+// Xotirada qabul qilamiz, so'ng sharp bilan optimallab diskka yozamiz.
 const imageUpload = multer({
-  storage: imageStorage,
-  limits: { fileSize: 5 * 1024 * 1024, files: 1 },
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 8 * 1024 * 1024, files: 1 },
   fileFilter: (_req, file, cb) => {
     const ok =
       IMG_EXT.includes(path.extname(file.originalname).toLowerCase()) &&
@@ -69,6 +64,25 @@ const imageUpload = multer({
     cb(ok ? null : new Error("Faqat rasm fayllari (jpg, png, webp)"), ok);
   },
 });
+
+// Rasmni optimallab (webp, maks 1600px) media papkasiga yozadi, URL qaytaradi.
+async function saveOptimizedImage(file) {
+  const base = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  const ext = path.extname(file.originalname).toLowerCase();
+  // SVG/GIF — animatsiya/vektor, sharp bilan buzilmasin: asl holicha saqlaymiz.
+  if (ext === ".svg" || ext === ".gif") {
+    const name = `${base}${ext}`;
+    await fs.promises.writeFile(path.join(mediaDir, name), file.buffer);
+    return `/media/${name}`;
+  }
+  const name = `${base}.webp`;
+  await sharp(file.buffer)
+    .rotate() // EXIF orientatsiyasini to'g'rilash
+    .resize({ width: 1600, height: 1600, fit: "inside", withoutEnlargement: true })
+    .webp({ quality: 80 })
+    .toFile(path.join(mediaDir, name));
+  return `/media/${name}`;
+}
 
 const storage = multer.diskStorage({
   destination: (_req, _file, cb) => cb(null, uploadDir),
@@ -265,6 +279,18 @@ setInterval(() => {
     backupDataToTelegram();
   }
 }, 10 * 60 * 1000);
+
+// Rejalashtirilgan maqolalar (scheduled) — vaqti kelganda avtomatik chop etamiz.
+function runScheduler() {
+  try {
+    const n = Articles.publishDue();
+    if (n) console.log(`🕒 ${n} ta rejalashtirilgan maqola chop etildi`);
+  } catch (err) {
+    console.warn("⚠️ Scheduler xatosi:", err.message);
+  }
+}
+runScheduler(); // startda bir marta
+setInterval(runScheduler, 60 * 1000); // har daqiqa
 
 // ---- Routes -------------------------------------------------------------------
 app.get("/api/health", (_req, res) => res.json({ ok: true }));
@@ -594,6 +620,8 @@ app.get("/api/articles", (_req, res) => {
 app.get("/api/articles/:slug", (req, res) => {
   const a = Articles.getPublishedBySlug(req.params.slug);
   if (!a) return res.status(404).json({ error: "Maqola topilmadi" });
+  a.faqs = Articles.getFaqs(a.id);
+  Articles.incrementViews(a.id); // ko'rishlar hisoblagichi
   res.json({ article: a });
 });
 
@@ -608,7 +636,7 @@ const loginLimiter = rateLimit({
 app.post("/api/admin/login", loginLimiter, loginHandler);
 
 // ---- Admin CRUD (JWT himoyasida) ---------------------------------------------
-const VALID_STATUS = ["draft", "published"];
+const VALID_STATUS = ["draft", "published", "scheduled", "archived"];
 
 // Kiruvchi maqola ma'lumotlarini tekshirish va tozalash.
 function parseArticleInput(body, { forId = null } = {}) {
@@ -617,6 +645,13 @@ function parseArticleInput(body, { forId = null } = {}) {
   const status = VALID_STATUS.includes(body.status) ? body.status : "draft";
   const slugBase = clean(body.slug, 200) || title;
   const slug = uniqueSlug(slugBase, forId);
+  // FAQ'lar — massiv, har biri {question, answer}
+  const faqs = Array.isArray(body.faqs)
+    ? body.faqs
+        .map((f) => ({ question: clean(f.question, 300), answer: cleanHtml(f.answer || "") }))
+        .filter((f) => f.question)
+        .slice(0, 30)
+    : [];
   return {
     data: {
       title,
@@ -627,8 +662,19 @@ function parseArticleInput(body, { forId = null } = {}) {
       icon: clean(body.icon, 40) || "book",
       icon_color: clean(body.icon_color, 40) || "blue",
       cover_image: clean(body.cover_image, 500),
+      cover_alt: clean(body.cover_alt, 300),
+      cover_caption: clean(body.cover_caption, 300),
       author: clean(body.author, 120) || "Digital CFO",
       status,
+      published_at: clean(body.published_at, 40) || null,
+      is_featured: body.is_featured ? 1 : 0,
+      seo_title: clean(body.seo_title, 200),
+      seo_description: clean(body.seo_description, 320),
+      focus_keyword: clean(body.focus_keyword, 120),
+      canonical_url: clean(body.canonical_url, 500),
+      robots_index: body.robots_index === 0 || body.robots_index === false ? 0 : 1,
+      robots_follow: body.robots_follow === 0 || body.robots_follow === false ? 0 : 1,
+      faqs,
     },
   };
 }
@@ -640,6 +686,7 @@ app.get("/api/admin/articles", requireAdmin, (_req, res) => {
 app.get("/api/admin/articles/:id", requireAdmin, (req, res) => {
   const a = Articles.getById(Number(req.params.id));
   if (!a) return res.status(404).json({ error: "Maqola topilmadi" });
+  a.faqs = Articles.getFaqs(a.id); // tahrirlash formasi uchun
   res.json({ article: a });
 });
 
@@ -669,10 +716,16 @@ app.delete("/api/admin/articles/:id", requireAdmin, (req, res) => {
   res.json({ ok: true });
 });
 
-// ---- Rasm yuklash (maqola muqovasi) ------------------------------------------
-app.post("/api/admin/upload", requireAdmin, imageUpload.single("image"), (req, res) => {
+// ---- Rasm yuklash (maqola muqovasi / matn ichidagi rasmlar) ------------------
+app.post("/api/admin/upload", requireAdmin, imageUpload.single("image"), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: "Rasm yuklanmadi" });
-  res.json({ ok: true, url: `/media/${req.file.filename}` });
+  try {
+    const url = await saveOptimizedImage(req.file);
+    res.json({ ok: true, url });
+  } catch (err) {
+    console.warn("⚠️ Rasm optimallashda xato:", err.message);
+    res.status(400).json({ error: "Rasmni qayta ishlab bo'lmadi" });
+  }
 });
 
 // ---- Multer/umumiy xatolarni chiroyli qaytarish ------------------------------

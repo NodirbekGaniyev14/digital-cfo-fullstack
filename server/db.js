@@ -179,54 +179,99 @@ export const Articles = {
 
   insert: (a) => {
     const now = new Date().toISOString();
+    const p = _articleParams(a, now);
     const info = db
       .prepare(
-        `INSERT INTO articles (title, slug, excerpt, content, category, icon, icon_color, cover_image, author, status, created_at, updated_at)
-         VALUES (@title, @slug, @excerpt, @content, @category, @icon, @icon_color, @cover_image, @author, @status, @created_at, @updated_at)`
+        `INSERT INTO articles (${ALL_COLS.join(", ")}, created_at, updated_at)
+         VALUES (${ALL_COLS.map((c) => "@" + c).join(", ")}, @created_at, @updated_at)`
       )
-      .run({
-        title: a.title,
-        slug: a.slug,
-        excerpt: a.excerpt || "",
-        content: a.content || "",
-        category: a.category || "",
-        icon: a.icon || "book",
-        icon_color: a.icon_color || "blue",
-        cover_image: a.cover_image || "",
-        author: a.author || "Digital CFO",
-        status: a.status === "published" ? "published" : "draft",
-        created_at: a.created_at || now,
-        updated_at: now,
-      });
-    return Articles.getById(info.lastInsertRowid);
+      .run({ ...p, created_at: a.created_at || now, updated_at: now });
+    const created = Articles.getById(info.lastInsertRowid);
+    if (Array.isArray(a.faqs)) Articles.setFaqs(created.id, a.faqs);
+    return { ...created, faqs: Articles.getFaqs(created.id) };
   },
 
   update: (id, a) => {
     const now = new Date().toISOString();
+    const p = _articleParams(a, now);
     db.prepare(
-      `UPDATE articles SET title=@title, slug=@slug, excerpt=@excerpt, content=@content,
-         category=@category, icon=@icon, icon_color=@icon_color, cover_image=@cover_image,
-         author=@author, status=@status, updated_at=@updated_at WHERE id=@id`
-    ).run({
-      id,
-      title: a.title,
-      slug: a.slug,
-      excerpt: a.excerpt || "",
-      content: a.content || "",
-      category: a.category || "",
-      icon: a.icon || "book",
-      icon_color: a.icon_color || "blue",
-      cover_image: a.cover_image || "",
-      author: a.author || "Digital CFO",
-      status: a.status === "published" ? "published" : "draft",
-      updated_at: now,
-    });
-    return Articles.getById(id);
+      `UPDATE articles SET ${ALL_COLS.map((c) => `${c}=@${c}`).join(", ")}, updated_at=@updated_at WHERE id=@id`
+    ).run({ ...p, id, updated_at: now });
+    if (Array.isArray(a.faqs)) Articles.setFaqs(id, a.faqs);
+    return { ...Articles.getById(id), faqs: Articles.getFaqs(id) };
   },
 
-  remove: (id) => db.prepare("DELETE FROM articles WHERE id=?").run(id),
+  // Maqola FAQ'larini to'liq almashtiradi (eskisini o'chirib, yangisini yozadi).
+  setFaqs: (articleId, faqs) => {
+    const tx = db.transaction((list) => {
+      db.prepare("DELETE FROM article_faqs WHERE article_id=?").run(articleId);
+      const ins = db.prepare(
+        "INSERT INTO article_faqs (article_id, question, answer, position) VALUES (?,?,?,?)"
+      );
+      list.forEach((f, i) => {
+        const q = String(f.question || "").trim();
+        if (q) ins.run(articleId, q, cleanHtml(f.answer || ""), i);
+      });
+    });
+    tx(faqs || []);
+  },
+
+  remove: (id) => {
+    db.prepare("DELETE FROM article_faqs WHERE article_id=?").run(id);
+    db.prepare("DELETE FROM article_tags WHERE article_id=?").run(id);
+    return db.prepare("DELETE FROM articles WHERE id=?").run(id);
+  },
   count: () => db.prepare("SELECT COUNT(*) c FROM articles").get().c,
+  incrementViews: (id) => db.prepare("UPDATE articles SET views=views+1 WHERE id=?").run(id),
+
+  // Rejalashtirilgan maqolalarni vaqti kelganda 'published' ga o'tkazadi.
+  publishDue: () => {
+    const now = new Date().toISOString();
+    return db.prepare(
+      "UPDATE articles SET status='published' WHERE status='scheduled' AND published_at IS NOT NULL AND published_at <= ?"
+    ).run(now).changes;
+  },
 };
+
+// Barcha yoziladigan ustunlar (created_at/updated_at alohida boshqariladi).
+const ALL_COLS = [
+  "title", "slug", "excerpt", "content", "category", "icon", "icon_color",
+  "cover_image", "cover_alt", "cover_caption", "author", "status",
+  "seo_title", "seo_description", "focus_keyword", "canonical_url",
+  "robots_index", "robots_follow", "is_featured", "published_at", "reading_minutes",
+];
+const VALID_STATUS = ["draft", "published", "scheduled", "archived"];
+
+function _articleParams(a, now) {
+  const status = VALID_STATUS.includes(a.status) ? a.status : "draft";
+  // published_at: chop etilganda vaqt bo'lmasa — hozir; rejalashtirilganda — berilgan vaqt.
+  let published_at = a.published_at || null;
+  if (status === "published" && !published_at) published_at = now;
+  const words = String(a.content || "").replace(/<[^>]+>/g, " ").trim().split(/\s+/).filter(Boolean).length;
+  return {
+    title: a.title,
+    slug: a.slug,
+    excerpt: a.excerpt || "",
+    content: a.content || "",
+    category: a.category || "",
+    icon: a.icon || "book",
+    icon_color: a.icon_color || "blue",
+    cover_image: a.cover_image || "",
+    cover_alt: a.cover_alt || "",
+    cover_caption: a.cover_caption || "",
+    author: a.author || "Digital CFO",
+    status,
+    seo_title: a.seo_title || "",
+    seo_description: a.seo_description || "",
+    focus_keyword: a.focus_keyword || "",
+    canonical_url: a.canonical_url || "",
+    robots_index: a.robots_index === 0 || a.robots_index === "0" ? 0 : 1,
+    robots_follow: a.robots_follow === 0 || a.robots_follow === "0" ? 0 : 1,
+    is_featured: a.is_featured ? 1 : 0,
+    published_at,
+    reading_minutes: Math.max(1, Math.round(words / 200)),
+  };
+}
 
 // --- Dastlabki seed: mavjud 6 maqolani client'dagi articles.js dan ko'chiramiz ---
 // Faqat jadval bo'sh bo'lsa bir marta ishlaydi.
