@@ -82,6 +82,12 @@ db.exec(`
     article_id INTEGER NOT NULL, question TEXT NOT NULL,
     answer TEXT DEFAULT '', position INTEGER DEFAULT 0
   );
+  CREATE TABLE IF NOT EXISTS subscribers (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email TEXT NOT NULL UNIQUE,
+    source TEXT DEFAULT '',
+    created_at TEXT NOT NULL
+  );
   CREATE INDEX IF NOT EXISTS idx_faqs_article ON article_faqs(article_id);
   CREATE INDEX IF NOT EXISTS idx_atags_article ON article_tags(article_id);
 `);
@@ -371,6 +377,22 @@ export const Tags = {
     });
     tx();
   },
+};
+
+// --- Newsletter obunachilari ---
+export const Subscribers = {
+  // Yangi obuna (dublikat bo'lsa false). email allaqachon tekshirilgan bo'lishi kerak.
+  add: (email, source = "") => {
+    try {
+      db.prepare("INSERT INTO subscribers (email, source, created_at) VALUES (?,?,?)")
+        .run(email.toLowerCase(), source, new Date().toISOString());
+      return true;
+    } catch {
+      return false; // UNIQUE buzilishi — allaqachon obuna
+    }
+  },
+  count: () => db.prepare("SELECT COUNT(*) c FROM subscribers").get().c,
+  list: () => db.prepare("SELECT id, email, source, created_at FROM subscribers ORDER BY datetime(created_at) DESC").all(),
 };
 
 // --- Dastlabki seed: mavjud 6 maqolani client'dagi articles.js dan ko'chiramiz ---

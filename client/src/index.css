@@ -423,6 +423,32 @@ body {
   color: #aab6c4;
 }
 
+/* --- Chop etish / PDF (window.print) — faqat maqola matni --- */
+@media print {
+  nav,
+  footer,
+  aside,
+  .print\:hidden {
+    display: none !important;
+  }
+  body,
+  .article-prose {
+    color: #000 !important;
+    background: #fff !important;
+  }
+  article {
+    padding-top: 0 !important;
+  }
+  .article-prose a {
+    color: #000 !important;
+    text-decoration: underline;
+  }
+  .article-prose img,
+  .article-prose table {
+    break-inside: avoid;
+  }
+}
+
 /* Harakatni kamaytirish — OS sozlamasini hurmat qilamiz */
 @media (prefers-reduced-motion: reduce) {
   *,

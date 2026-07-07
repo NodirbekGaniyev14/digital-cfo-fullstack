@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Clock, ChevronRight, Send, Loader2, User } from "lucide-react";
+import { Clock, ChevronRight, Send, Loader2, User, Download } from "lucide-react";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
 import ArticleCard, { ArticleCover } from "@/components/ArticleCard";
 import ShareButtons from "@/components/ShareButtons";
 import TableOfContents from "@/components/TableOfContents";
+import NewsletterForm from "@/components/NewsletterForm";
 import Seo from "@/lib/seo";
 import NotFound from "@/pages/NotFound";
 import { formatDateUz, timeAgoUz, BOT_URL } from "@/data/articles";
@@ -126,8 +127,14 @@ export default function Article() {
               <span>{timeAgoUz(article.created_at)}</span>
               <span className="flex items-center gap-1.5"><Clock className="h-4 w-4" /> {mins} daqiqa o'qish</span>
             </div>
-            <div className="mt-5 border-t border-navy/[.06] pt-4 dark:border-white/[.06]">
+            <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-navy/[.06] pt-4 dark:border-white/[.06] print:hidden">
               <ShareButtons slug={article.slug} title={article.title} />
+              <button
+                onClick={() => window.print()}
+                className="flex items-center gap-1.5 rounded-lg border border-navy/10 px-3 py-2 text-[13px] font-semibold text-slate-500 transition-colors hover:border-navy hover:text-navy dark:border-white/10 dark:text-slate-300 dark:hover:text-white"
+              >
+                <Download className="h-4 w-4" /> PDF
+              </button>
             </div>
           </header>
 
@@ -213,7 +220,7 @@ export default function Article() {
           )}
 
           {/* Telegram CTA */}
-          <div className="mt-14 rounded-2xl bg-navy px-7 py-8 text-center text-white">
+          <div className="mt-14 rounded-2xl bg-navy px-7 py-8 text-center text-white print:hidden">
             <h2 className="font-heading text-[22px] font-bold">Hisobotingizni tahlil qildiring</h2>
             <p className="mx-auto mt-2 max-w-[440px] text-[15px] text-slate-300">
               1C hisobotingizni yuboring — 50+ ko'rsatkich va tayyor PDF hisobotni
@@ -227,6 +234,11 @@ export default function Article() {
             >
               <Send className="h-[18px] w-[18px]" /> Telegram botga o'tish
             </a>
+          </div>
+
+          {/* Newsletter */}
+          <div className="mt-8 print:hidden">
+            <NewsletterForm source={`article:${article.slug}`} />
           </div>
          </div>
 
@@ -244,7 +256,7 @@ export default function Article() {
       </article>
 
       {related.length > 0 && (
-        <section className="mt-20 border-t border-navy/[.06] bg-softbg px-6 py-16 dark:border-white/[.06] dark:bg-[#0a1020]">
+        <section className="mt-20 border-t border-navy/[.06] bg-softbg px-6 py-16 dark:border-white/[.06] dark:bg-[#0a1020] print:hidden">
           <div className="mx-auto max-w-[1200px]">
             <h2 className="mb-8 font-heading text-[24px] font-bold text-navy dark:text-white">
               O'xshash maqolalar

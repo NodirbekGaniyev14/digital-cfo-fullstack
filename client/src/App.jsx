@@ -43,11 +43,11 @@ function PublicChrome() {
   const { pathname } = useLocation();
   if (pathname.startsWith("/admin")) return null;
   return (
-    <>
+    <div className="print:hidden">
       <TelegramFAB />
       <AIAssistant />
       <ContactModal />
-    </>
+    </div>
   );
 }
 
@@ -60,7 +60,7 @@ export default function App() {
         <BrowserRouter>
           <MotionConfig reducedMotion="user">
             <ScrollManager />
-            <ScrollProgress />
+            <div className="print:hidden"><ScrollProgress /></div>
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/blog" element={<ArticlesIndex />} />

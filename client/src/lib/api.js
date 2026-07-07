@@ -37,6 +37,8 @@ async function request(url, { method = "GET", body, admin = false } = {}) {
 // --- Public ---
 export const getArticles = () => request("/api/articles").then((d) => d.articles || []);
 export const getArticle = (slug) => request(`/api/articles/${slug}`).then((d) => d.article);
+export const subscribe = (email, source) =>
+  request("/api/subscribe", { method: "POST", body: { email, source } });
 
 // --- Admin ---
 export const login = (username, password) =>
@@ -54,6 +56,13 @@ export const adminUpdate = (id, data) =>
   request(`/api/admin/articles/${id}`, { method: "PUT", body: data, admin: true }).then((d) => d.article);
 export const adminDelete = (id) =>
   request(`/api/admin/articles/${id}`, { method: "DELETE", admin: true });
+
+export const adminMedia = () =>
+  request("/api/admin/media", { admin: true }).then((d) => d.media || []);
+export const adminDeleteMedia = (name) =>
+  request(`/api/admin/media/${encodeURIComponent(name)}`, { method: "DELETE", admin: true });
+export const adminSubscribers = () =>
+  request("/api/admin/subscribers", { admin: true });
 
 // Rasm yuklash (FormData) — muqova uchun.
 export async function uploadImage(file) {

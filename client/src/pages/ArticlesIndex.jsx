@@ -4,6 +4,7 @@ import { BookOpen, Loader2, Search, Clock, Flame, X } from "lucide-react";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
 import { ArticleRow } from "@/components/ArticleCard";
+import NewsletterForm from "@/components/NewsletterForm";
 import Seo from "@/lib/seo";
 import { getArticles } from "@/lib/api";
 import { articlesListJsonLd } from "@/lib/schema";
@@ -111,7 +112,11 @@ export default function ArticlesIndex() {
           </div>
         )}
 
-        <div className="mt-12 text-center text-[14px] text-slate-400">
+        <div className="mt-10">
+          <NewsletterForm source="blog" />
+        </div>
+
+        <div className="mt-10 text-center text-[14px] text-slate-400">
           <Link to="/" className="font-semibold text-azure hover:underline">
             ← Bosh sahifaga qaytish
           </Link>

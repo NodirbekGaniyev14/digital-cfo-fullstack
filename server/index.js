@@ -10,7 +10,7 @@ import fs from "node:fs";
 import { fileURLToPath } from "node:url";
 import { execFile } from "node:child_process";
 import { timingSafeEqual } from "node:crypto";
-import db, { Articles, Authors, Tags, cleanHtml, uniqueSlug } from "./db.js";
+import db, { Articles, Authors, Tags, Subscribers, cleanHtml, uniqueSlug } from "./db.js";
 import { loginHandler, requireAdmin } from "./auth.js";
 import { renderArticle, renderList, buildSitemap, hasTemplate } from "./ssr.js";
 
@@ -628,6 +628,24 @@ app.get("/api/articles/:slug", (req, res) => {
 // Public: teglar ro'yxati (frontend filtr uchun)
 app.get("/api/tags", (_req, res) => res.json({ tags: Tags.all() }));
 
+// ---- Newsletter obuna (public) -----------------------------------------------
+const subscribeLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Juda ko'p urinish. Birozdan so'ng qayta urinib ko'ring." },
+});
+app.post("/api/subscribe", subscribeLimiter, (req, res) => {
+  if (clean(req.body?.website)) return res.json({ ok: true }); // honeypot
+  const email = clean(req.body?.email, 160).toLowerCase();
+  if (!EMAIL_RE.test(email)) return res.status(400).json({ error: "Email manzili noto'g'ri" });
+  const source = clean(req.body?.source, 80);
+  const added = Subscribers.add(email, source);
+  if (added) console.log("📧 Yangi obunachi:", email);
+  res.json({ ok: true, already: !added });
+});
+
 // ---- Admin login (rate-limit bilan) ------------------------------------------
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -741,6 +759,44 @@ app.post("/api/admin/upload", requireAdmin, imageUpload.single("image"), async (
     console.warn("⚠️ Rasm optimallashda xato:", err.message);
     res.status(400).json({ error: "Rasmni qayta ishlab bo'lmadi" });
   }
+});
+
+// ---- Media library (yuklangan rasmlar) ---------------------------------------
+app.get("/api/admin/media", requireAdmin, (_req, res) => {
+  let files = [];
+  try {
+    files = fs
+      .readdirSync(mediaDir)
+      .filter((n) => IMG_EXT.includes(path.extname(n).toLowerCase()))
+      .map((n) => {
+        const st = fs.statSync(path.join(mediaDir, n));
+        return { name: n, url: `/media/${n}`, size: st.size, mtime: st.mtimeMs };
+      })
+      .sort((a, b) => b.mtime - a.mtime);
+  } catch (err) {
+    console.warn("⚠️ Media o'qishda xato:", err.message);
+  }
+  res.json({ media: files });
+});
+
+app.delete("/api/admin/media/:name", requireAdmin, (req, res) => {
+  const name = path.basename(req.params.name || ""); // path traversal himoyasi
+  if (!name || !IMG_EXT.includes(path.extname(name).toLowerCase())) {
+    return res.status(400).json({ error: "Noto'g'ri fayl" });
+  }
+  const target = path.join(mediaDir, name);
+  if (!fs.existsSync(target)) return res.status(404).json({ error: "Topilmadi" });
+  try {
+    fs.unlinkSync(target);
+    res.json({ ok: true });
+  } catch {
+    res.status(500).json({ error: "O'chirib bo'lmadi" });
+  }
+});
+
+// ---- Obunachilar (admin) -----------------------------------------------------
+app.get("/api/admin/subscribers", requireAdmin, (_req, res) => {
+  res.json({ count: Subscribers.count(), subscribers: Subscribers.list() });
 });
 
 // ---- Multer/umumiy xatolarni chiroyli qaytarish ------------------------------

@@ -3,6 +3,7 @@ import { auth } from "@/lib/api";
 import AdminLogin from "./AdminLogin";
 import AdminList from "./AdminList";
 import AdminEditor from "./AdminEditor";
+import AdminMedia from "./AdminMedia";
 
 // Token bo'lmasa — login sahifasiga.
 function RequireAuth({ children }) {
@@ -18,6 +19,7 @@ export default function AdminApp() {
       <Route path="articles" element={<RequireAuth><AdminList /></RequireAuth>} />
       <Route path="articles/new" element={<RequireAuth><AdminEditor /></RequireAuth>} />
       <Route path="articles/:id/edit" element={<RequireAuth><AdminEditor /></RequireAuth>} />
+      <Route path="media" element={<RequireAuth><AdminMedia /></RequireAuth>} />
       <Route path="*" element={<Navigate to="/admin" replace />} />
     </Routes>
   );

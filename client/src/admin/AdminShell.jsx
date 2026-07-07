@@ -1,5 +1,5 @@
-import { Link, useNavigate } from "react-router-dom";
-import { BarChart3, LogOut, ExternalLink } from "lucide-react";
+import { Link, NavLink, useNavigate } from "react-router-dom";
+import { BarChart3, LogOut, ExternalLink, FileText, Image } from "lucide-react";
 import { auth } from "@/lib/api";
 
 // Admin sahifalari uchun umumiy header + konteyner.
@@ -21,6 +21,10 @@ export default function AdminShell({ children }) {
               Admin <span className="text-azure">panel</span>
             </span>
           </Link>
+          <nav className="hidden items-center gap-1 sm:flex">
+            <ShellLink to="/admin" end icon={FileText}>Maqolalar</ShellLink>
+            <ShellLink to="/admin/media" icon={Image}>Media</ShellLink>
+          </nav>
           <div className="flex items-center gap-2">
             <a
               href="/blog"
@@ -41,5 +45,23 @@ export default function AdminShell({ children }) {
       </header>
       <main className="mx-auto max-w-[1100px] px-5 py-8">{children}</main>
     </div>
+  );
+}
+
+function ShellLink({ to, end, icon: Icon, children }) {
+  return (
+    <NavLink
+      to={to}
+      end={end}
+      className={({ isActive }) =>
+        `flex items-center gap-1.5 rounded-lg px-3 py-2 text-[13.5px] font-semibold transition-colors ${
+          isActive
+            ? "bg-navy/[.06] text-navy dark:bg-white/[.08] dark:text-white"
+            : "text-slate-500 hover:text-navy dark:text-slate-300 dark:hover:text-white"
+        }`
+      }
+    >
+      <Icon className="h-4 w-4" /> {children}
+    </NavLink>
   );
 }
