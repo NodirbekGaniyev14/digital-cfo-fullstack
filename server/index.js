@@ -799,6 +799,38 @@ app.get("/api/admin/subscribers", requireAdmin, (_req, res) => {
   res.json({ count: Subscribers.count(), subscribers: Subscribers.list() });
 });
 
+// ---- Dashboard statistikasi (admin) ------------------------------------------
+app.get("/api/admin/stats", requireAdmin, (_req, res) => {
+  const all = Articles.listAll();
+  const byStatus = (s) => all.filter((a) => a.status === s).length;
+  const totalViews = all.reduce((n, a) => n + (a.views || 0), 0);
+  const top = all
+    .filter((a) => a.status === "published")
+    .sort((a, b) => (b.views || 0) - (a.views || 0))
+    .slice(0, 5)
+    .map((a) => ({ id: a.id, title: a.title, slug: a.slug, views: a.views || 0 }));
+  const newest = [...all]
+    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+    .slice(0, 5)
+    .map((a) => ({ id: a.id, title: a.title, slug: a.slug, status: a.status, created_at: a.created_at }));
+  let media = 0;
+  try {
+    media = fs.readdirSync(mediaDir).filter((n) => IMG_EXT.includes(path.extname(n).toLowerCase())).length;
+  } catch { /* ignore */ }
+  res.json({
+    total: all.length,
+    published: byStatus("published"),
+    draft: byStatus("draft"),
+    scheduled: byStatus("scheduled"),
+    archived: byStatus("archived"),
+    views: totalViews,
+    subscribers: Subscribers.count(),
+    media,
+    top,
+    newest,
+  });
+});
+
 // ---- Multer/umumiy xatolarni chiroyli qaytarish ------------------------------
 app.use((err, _req, res, _next) => {
   if (err) {

@@ -63,6 +63,8 @@ export const adminDeleteMedia = (name) =>
   request(`/api/admin/media/${encodeURIComponent(name)}`, { method: "DELETE", admin: true });
 export const adminSubscribers = () =>
   request("/api/admin/subscribers", { admin: true });
+export const adminStats = () =>
+  request("/api/admin/stats", { admin: true });
 
 // Rasm yuklash (FormData) — muqova uchun.
 export async function uploadImage(file) {

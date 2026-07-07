@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { auth } from "@/lib/api";
 import AdminLogin from "./AdminLogin";
+import AdminDashboard from "./AdminDashboard";
 import AdminList from "./AdminList";
 import AdminEditor from "./AdminEditor";
 import AdminMedia from "./AdminMedia";
@@ -15,7 +16,7 @@ export default function AdminApp() {
   return (
     <Routes>
       <Route path="login" element={<AdminLogin />} />
-      <Route index element={<RequireAuth><AdminList /></RequireAuth>} />
+      <Route index element={<RequireAuth><AdminDashboard /></RequireAuth>} />
       <Route path="articles" element={<RequireAuth><AdminList /></RequireAuth>} />
       <Route path="articles/new" element={<RequireAuth><AdminEditor /></RequireAuth>} />
       <Route path="articles/:id/edit" element={<RequireAuth><AdminEditor /></RequireAuth>} />

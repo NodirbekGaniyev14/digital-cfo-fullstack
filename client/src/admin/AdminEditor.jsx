@@ -137,7 +137,7 @@ export default function AdminEditor() {
       if (isEdit) await adminUpdate(Number(id), payload);
       else await adminCreate(payload);
       toast.success(statusOverride === "published" ? "Chop etildi!" : "Saqlandi");
-      nav("/admin");
+      nav("/admin/articles");
     } catch (err) {
       toast.error(err.message);
     } finally {
@@ -157,7 +157,7 @@ export default function AdminEditor() {
 
   return (
     <AdminShell>
-      <Link to="/admin" className="mb-5 inline-flex items-center gap-1.5 text-[14px] font-medium text-slate-500 hover:text-navy dark:text-slate-300 dark:hover:text-white">
+      <Link to="/admin/articles" className="mb-5 inline-flex items-center gap-1.5 text-[14px] font-medium text-slate-500 hover:text-navy dark:text-slate-300 dark:hover:text-white">
         <ArrowLeft className="h-4 w-4" /> Orqaga
       </Link>
 
