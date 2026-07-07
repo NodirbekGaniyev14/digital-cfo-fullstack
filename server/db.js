@@ -88,6 +88,15 @@ db.exec(`
     source TEXT DEFAULT '',
     created_at TEXT NOT NULL
   );
+  CREATE TABLE IF NOT EXISTS article_revisions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    article_id INTEGER NOT NULL,
+    title TEXT DEFAULT '',
+    excerpt TEXT DEFAULT '',
+    content TEXT DEFAULT '',
+    created_at TEXT NOT NULL
+  );
+  CREATE INDEX IF NOT EXISTS idx_rev_article ON article_revisions(article_id);
   CREATE INDEX IF NOT EXISTS idx_faqs_article ON article_faqs(article_id);
   CREATE INDEX IF NOT EXISTS idx_atags_article ON article_tags(article_id);
 `);
@@ -208,6 +217,7 @@ export const Articles = {
 
   update: (id, a) => {
     const now = new Date().toISOString();
+    Revisions.snapshot(Articles.getById(id)); // eski holatni tarixga
     const author = Authors.upsertByName(a.author, { avatar: a.author_avatar, bio: a.author_bio });
     const p = _articleParams(a, now);
     p.author = author.name;
@@ -246,6 +256,7 @@ export const Articles = {
   remove: (id) => {
     db.prepare("DELETE FROM article_faqs WHERE article_id=?").run(id);
     db.prepare("DELETE FROM article_tags WHERE article_id=?").run(id);
+    db.prepare("DELETE FROM article_revisions WHERE article_id=?").run(id);
     return db.prepare("DELETE FROM articles WHERE id=?").run(id);
   },
   count: () => db.prepare("SELECT COUNT(*) c FROM articles").get().c,
@@ -377,6 +388,25 @@ export const Tags = {
     });
     tx();
   },
+};
+
+// --- Versiya tarixi (revisions) ---
+export const Revisions = {
+  // Maqolaning joriy holatini tarixga yozadi (o'zgartirishdan OLDIN).
+  snapshot: (article) => {
+    if (!article) return;
+    db.prepare(
+      "INSERT INTO article_revisions (article_id, title, excerpt, content, created_at) VALUES (?,?,?,?,?)"
+    ).run(article.id, article.title || "", article.excerpt || "", article.content || "", new Date().toISOString());
+    // Har maqola uchun oxirgi 20 tasini saqlaymiz.
+    db.prepare(
+      `DELETE FROM article_revisions WHERE article_id=? AND id NOT IN
+         (SELECT id FROM article_revisions WHERE article_id=? ORDER BY id DESC LIMIT 20)`
+    ).run(article.id, article.id);
+  },
+  list: (articleId) =>
+    db.prepare("SELECT id, title, created_at FROM article_revisions WHERE article_id=? ORDER BY id DESC").all(articleId),
+  get: (id) => db.prepare("SELECT * FROM article_revisions WHERE id=?").get(id),
 };
 
 // --- Newsletter obunachilari ---

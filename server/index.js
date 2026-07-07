@@ -10,7 +10,7 @@ import fs from "node:fs";
 import { fileURLToPath } from "node:url";
 import { execFile } from "node:child_process";
 import { timingSafeEqual } from "node:crypto";
-import db, { Articles, Authors, Tags, Subscribers, cleanHtml, uniqueSlug } from "./db.js";
+import db, { Articles, Authors, Tags, Subscribers, Revisions, cleanHtml, uniqueSlug } from "./db.js";
 import { loginHandler, requireAdmin } from "./auth.js";
 import { renderArticle, renderList, buildSitemap, hasTemplate } from "./ssr.js";
 
@@ -747,6 +747,16 @@ app.delete("/api/admin/articles/:id", requireAdmin, (req, res) => {
   Articles.remove(id);
   console.log("🗑️ Maqola o'chirildi:", id);
   res.json({ ok: true });
+});
+
+// ---- Versiya tarixi (revisions) ----------------------------------------------
+app.get("/api/admin/articles/:id/revisions", requireAdmin, (req, res) => {
+  res.json({ revisions: Revisions.list(Number(req.params.id)) });
+});
+app.get("/api/admin/revisions/:revId", requireAdmin, (req, res) => {
+  const r = Revisions.get(Number(req.params.revId));
+  if (!r) return res.status(404).json({ error: "Versiya topilmadi" });
+  res.json({ revision: r });
 });
 
 // ---- Rasm yuklash (maqola muqovasi / matn ichidagi rasmlar) ------------------

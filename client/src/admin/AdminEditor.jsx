@@ -2,14 +2,14 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { toast } from "sonner";
 import {
-  ArrowLeft, Loader2, Save, Upload, X, Plus, Trash2, ChevronDown,
+  ArrowLeft, Loader2, Save, Upload, X, Plus, Trash2, ChevronDown, History, User,
 } from "lucide-react";
 import AdminShell from "./AdminShell";
 import TiptapEditor from "./TiptapEditor";
 import {
   ArticleCover, ArticleIcon, ICON_OPTIONS, COLOR_OPTIONS,
 } from "@/components/ArticleCard";
-import { adminGetArticle, adminCreate, adminUpdate, uploadImage, adminMeta } from "@/lib/api";
+import { adminGetArticle, adminCreate, adminUpdate, uploadImage, adminMeta, adminRevisions, adminRevision } from "@/lib/api";
 
 const DEFAULT_CATEGORIES = ["Asoslar", "Likvidlik", "Risk", "Rentabellik", "Barqarorlik", "Amaliyot", "CFO", "IFRS", "KPI", "Budget", "Case Study"];
 
@@ -44,7 +44,11 @@ export default function AdminEditor() {
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [meta, setMeta] = useState({ authors: [], tags: [], categories: [] });
   const [tagInput, setTagInput] = useState("");
+  const [autosaveFound, setAutosaveFound] = useState(null);
+  const [revisions, setRevisions] = useState(null);
+  const [showRevisions, setShowRevisions] = useState(false);
   const slugTouched = useRef(false);
+  const AUTOSAVE_KEY = `cfo_autosave_${id || "new"}`;
 
   useEffect(() => {
     adminMeta().then(setMeta).catch(() => {});
@@ -69,6 +73,29 @@ export default function AdminEditor() {
       })
       .finally(() => setLoading(false));
   }, [id]);
+
+  // Autosave: mavjud qoralamani (localStorage) o'qib olamiz (tiklash taklifi uchun).
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(AUTOSAVE_KEY);
+      if (raw) {
+        const d = JSON.parse(raw);
+        if (d?.form) setAutosaveFound(d);
+      }
+    } catch { /* ignore */ }
+  }, [AUTOSAVE_KEY]);
+
+  // Autosave: forma o'zgarganda 1.2s dan so'ng localStorage'ga yozamiz.
+  useEffect(() => {
+    if (loading) return;
+    if (!form.title && !form.content) return; // bo'sh formani saqlamaymiz
+    const t = setTimeout(() => {
+      try {
+        localStorage.setItem(AUTOSAVE_KEY, JSON.stringify({ savedAt: Date.now(), form }));
+      } catch { /* ignore */ }
+    }, 1200);
+    return () => clearTimeout(t);
+  }, [form, loading, AUTOSAVE_KEY]);
 
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
@@ -126,6 +153,34 @@ export default function AdminEditor() {
     set("faqs", form.faqs.map((f, idx) => (idx === i ? { ...f, [k]: v } : f)));
   const removeFaq = (i) => set("faqs", form.faqs.filter((_, idx) => idx !== i));
 
+  const restoreAutosave = () => {
+    if (autosaveFound?.form) {
+      setForm({ ...empty, ...autosaveFound.form });
+      slugTouched.current = true;
+    }
+    setAutosaveFound(null);
+    toast.success("Qoralama tiklandi");
+  };
+  const dismissAutosave = () => {
+    try { localStorage.removeItem(AUTOSAVE_KEY); } catch { /* ignore */ }
+    setAutosaveFound(null);
+  };
+  const openRevisions = async () => {
+    setShowRevisions(true);
+    if (revisions === null) {
+      try { setRevisions(await adminRevisions(Number(id))); }
+      catch (e) { toast.error(e.message); setRevisions([]); }
+    }
+  };
+  const restoreRevision = async (revId) => {
+    try {
+      const r = await adminRevision(revId);
+      setForm((f) => ({ ...f, title: r.title, excerpt: r.excerpt, content: r.content }));
+      setShowRevisions(false);
+      toast.success("Versiya yuklandi — saqlashni unutmang");
+    } catch (e) { toast.error(e.message); }
+  };
+
   const save = async (statusOverride) => {
     if (!form.title.trim()) return toast.error("Sarlavha majburiy");
     const payload = { ...form, status: statusOverride || form.status };
@@ -136,6 +191,7 @@ export default function AdminEditor() {
     try {
       if (isEdit) await adminUpdate(Number(id), payload);
       else await adminCreate(payload);
+      try { localStorage.removeItem(AUTOSAVE_KEY); } catch { /* ignore */ }
       toast.success(statusOverride === "published" ? "Chop etildi!" : "Saqlandi");
       nav("/admin/articles");
     } catch (err) {
@@ -155,11 +211,64 @@ export default function AdminEditor() {
     );
   }
 
+  const showRestore =
+    autosaveFound &&
+    (autosaveFound.form.title !== form.title || autosaveFound.form.content !== form.content);
+
   return (
     <AdminShell>
-      <Link to="/admin/articles" className="mb-5 inline-flex items-center gap-1.5 text-[14px] font-medium text-slate-500 hover:text-navy dark:text-slate-300 dark:hover:text-white">
-        <ArrowLeft className="h-4 w-4" /> Orqaga
-      </Link>
+      <div className="mb-5 flex items-center justify-between">
+        <Link to="/admin/articles" className="inline-flex items-center gap-1.5 text-[14px] font-medium text-slate-500 hover:text-navy dark:text-slate-300 dark:hover:text-white">
+          <ArrowLeft className="h-4 w-4" /> Orqaga
+        </Link>
+        {isEdit && (
+          <button
+            onClick={openRevisions}
+            className="flex items-center gap-1.5 rounded-lg border border-navy/15 px-3 py-2 text-[13px] font-medium text-slate-600 transition-colors hover:text-navy dark:border-white/15 dark:text-slate-300 dark:hover:text-white"
+          >
+            <History className="h-4 w-4" /> Versiyalar
+          </button>
+        )}
+      </div>
+
+      {showRestore && (
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-[13.5px] dark:border-amber-500/30 dark:bg-amber-500/10">
+          <span className="text-amber-800 dark:text-amber-300">
+            💾 Saqlanmagan qoralama topildi ({new Date(autosaveFound.savedAt).toLocaleString("uz")}).
+          </span>
+          <div className="flex gap-2">
+            <button onClick={restoreAutosave} className="rounded-lg bg-amber-500 px-3 py-1.5 font-semibold text-white">Tiklash</button>
+            <button onClick={dismissAutosave} className="rounded-lg border border-amber-300 px-3 py-1.5 font-medium text-amber-700 dark:text-amber-300">Bekor</button>
+          </div>
+        </div>
+      )}
+
+      {/* Versiyalar modali */}
+      {showRevisions && (
+        <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/40 p-4" onClick={() => setShowRevisions(false)}>
+          <div className="max-h-[70vh] w-full max-w-[440px] overflow-y-auto rounded-2xl bg-white p-5 shadow-xl dark:bg-[#0d182b]" onClick={(e) => e.stopPropagation()}>
+            <h3 className="mb-3 font-heading text-[16px] font-bold text-navy dark:text-white">Versiya tarixi</h3>
+            {revisions === null ? (
+              <div className="flex justify-center py-8 text-slate-400"><Loader2 className="h-5 w-5 animate-spin" /></div>
+            ) : revisions.length === 0 ? (
+              <p className="py-6 text-center text-[13.5px] text-slate-400">Hozircha versiya yo'q. Har saqlashda oldingi holat shu yerga yoziladi.</p>
+            ) : (
+              <ul className="space-y-1.5">
+                {revisions.map((r) => (
+                  <li key={r.id} className="flex items-center justify-between gap-3 rounded-lg border border-navy/[.08] px-3 py-2.5 dark:border-white/[.08]">
+                    <div className="min-w-0">
+                      <p className="truncate text-[13.5px] font-medium text-navy dark:text-white">{r.title || "(sarlavhasiz)"}</p>
+                      <p className="text-[12px] text-slate-400">{new Date(r.created_at).toLocaleString("uz")}</p>
+                    </div>
+                    <button onClick={() => restoreRevision(r.id)} className="flex-none rounded-lg bg-navy px-3 py-1.5 text-[12.5px] font-semibold text-white">Tiklash</button>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <button onClick={() => setShowRevisions(false)} className="mt-4 w-full rounded-lg border border-navy/15 py-2 text-[13.5px] font-medium text-slate-600 dark:border-white/15 dark:text-slate-300">Yopish</button>
+          </div>
+        </div>
+      )}
 
       <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
         {/* Asosiy ustun */}

@@ -65,6 +65,10 @@ export const adminSubscribers = () =>
   request("/api/admin/subscribers", { admin: true });
 export const adminStats = () =>
   request("/api/admin/stats", { admin: true });
+export const adminRevisions = (id) =>
+  request(`/api/admin/articles/${id}/revisions`, { admin: true }).then((d) => d.revisions || []);
+export const adminRevision = (revId) =>
+  request(`/api/admin/revisions/${revId}`, { admin: true }).then((d) => d.revision);
 
 // Rasm yuklash (FormData) — muqova uchun.
 export async function uploadImage(file) {
