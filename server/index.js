@@ -10,7 +10,7 @@ import fs from "node:fs";
 import { fileURLToPath } from "node:url";
 import { execFile } from "node:child_process";
 import { timingSafeEqual } from "node:crypto";
-import db, { Articles, cleanHtml, uniqueSlug } from "./db.js";
+import db, { Articles, Authors, Tags, cleanHtml, uniqueSlug } from "./db.js";
 import { loginHandler, requireAdmin } from "./auth.js";
 import { renderArticle, renderList, buildSitemap, hasTemplate } from "./ssr.js";
 
@@ -620,10 +620,13 @@ app.get("/api/articles", (_req, res) => {
 app.get("/api/articles/:slug", (req, res) => {
   const a = Articles.getPublishedBySlug(req.params.slug);
   if (!a) return res.status(404).json({ error: "Maqola topilmadi" });
-  a.faqs = Articles.getFaqs(a.id);
+  Articles.hydrate(a); // faqs + tags + author_obj
   Articles.incrementViews(a.id); // ko'rishlar hisoblagichi
   res.json({ article: a });
 });
+
+// Public: teglar ro'yxati (frontend filtr uchun)
+app.get("/api/tags", (_req, res) => res.json({ tags: Tags.all() }));
 
 // ---- Admin login (rate-limit bilan) ------------------------------------------
 const loginLimiter = rateLimit({
@@ -665,6 +668,9 @@ function parseArticleInput(body, { forId = null } = {}) {
       cover_alt: clean(body.cover_alt, 300),
       cover_caption: clean(body.cover_caption, 300),
       author: clean(body.author, 120) || "Digital CFO",
+      author_avatar: clean(body.author_avatar, 500),
+      author_bio: clean(body.author_bio, 600),
+      tags: Array.isArray(body.tags) ? body.tags.map((t) => clean(t, 40)).filter(Boolean) : [],
       status,
       published_at: clean(body.published_at, 40) || null,
       is_featured: body.is_featured ? 1 : 0,
@@ -686,8 +692,17 @@ app.get("/api/admin/articles", requireAdmin, (_req, res) => {
 app.get("/api/admin/articles/:id", requireAdmin, (req, res) => {
   const a = Articles.getById(Number(req.params.id));
   if (!a) return res.status(404).json({ error: "Maqola topilmadi" });
-  a.faqs = Articles.getFaqs(a.id); // tahrirlash formasi uchun
+  Articles.hydrate(a); // faqs + tags + author_obj (tahrirlash formasi uchun)
   res.json({ article: a });
+});
+
+// Editor uchun meta: mavjud mualliflar, teglar, kategoriyalar (datalist).
+app.get("/api/admin/meta", requireAdmin, (_req, res) => {
+  const categories = db
+    .prepare("SELECT DISTINCT category FROM articles WHERE category != '' ORDER BY category")
+    .all()
+    .map((r) => r.category);
+  res.json({ authors: Authors.list(), tags: Tags.all(), categories });
 });
 
 app.post("/api/admin/articles", requireAdmin, (req, res) => {
@@ -772,8 +787,7 @@ if (fs.existsSync(clientDist)) {
     const a = Articles.getPublishedBySlug(req.params.slug);
     if (!a) return next(); // topilmasa — SPA 404 sahifasi ko'rsatadi
     try {
-      // FAQ'larni biriktiramiz (FAQ Schema uchun).
-      a.faqs = Articles.getFaqs(a.id);
+      Articles.hydrate(a); // faqs (FAQ Schema) + tags + author_obj
       res.type("html").send(renderArticle(a));
     } catch (e) {
       console.warn("⚠️ SSR (maqola) xatosi:", e.message);

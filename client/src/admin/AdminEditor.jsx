@@ -9,7 +9,7 @@ import TiptapEditor from "./TiptapEditor";
 import {
   ArticleCover, ArticleIcon, ICON_OPTIONS, COLOR_OPTIONS,
 } from "@/components/ArticleCard";
-import { adminGetArticle, adminCreate, adminUpdate, uploadImage } from "@/lib/api";
+import { adminGetArticle, adminCreate, adminUpdate, uploadImage, adminMeta } from "@/lib/api";
 
 const DEFAULT_CATEGORIES = ["Asoslar", "Likvidlik", "Risk", "Rentabellik", "Barqarorlik", "Amaliyot", "CFO", "IFRS", "KPI", "Budget", "Case Study"];
 
@@ -26,9 +26,10 @@ function slugify(s) {
 const empty = {
   title: "", slug: "", excerpt: "", content: "", category: "",
   icon: "chart", icon_color: "blue", cover_image: "", cover_alt: "", cover_caption: "",
-  author: "Digital CFO", status: "draft", published_at: "", is_featured: 0,
+  author: "Digital CFO", author_avatar: "", author_bio: "",
+  status: "draft", published_at: "", is_featured: 0,
   seo_title: "", seo_description: "", focus_keyword: "", canonical_url: "",
-  robots_index: 1, robots_follow: 1, tags: "", faqs: [],
+  robots_index: 1, robots_follow: 1, tags: [], faqs: [],
 };
 
 // /admin/articles/new va /admin/articles/:id/edit
@@ -40,14 +41,27 @@ export default function AdminEditor() {
   const [loading, setLoading] = useState(isEdit);
   const [busy, setBusy] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const [meta, setMeta] = useState({ authors: [], tags: [], categories: [] });
+  const [tagInput, setTagInput] = useState("");
   const slugTouched = useRef(false);
+
+  useEffect(() => {
+    adminMeta().then(setMeta).catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (!isEdit) return;
     adminGetArticle(Number(id))
       .then((a) => {
         slugTouched.current = true;
-        setForm({ ...empty, ...a });
+        setForm({
+          ...empty,
+          ...a,
+          tags: (a.tags || []).map((t) => t.name),
+          author_avatar: a.author_obj?.avatar || "",
+          author_bio: a.author_obj?.bio || "",
+        });
       })
       .catch((e) => {
         toast.error(e.message);
@@ -77,6 +91,33 @@ export default function AdminEditor() {
       setUploading(false);
       e.target.value = "";
     }
+  };
+
+  const onAvatarUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setAvatarUploading(true);
+    try {
+      const url = await uploadImage(file);
+      set("author_avatar", url);
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setAvatarUploading(false);
+      e.target.value = "";
+    }
+  };
+
+  // Teglar (chips)
+  const addTag = (name) => {
+    const nm = String(name).trim().replace(/,+$/, "");
+    if (nm && !form.tags.includes(nm)) set("tags", [...form.tags, nm]);
+    setTagInput("");
+  };
+  const removeTag = (nm) => set("tags", form.tags.filter((t) => t !== nm));
+  const onTagKey = (e) => {
+    if (e.key === "Enter" || e.key === ",") { e.preventDefault(); addTag(tagInput); }
+    else if (e.key === "Backspace" && !tagInput && form.tags.length) removeTag(form.tags[form.tags.length - 1]);
   };
 
   // FAQ builder
@@ -356,7 +397,7 @@ export default function AdminEditor() {
                 placeholder="Masalan: Likvidlik"
               />
               <datalist id="cat-list">
-                {DEFAULT_CATEGORIES.map((c) => <option key={c} value={c} />)}
+                {[...new Set([...meta.categories, ...DEFAULT_CATEGORIES])].map((c) => <option key={c} value={c} />)}
               </datalist>
             </Field>
 
@@ -397,11 +438,70 @@ export default function AdminEditor() {
               </div>
             </Field>
 
-            <Field label="Muallif">
+            <Field label="Teglar" hint="Enter yoki vergul bilan qo'shing">
+              <div className="flex flex-wrap gap-1.5 rounded-xl border border-navy/15 p-2 dark:border-white/15">
+                {form.tags.map((tg) => (
+                  <span key={tg} className="inline-flex items-center gap-1 rounded-lg bg-azure/10 px-2 py-1 text-[12.5px] font-medium text-azure">
+                    {tg}
+                    <button type="button" onClick={() => removeTag(tg)} className="hover:text-red-500"><X className="h-3 w-3" /></button>
+                  </span>
+                ))}
+                <input
+                  list="tag-list"
+                  value={tagInput}
+                  onChange={(e) => setTagInput(e.target.value)}
+                  onKeyDown={onTagKey}
+                  onBlur={() => tagInput && addTag(tagInput)}
+                  placeholder={form.tags.length ? "" : "tag qo'shish…"}
+                  className="min-w-[80px] flex-1 bg-transparent px-1 text-[13.5px] outline-none dark:text-white"
+                />
+              </div>
+              <datalist id="tag-list">
+                {meta.tags.map((t) => <option key={t.slug} value={t.name} />)}
+              </datalist>
+            </Field>
+          </div>
+
+          {/* Muallif */}
+          <div className="rounded-2xl border border-navy/[.08] bg-white p-5 dark:border-white/[.08] dark:bg-[#0d182b]">
+            <h3 className="mb-3 font-heading text-[14px] font-bold text-navy dark:text-white">Muallif</h3>
+            <div className="mb-4 flex items-center gap-3">
+              {form.author_avatar ? (
+                <img src={form.author_avatar} alt="" className="h-14 w-14 flex-none rounded-full object-cover" />
+              ) : (
+                <div className="flex h-14 w-14 flex-none items-center justify-center rounded-full bg-navy/[.06] text-slate-400 dark:bg-white/[.06]">
+                  <User className="h-6 w-6" />
+                </div>
+              )}
+              <div className="flex flex-col gap-1.5">
+                <label className="flex cursor-pointer items-center gap-1.5 text-[13px] font-semibold text-azure hover:underline">
+                  {avatarUploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
+                  Avatar yuklash
+                  <input type="file" accept="image/*" onChange={onAvatarUpload} className="hidden" />
+                </label>
+                {form.author_avatar && (
+                  <button type="button" onClick={() => set("author_avatar", "")} className="text-left text-[12px] text-slate-400 hover:text-red-500">O'chirish</button>
+                )}
+              </div>
+            </div>
+            <Field label="Ism">
               <input
+                list="author-list"
                 value={form.author}
                 onChange={(e) => set("author", e.target.value)}
                 className="w-full rounded-xl border border-navy/15 bg-transparent px-3 py-2.5 text-[14px] outline-none focus:border-azure dark:border-white/15 dark:text-white"
+              />
+              <datalist id="author-list">
+                {meta.authors.map((au) => <option key={au.slug} value={au.name} />)}
+              </datalist>
+            </Field>
+            <Field label="Bio (qisqa tavsif)">
+              <textarea
+                value={form.author_bio}
+                onChange={(e) => set("author_bio", e.target.value)}
+                rows={2}
+                className="w-full resize-y rounded-xl border border-navy/15 bg-transparent px-3 py-2.5 text-[13.5px] outline-none focus:border-azure dark:border-white/15 dark:text-white"
+                placeholder="Masalan: Moliyaviy tahlilchi, 10 yillik tajriba"
               />
             </Field>
           </div>

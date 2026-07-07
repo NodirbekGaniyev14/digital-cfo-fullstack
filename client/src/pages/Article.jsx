@@ -177,6 +177,41 @@ export default function Article() {
             </section>
           )}
 
+          {/* Teglar */}
+          {article.tags?.length > 0 && (
+            <div className="mt-10 flex flex-wrap gap-2">
+              {article.tags.map((t) => (
+                <Link
+                  key={t.slug}
+                  to={`/blog?tag=${t.slug}`}
+                  className="rounded-lg bg-navy/[.05] px-3 py-1.5 text-[13px] font-medium text-slate-600 transition-colors hover:bg-azure hover:text-white dark:bg-white/[.06] dark:text-slate-300"
+                >
+                  #{t.name}
+                </Link>
+              ))}
+            </div>
+          )}
+
+          {/* Muallif */}
+          {article.author_obj && (article.author_obj.bio || article.author_obj.avatar) && (
+            <div className="mt-10 flex items-start gap-4 rounded-2xl border border-navy/[.08] bg-softbg/60 p-5 dark:border-white/[.08] dark:bg-white/[.03]">
+              {article.author_obj.avatar ? (
+                <img src={article.author_obj.avatar} alt={article.author_obj.name} className="h-14 w-14 flex-none rounded-full object-cover" />
+              ) : (
+                <div className="flex h-14 w-14 flex-none items-center justify-center rounded-full bg-navy text-white">
+                  <User className="h-6 w-6" />
+                </div>
+              )}
+              <div>
+                <p className="text-[12px] font-semibold uppercase tracking-wide text-slate-400">Muallif</p>
+                <p className="font-heading text-[16px] font-bold text-navy dark:text-white">{article.author_obj.name}</p>
+                {article.author_obj.bio && (
+                  <p className="mt-1 text-[14px] leading-relaxed text-slate-500 dark:text-slate-400">{article.author_obj.bio}</p>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Telegram CTA */}
           <div className="mt-14 rounded-2xl bg-navy px-7 py-8 text-center text-white">
             <h2 className="font-heading text-[22px] font-bold">Hisobotingizni tahlil qildiring</h2>

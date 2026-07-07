@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
-import { BookOpen, Loader2, Search, Clock, Flame } from "lucide-react";
+import { Link, useSearchParams } from "react-router-dom";
+import { BookOpen, Loader2, Search, Clock, Flame, X } from "lucide-react";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
 import { ArticleRow } from "@/components/ArticleCard";
@@ -13,6 +13,8 @@ export default function ArticlesIndex() {
   const [articles, setArticles] = useState(null); // null=yuklanmoqda
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState("new"); // new | popular
+  const [params, setParams] = useSearchParams();
+  const tag = params.get("tag") || "";
 
   useEffect(() => {
     let alive = true;
@@ -26,6 +28,7 @@ export default function ArticlesIndex() {
     if (!articles) return [];
     const q = query.trim().toLowerCase();
     let list = articles;
+    if (tag) list = list.filter((a) => (a.tag_slugs || []).includes(tag));
     if (q) {
       list = list.filter((a) =>
         `${a.title} ${a.excerpt} ${a.category} ${a.author}`.toLowerCase().includes(q)
@@ -37,7 +40,7 @@ export default function ArticlesIndex() {
       if (sort === "popular") return (b.views || 0) - (a.views || 0);
       return new Date(b.published_at || b.created_at) - new Date(a.published_at || a.created_at);
     });
-  }, [articles, query, sort]);
+  }, [articles, query, sort, tag]);
 
   return (
     <div className="overflow-x-hidden bg-softbg dark:bg-[#070b16]">
@@ -66,6 +69,15 @@ export default function ArticlesIndex() {
       </header>
 
       <main className="mx-auto max-w-[860px] px-4 pb-24 sm:px-6">
+        {tag && (
+          <div className="mb-4 flex items-center gap-2 text-[14px] text-slate-500 dark:text-slate-400">
+            <span>Teg bo'yicha:</span>
+            <span className="inline-flex items-center gap-1.5 rounded-lg bg-azure/10 px-3 py-1 font-semibold text-azure">
+              #{tag}
+              <button onClick={() => setParams({})} className="hover:text-navy dark:hover:text-white"><X className="h-3.5 w-3.5" /></button>
+            </span>
+          </div>
+        )}
         {/* Qidiruv + saralash */}
         <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="relative flex-1 sm:max-w-[360px]">

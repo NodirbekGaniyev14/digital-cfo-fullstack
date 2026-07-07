@@ -42,6 +42,8 @@ export const getArticle = (slug) => request(`/api/articles/${slug}`).then((d) =>
 export const login = (username, password) =>
   request("/api/admin/login", { method: "POST", body: { username, password } });
 
+export const adminMeta = () =>
+  request("/api/admin/meta", { admin: true });
 export const adminGetArticles = () =>
   request("/api/admin/articles", { admin: true }).then((d) => d.articles || []);
 export const adminGetArticle = (id) =>

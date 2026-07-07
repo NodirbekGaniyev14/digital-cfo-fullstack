@@ -162,9 +162,13 @@ const LIST_COLS =
   "views, is_featured, reading_minutes, published_at, created_at, updated_at";
 
 export const Articles = {
-  // Public: faqat chop etilganlar, eng yangisi tepada.
+  // Public: faqat chop etilganlar, eng yangisi tepada (+ teg slug'lari).
   listPublished: () =>
-    db.prepare(`SELECT ${LIST_COLS} FROM articles WHERE status='published' ORDER BY datetime(created_at) DESC`).all(),
+    db.prepare(
+      `SELECT ${LIST_COLS},
+         (SELECT group_concat(t.slug) FROM tags t JOIN article_tags at ON at.tag_id=t.id WHERE at.article_id=articles.id) AS tag_slugs
+       FROM articles WHERE status='published' ORDER BY datetime(created_at) DESC`
+    ).all().map((r) => ({ ...r, tag_slugs: r.tag_slugs ? r.tag_slugs.split(",") : [] })),
   getPublishedBySlug: (slug) =>
     db.prepare("SELECT * FROM articles WHERE slug=? AND status='published'").get(slug),
 
@@ -180,26 +184,42 @@ export const Articles = {
 
   insert: (a) => {
     const now = new Date().toISOString();
+    const author = Authors.upsertByName(a.author, { avatar: a.author_avatar, bio: a.author_bio });
     const p = _articleParams(a, now);
+    p.author = author.name;
     const info = db
       .prepare(
         `INSERT INTO articles (${ALL_COLS.join(", ")}, created_at, updated_at)
          VALUES (${ALL_COLS.map((c) => "@" + c).join(", ")}, @created_at, @updated_at)`
       )
       .run({ ...p, created_at: a.created_at || now, updated_at: now });
-    const created = Articles.getById(info.lastInsertRowid);
-    if (Array.isArray(a.faqs)) Articles.setFaqs(created.id, a.faqs);
-    return { ...created, faqs: Articles.getFaqs(created.id) };
+    const id = info.lastInsertRowid;
+    db.prepare("UPDATE articles SET author_id=? WHERE id=?").run(author.id, id);
+    if (Array.isArray(a.faqs)) Articles.setFaqs(id, a.faqs);
+    if (a.tags !== undefined) Tags.setForArticle(id, a.tags);
+    return Articles.hydrate(Articles.getById(id));
   },
 
   update: (id, a) => {
     const now = new Date().toISOString();
+    const author = Authors.upsertByName(a.author, { avatar: a.author_avatar, bio: a.author_bio });
     const p = _articleParams(a, now);
+    p.author = author.name;
     db.prepare(
-      `UPDATE articles SET ${ALL_COLS.map((c) => `${c}=@${c}`).join(", ")}, updated_at=@updated_at WHERE id=@id`
-    ).run({ ...p, id, updated_at: now });
+      `UPDATE articles SET ${ALL_COLS.map((c) => `${c}=@${c}`).join(", ")}, author_id=@author_id, updated_at=@updated_at WHERE id=@id`
+    ).run({ ...p, id, author_id: author.id, updated_at: now });
     if (Array.isArray(a.faqs)) Articles.setFaqs(id, a.faqs);
-    return { ...Articles.getById(id), faqs: Articles.getFaqs(id) };
+    if (a.tags !== undefined) Tags.setForArticle(id, a.tags);
+    return Articles.hydrate(Articles.getById(id));
+  },
+
+  // Maqolaga bog'liq ma'lumotlarni biriktiradi (FAQ, teglar, muallif obyekti).
+  hydrate: (a) => {
+    if (!a) return a;
+    a.faqs = Articles.getFaqs(a.id);
+    a.tags = Tags.getForArticle(a.id);
+    a.author_obj = a.author_id ? Authors.getById(a.author_id) : null;
+    return a;
   },
 
   // Maqola FAQ'larini to'liq almashtiradi (eskisini o'chirib, yangisini yozadi).
@@ -273,6 +293,85 @@ function _articleParams(a, now) {
     reading_minutes: Math.max(1, Math.round(words / 200)),
   };
 }
+
+// Berilgan jadval ichida unikal slug (name/base'dan).
+function uniqueSlugIn(table, base, excludeId = null) {
+  const s = slugify(base);
+  const exists = db.prepare(`SELECT id FROM ${table} WHERE slug=? AND id!=?`);
+  let candidate = s;
+  let i = 1;
+  while (exists.get(candidate, excludeId ?? -1)) candidate = `${s}-${++i}`;
+  return candidate;
+}
+
+// --- Mualliflar (avatar + bio) ---
+export const Authors = {
+  list: () => db.prepare("SELECT * FROM authors ORDER BY name").all(),
+  getById: (id) => db.prepare("SELECT * FROM authors WHERE id=?").get(id),
+  getBySlug: (slug) => db.prepare("SELECT * FROM authors WHERE slug=?").get(slug),
+  // Nom bo'yicha topadi yoki yaratadi; avatar/bio berilsa yangilaydi.
+  upsertByName: (name, extra = {}) => {
+    const nm = String(name || "").trim() || "Digital CFO";
+    let a = db.prepare("SELECT * FROM authors WHERE name=?").get(nm);
+    if (!a) {
+      const slug = uniqueSlugIn("authors", nm);
+      const info = db
+        .prepare("INSERT INTO authors (name, slug, avatar, bio, created_at) VALUES (?,?,?,?,?)")
+        .run(nm, slug, extra.avatar || "", extra.bio || "", new Date().toISOString());
+      return Authors.getById(info.lastInsertRowid);
+    }
+    if (extra.avatar !== undefined || extra.bio !== undefined) {
+      db.prepare("UPDATE authors SET avatar=?, bio=? WHERE id=?").run(
+        extra.avatar !== undefined ? extra.avatar : a.avatar,
+        extra.bio !== undefined ? extra.bio : a.bio,
+        a.id
+      );
+      a = Authors.getById(a.id);
+    }
+    return a;
+  },
+  remove: (id) => {
+    db.prepare("UPDATE articles SET author_id=NULL WHERE author_id=?").run(id);
+    return db.prepare("DELETE FROM authors WHERE id=?").run(id);
+  },
+};
+
+// --- Teglar (M2M) ---
+export const Tags = {
+  all: () => db.prepare("SELECT * FROM tags ORDER BY name").all(),
+  getForArticle: (articleId) =>
+    db.prepare(
+      "SELECT t.name, t.slug FROM tags t JOIN article_tags at ON at.tag_id=t.id WHERE at.article_id=? ORDER BY t.name"
+    ).all(articleId),
+  // Nom bo'yicha topadi yoki yaratadi.
+  upsertByName: (name) => {
+    const nm = String(name || "").trim();
+    if (!nm) return null;
+    let t = db.prepare("SELECT * FROM tags WHERE name=? COLLATE NOCASE").get(nm);
+    if (!t) {
+      const info = db.prepare("INSERT INTO tags (name, slug) VALUES (?,?)").run(nm, uniqueSlugIn("tags", nm));
+      t = db.prepare("SELECT * FROM tags WHERE id=?").get(info.lastInsertRowid);
+    }
+    return t;
+  },
+  // Maqola teglarini to'liq almashtiradi. `tags`: massiv yoki vergulli satr.
+  setForArticle: (articleId, tags) => {
+    const names = (Array.isArray(tags) ? tags : String(tags || "").split(","))
+      .map((s) => String(s).trim())
+      .filter(Boolean)
+      .slice(0, 20);
+    const tx = db.transaction(() => {
+      db.prepare("DELETE FROM article_tags WHERE article_id=?").run(articleId);
+      const link = db.prepare("INSERT OR IGNORE INTO article_tags (article_id, tag_id) VALUES (?,?)");
+      const seen = new Set();
+      for (const nm of names) {
+        const t = Tags.upsertByName(nm);
+        if (t && !seen.has(t.id)) { link.run(articleId, t.id); seen.add(t.id); }
+      }
+    });
+    tx();
+  },
+};
 
 // --- Dastlabki seed: mavjud 6 maqolani client'dagi articles.js dan ko'chiramiz ---
 // Faqat jadval bo'sh bo'lsa bir marta ishlaydi.
