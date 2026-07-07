@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import AdminShell from "./AdminShell";
 import TiptapEditor from "./TiptapEditor";
+import SeoHealth from "./SeoHealth";
 import {
   ArticleCover, ArticleIcon, ICON_OPTIONS, COLOR_OPTIONS,
 } from "@/components/ArticleCard";
@@ -400,6 +401,8 @@ export default function AdminEditor() {
               <p className="line-clamp-2 text-[12.5px] text-slate-500">{form.seo_description || form.excerpt || "Meta tavsif shu yerda ko'rinadi…"}</p>
             </div>
           </div>
+
+          <SeoHealth form={form} />
         </div>
 
         {/* Yon panel */}
