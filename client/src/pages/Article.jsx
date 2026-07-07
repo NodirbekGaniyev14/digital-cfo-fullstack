@@ -71,7 +71,7 @@ export default function Article() {
 
   if (article === undefined) {
     return (
-      <div className="flex min-h-screen flex-col bg-white dark:bg-[#070b16]">
+      <div className="flex min-h-screen flex-col bg-white dark:bg-[#0a0e1a]">
         <Navbar />
         <div className="flex flex-1 items-center justify-center text-slate-400">
           <Loader2 className="h-7 w-7 animate-spin" />
@@ -84,7 +84,7 @@ export default function Article() {
   const mins = readingMinutes(article.content);
 
   return (
-    <div className="overflow-x-hidden bg-white dark:bg-[#070b16]">
+    <div className="overflow-x-hidden bg-white dark:bg-[#0a0e1a]">
       <Seo
         title={article.title}
         description={article.excerpt || article.title}
@@ -256,7 +256,7 @@ export default function Article() {
       </article>
 
       {related.length > 0 && (
-        <section className="mt-20 border-t border-navy/[.06] bg-softbg px-6 py-16 dark:border-white/[.06] dark:bg-[#0a1020] print:hidden">
+        <section className="mt-20 border-t border-navy/[.06] bg-softbg px-6 py-16 dark:border-white/[.06] dark:bg-[#0e1424] print:hidden">
           <div className="mx-auto max-w-[1200px]">
             <h2 className="mb-8 font-heading text-[24px] font-bold text-navy dark:text-white">
               O'xshash maqolalar

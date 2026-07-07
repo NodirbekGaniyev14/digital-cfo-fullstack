@@ -68,7 +68,7 @@ export default function AdminList() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Sarlavha, kategoriya, holat…"
-            className="w-full rounded-xl border border-navy/10 bg-white py-2.5 pl-10 pr-4 text-[14px] outline-none focus:border-azure dark:border-white/10 dark:bg-[#0d182b] dark:text-white"
+            className="w-full rounded-xl border border-navy/10 bg-white py-2.5 pl-10 pr-4 text-[14px] outline-none focus:border-azure dark:border-white/10 dark:bg-[#141b2e] dark:text-white"
           />
         </div>
       )}
@@ -78,11 +78,11 @@ export default function AdminList() {
           <Loader2 className="h-6 w-6 animate-spin" />
         </div>
       ) : shown.length === 0 ? (
-        <div className="rounded-2xl border border-navy/[.08] bg-white p-12 text-center text-slate-500 dark:border-white/[.08] dark:bg-[#0d182b]">
+        <div className="rounded-2xl border border-navy/[.08] bg-white p-12 text-center text-slate-500 dark:border-white/[.08] dark:bg-[#141b2e]">
           {query ? `"${query}" bo'yicha topilmadi.` : "Hozircha maqola yo'q. «Yangi maqola» bilan boshlang."}
         </div>
       ) : (
-        <div className="overflow-hidden rounded-2xl border border-navy/[.08] bg-white dark:border-white/[.08] dark:bg-[#0d182b]">
+        <div className="overflow-hidden rounded-2xl border border-navy/[.08] bg-white dark:border-white/[.08] dark:bg-[#141b2e]">
           {shown.map((a) => (
             <div
               key={a.id}

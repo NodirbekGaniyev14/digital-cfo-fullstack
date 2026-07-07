@@ -30,7 +30,7 @@ export default function NewsletterForm({ source = "article", compact = false }) 
   }
 
   return (
-    <div className={`rounded-2xl border border-navy/[.08] bg-white dark:border-white/[.08] dark:bg-[#0d182b] ${compact ? "p-5" : "p-6 sm:p-7"}`}>
+    <div className={`rounded-2xl border border-navy/[.08] bg-white dark:border-white/[.08] dark:bg-[#141b2e] ${compact ? "p-5" : "p-6 sm:p-7"}`}>
       {!compact && (
         <>
           <div className="mb-1 flex items-center gap-2">

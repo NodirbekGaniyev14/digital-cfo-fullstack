@@ -17,7 +17,7 @@ export default function Footer() {
   const isHome = useLocation().pathname === "/";
   const SERVICES = t("ft.services");
   return (
-    <footer className="bg-[#0b1220] px-6 pb-[30px] pt-16 text-slate-300">
+    <footer className="bg-[#0c111f] px-6 pb-[30px] pt-16 text-slate-300">
       <div className="mx-auto max-w-[1200px]">
         <div className="grid gap-9 border-b border-white/[.08] pb-10 sm:grid-cols-2 lg:grid-cols-4">
           <div>

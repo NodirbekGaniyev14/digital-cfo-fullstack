@@ -49,7 +49,7 @@ export default function AdminDashboard() {
       {/* Stat kartalar */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
         {cards.map((c) => (
-          <div key={c.label} className="rounded-2xl border border-navy/[.08] bg-white p-5 dark:border-white/[.08] dark:bg-[#0d182b]">
+          <div key={c.label} className="rounded-2xl border border-navy/[.08] bg-white p-5 dark:border-white/[.08] dark:bg-[#141b2e]">
             <c.Icon className={`mb-3 h-6 w-6 ${c.color}`} />
             <p className="font-heading text-[26px] font-extrabold text-navy dark:text-white">{c.value}</p>
             <p className="text-[12.5px] text-slate-400">{c.label}</p>
@@ -94,7 +94,7 @@ export default function AdminDashboard() {
 
 function Panel({ title, icon: Icon, children }) {
   return (
-    <div className="rounded-2xl border border-navy/[.08] bg-white p-5 dark:border-white/[.08] dark:bg-[#0d182b]">
+    <div className="rounded-2xl border border-navy/[.08] bg-white p-5 dark:border-white/[.08] dark:bg-[#141b2e]">
       <h2 className="mb-3 flex items-center gap-2 font-heading text-[15px] font-bold text-navy dark:text-white">
         <Icon className="h-4 w-4 text-azure" /> {title}
       </h2>

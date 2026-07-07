@@ -11,10 +11,10 @@
   --card-border: rgba(255, 255, 255, 0.5);
 }
 .dark {
-  --page: #070b16;
-  --ink: #e6edf6;
-  --card: rgba(18, 27, 45, 0.62);
-  --card-border: rgba(255, 255, 255, 0.08);
+  --page: #0a0e1a;
+  --ink: #eaf1fb;
+  --card: rgba(20, 27, 46, 0.7);
+  --card-border: rgba(148, 163, 184, 0.12);
   color-scheme: dark;
 }
 
@@ -96,38 +96,38 @@ body {
 
 /* --- Dark mavzu: mavjud utility klasslarini moslash --- */
 .dark .bg-white {
-  background-color: #0d182b !important;
+  background-color: #141b2e !important;
 }
 .dark .bg-softbg {
   background-color: var(--page) !important;
 }
 .dark .bg-navy {
-  background-color: #131f38 !important;
+  background-color: #1c2540 !important;
 }
-/* Navy ramkalar dark fonda ko'rinmay qoladi — yorug' qilamiz */
+/* Navy ramkalar dark fonda ko'rinmay qoladi — slate-tinted yumshoq chegara */
 .dark [class*="border-navy/"] {
-  border-color: rgba(255, 255, 255, 0.12) !important;
+  border-color: rgba(148, 163, 184, 0.14) !important;
 }
 .dark .text-navy {
   color: var(--ink) !important;
 }
 .dark .text-slate-900 {
-  color: #e6edf6 !important;
+  color: #eaf1fb !important;
 }
 .dark .text-slate-800 {
-  color: #dbe4ee !important;
+  color: #dde5f0 !important;
 }
 .dark .text-slate-700 {
-  color: #c6d0dc !important;
+  color: #c9d3e1 !important;
 }
 .dark .text-slate-600 {
-  color: #aab6c4 !important;
+  color: #b2bece !important;
 }
 .dark .text-slate-500 {
-  color: #8b97a6 !important;
+  color: #94a1b5 !important;
 }
 .dark .text-slate-400 {
-  color: #707d8c !important;
+  color: #7e8b9f !important;
 }
 
 @keyframes floaty {

@@ -10,8 +10,8 @@ export default function AdminShell({ children }) {
     nav("/admin/login", { replace: true });
   };
   return (
-    <div className="min-h-screen bg-softbg dark:bg-[#070b16]">
-      <header className="sticky top-0 z-50 border-b border-navy/[.08] bg-white/90 backdrop-blur-xl dark:border-white/[.08] dark:bg-[#0b1220]/90">
+    <div className="min-h-screen bg-softbg dark:bg-[#0a0e1a]">
+      <header className="sticky top-0 z-50 border-b border-navy/[.08] bg-white/90 backdrop-blur-xl dark:border-white/[.08] dark:bg-[#0c111f]/90">
         <div className="mx-auto flex max-w-[1100px] items-center justify-between px-5 py-3">
           <Link to="/admin" className="flex items-center gap-2.5">
             <div className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-navy text-emerald-400">

@@ -55,7 +55,7 @@ export default function AdminMedia() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Fayl nomi bo'yicha qidirish…"
-            className="w-full rounded-xl border border-navy/10 bg-white py-2.5 pl-10 pr-4 text-[14px] outline-none focus:border-azure dark:border-white/10 dark:bg-[#0d182b] dark:text-white"
+            className="w-full rounded-xl border border-navy/10 bg-white py-2.5 pl-10 pr-4 text-[14px] outline-none focus:border-azure dark:border-white/10 dark:bg-[#141b2e] dark:text-white"
           />
         </div>
       )}
@@ -63,14 +63,14 @@ export default function AdminMedia() {
       {media === null ? (
         <div className="flex justify-center py-20 text-slate-400"><Loader2 className="h-6 w-6 animate-spin" /></div>
       ) : shown.length === 0 ? (
-        <div className="flex flex-col items-center gap-2 rounded-2xl border border-navy/[.08] bg-white p-12 text-center text-slate-500 dark:border-white/[.08] dark:bg-[#0d182b]">
+        <div className="flex flex-col items-center gap-2 rounded-2xl border border-navy/[.08] bg-white p-12 text-center text-slate-500 dark:border-white/[.08] dark:bg-[#141b2e]">
           <ImageOff className="h-8 w-8 text-slate-300" />
           {query ? `"${query}" topilmadi.` : "Hozircha rasm yo'q. Editorda rasm yuklang."}
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {shown.map((m) => (
-            <div key={m.name} className="group overflow-hidden rounded-xl border border-navy/[.08] bg-white dark:border-white/[.08] dark:bg-[#0d182b]">
+            <div key={m.name} className="group overflow-hidden rounded-xl border border-navy/[.08] bg-white dark:border-white/[.08] dark:bg-[#141b2e]">
               <div className="relative aspect-[4/3] bg-softbg dark:bg-white/[.03]">
                 <img src={m.url} alt={m.name} loading="lazy" className="h-full w-full object-cover" />
                 <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">

@@ -78,7 +78,7 @@ export default function ContactModal() {
             </button>
 
             {/* Chap — hero */}
-            <div className="relative hidden flex-col justify-between overflow-hidden bg-gradient-to-br from-[#0b1220] to-navy-light p-9 lg:flex">
+            <div className="relative hidden flex-col justify-between overflow-hidden bg-gradient-to-br from-[#0c111f] to-navy-light p-9 lg:flex">
               <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-azure/20 blur-3xl" />
               <div className="pointer-events-none absolute -bottom-20 -left-10 h-56 w-56 rounded-full bg-emerald-500/15 blur-3xl" />
               <div className="relative">
@@ -107,7 +107,7 @@ export default function ContactModal() {
             </div>
 
             {/* O'ng — forma yoki muvaffaqiyat */}
-            <div className="bg-[#0d182b] p-7 sm:p-9">
+            <div className="bg-[#141b2e] p-7 sm:p-9">
               {status === "done" ? (
                 <div className="flex h-full min-h-[360px] flex-col items-center justify-center text-center">
                   <CheckCircle2 className="h-16 w-16 text-emerald-400" />

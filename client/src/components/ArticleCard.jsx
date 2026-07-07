@@ -115,7 +115,7 @@ export default function ArticleCard({ article }) {
   return (
     <Link
       to={`/blog/${article.slug}`}
-      className="group flex flex-col overflow-hidden rounded-2xl border border-navy/[.08] bg-white shadow-[0_2px_16px_rgba(15,23,42,.05)] transition-all hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(15,23,42,.12)] dark:border-white/[.08] dark:bg-[#0d182b]"
+      className="group flex flex-col overflow-hidden rounded-2xl border border-navy/[.08] bg-white shadow-[0_2px_16px_rgba(15,23,42,.05)] transition-all hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(15,23,42,.12)] dark:border-white/[.08] dark:bg-[#141b2e]"
     >
       <ArticleCover article={article} className="h-[120px] w-full" iconClassName="h-9 w-9" />
       <div className="flex flex-1 flex-col p-5">

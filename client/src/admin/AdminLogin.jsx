@@ -27,10 +27,10 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-softbg px-6 dark:bg-[#070b16]">
+    <div className="flex min-h-screen items-center justify-center bg-softbg px-6 dark:bg-[#0a0e1a]">
       <form
         onSubmit={submit}
-        className="w-full max-w-[380px] rounded-2xl border border-navy/[.08] bg-white p-8 shadow-[0_10px_40px_rgba(15,23,42,.1)] dark:border-white/[.08] dark:bg-[#0d182b]"
+        className="w-full max-w-[380px] rounded-2xl border border-navy/[.08] bg-white p-8 shadow-[0_10px_40px_rgba(15,23,42,.1)] dark:border-white/[.08] dark:bg-[#141b2e]"
       >
         <div className="mb-6 flex flex-col items-center text-center">
           <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-navy text-emerald-400">

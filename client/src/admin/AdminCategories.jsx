@@ -75,7 +75,7 @@ export default function AdminCategories() {
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
             placeholder="Yangi kategoriya nomi"
-            className="flex-1 rounded-xl border border-navy/15 bg-white px-4 py-2.5 text-[15px] outline-none focus:border-azure dark:border-white/15 dark:bg-[#0d182b] dark:text-white"
+            className="flex-1 rounded-xl border border-navy/15 bg-white px-4 py-2.5 text-[15px] outline-none focus:border-azure dark:border-white/15 dark:bg-[#141b2e] dark:text-white"
           />
           <button type="submit" disabled={busy} className="flex items-center gap-2 rounded-xl bg-navy px-4 py-2.5 font-semibold text-white transition-transform hover:-translate-y-0.5 disabled:opacity-60">
             {busy ? <Loader2 className="h-5 w-5 animate-spin" /> : <Plus className="h-[18px] w-[18px]" />} Qo'shish
@@ -85,11 +85,11 @@ export default function AdminCategories() {
         {cats === null ? (
           <div className="flex justify-center py-16 text-slate-400"><Loader2 className="h-6 w-6 animate-spin" /></div>
         ) : cats.length === 0 ? (
-          <div className="flex flex-col items-center gap-2 rounded-2xl border border-navy/[.08] bg-white p-12 text-center text-slate-500 dark:border-white/[.08] dark:bg-[#0d182b]">
+          <div className="flex flex-col items-center gap-2 rounded-2xl border border-navy/[.08] bg-white p-12 text-center text-slate-500 dark:border-white/[.08] dark:bg-[#141b2e]">
             <FolderTree className="h-8 w-8 text-slate-300" /> Hozircha kategoriya yo'q.
           </div>
         ) : (
-          <div className="overflow-hidden rounded-2xl border border-navy/[.08] bg-white dark:border-white/[.08] dark:bg-[#0d182b]">
+          <div className="overflow-hidden rounded-2xl border border-navy/[.08] bg-white dark:border-white/[.08] dark:bg-[#141b2e]">
             {cats.map((c) => (
               <div key={c.id} className="flex items-center gap-3 border-b border-navy/[.06] px-4 py-3 last:border-b-0 dark:border-white/[.06]">
                 {editId === c.id ? (

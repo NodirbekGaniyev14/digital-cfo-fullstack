@@ -6,7 +6,7 @@ import Seo from "@/lib/seo";
 // 404 — topilmagan sahifa.
 export default function NotFound() {
   return (
-    <div className="flex min-h-screen flex-col bg-softbg dark:bg-[#070b16]">
+    <div className="flex min-h-screen flex-col bg-softbg dark:bg-[#0a0e1a]">
       <Seo title="Sahifa topilmadi — Digital CFO" description="So'ralgan sahifa mavjud emas." />
       <Navbar />
       <main className="flex flex-1 flex-col items-center justify-center px-6 py-32 text-center">

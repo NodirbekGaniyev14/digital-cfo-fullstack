@@ -44,7 +44,7 @@ export default function ArticlesIndex() {
   }, [articles, query, sort, tag]);
 
   return (
-    <div className="overflow-x-hidden bg-softbg dark:bg-[#070b16]">
+    <div className="overflow-x-hidden bg-softbg dark:bg-[#0a0e1a]">
       <Seo
         title="Maqolalar — moliyaviy tahlil bo'yicha qo'llanmalar"
         description="Moliyaviy tahlil, likvidlik, rentabellik, Altman Z-Score va 1C hisobotlari bo'yicha amaliy maqolalar — Digital CFO ekspertlaridan."
@@ -87,10 +87,10 @@ export default function ArticlesIndex() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Maqola qidirish…"
-              className="w-full rounded-xl border border-navy/10 bg-white py-2.5 pl-10 pr-4 text-[14.5px] outline-none focus:border-azure dark:border-white/10 dark:bg-[#0d182b] dark:text-white"
+              className="w-full rounded-xl border border-navy/10 bg-white py-2.5 pl-10 pr-4 text-[14.5px] outline-none focus:border-azure dark:border-white/10 dark:bg-[#141b2e] dark:text-white"
             />
           </div>
-          <div className="flex items-center gap-1 rounded-xl border border-navy/10 bg-white p-1 dark:border-white/10 dark:bg-[#0d182b]">
+          <div className="flex items-center gap-1 rounded-xl border border-navy/10 bg-white p-1 dark:border-white/10 dark:bg-[#141b2e]">
             <SortBtn active={sort === "new"} onClick={() => setSort("new")} icon={Clock}>Yangi</SortBtn>
             <SortBtn active={sort === "popular"} onClick={() => setSort("popular")} icon={Flame}>Ommabop</SortBtn>
           </div>
@@ -101,11 +101,11 @@ export default function ArticlesIndex() {
             <Loader2 className="h-6 w-6 animate-spin" />
           </div>
         ) : shown.length === 0 ? (
-          <div className="rounded-2xl border border-navy/[.08] bg-white p-12 text-center text-slate-500 dark:border-white/[.08] dark:bg-[#0d182b] dark:text-slate-400">
+          <div className="rounded-2xl border border-navy/[.08] bg-white p-12 text-center text-slate-500 dark:border-white/[.08] dark:bg-[#141b2e] dark:text-slate-400">
             {query ? `"${query}" bo'yicha hech narsa topilmadi.` : "Hozircha maqolalar yo'q."}
           </div>
         ) : (
-          <div className="divide-y divide-navy/[.06] overflow-hidden rounded-2xl border border-navy/[.08] bg-white shadow-[0_2px_20px_rgba(15,23,42,.05)] dark:divide-white/[.06] dark:border-white/[.08] dark:bg-[#0d182b]">
+          <div className="divide-y divide-navy/[.06] overflow-hidden rounded-2xl border border-navy/[.08] bg-white shadow-[0_2px_20px_rgba(15,23,42,.05)] dark:divide-white/[.06] dark:border-white/[.08] dark:bg-[#141b2e]">
             {shown.map((a) => (
               <ArticleRow key={a.slug} article={a} />
             ))}

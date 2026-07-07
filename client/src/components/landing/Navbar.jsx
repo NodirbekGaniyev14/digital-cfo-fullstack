@@ -56,7 +56,7 @@ export default function Navbar() {
       className={cn(
         "fixed inset-x-0 top-0 z-[200] border-b px-6 py-3.5 transition-all duration-300",
         scrolled
-          ? "border-navy/[.06] bg-softbg/80 dark:border-white/[.07] dark:bg-[#070b16]/85 shadow-[0_4px_22px_rgba(15,23,42,.07)] backdrop-blur-xl"
+          ? "border-navy/[.06] bg-softbg/80 dark:border-white/[.07] dark:bg-[#0a0e1a]/85 shadow-[0_4px_22px_rgba(15,23,42,.07)] backdrop-blur-xl"
           : "border-transparent bg-transparent"
       )}
     >
@@ -108,7 +108,7 @@ export default function Navbar() {
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
-            className="mt-3.5 flex flex-col gap-1 rounded-2xl border border-navy/[.08] bg-white/95 dark:bg-[#0d182b]/95 p-3.5 shadow-[0_20px_40px_rgba(15,23,42,.12)] backdrop-blur-xl xl:hidden"
+            className="mt-3.5 flex flex-col gap-1 rounded-2xl border border-navy/[.08] bg-white/95 dark:bg-[#141b2e]/95 p-3.5 shadow-[0_20px_40px_rgba(15,23,42,.12)] backdrop-blur-xl xl:hidden"
           >
             {NAV_LINKS.map((l) => (
               <NavItem
@@ -155,7 +155,7 @@ function LangDropdown({ lang, setLang }) {
             initial={{ opacity: 0, y: -6 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
-            className="absolute right-0 z-50 mt-1.5 w-[140px] overflow-hidden rounded-xl border border-navy/[.08] bg-white shadow-[0_16px_36px_rgba(15,23,42,.16)] dark:border-white/10 dark:bg-[#0d182b]"
+            className="absolute right-0 z-50 mt-1.5 w-[140px] overflow-hidden rounded-xl border border-navy/[.08] bg-white shadow-[0_16px_36px_rgba(15,23,42,.16)] dark:border-white/10 dark:bg-[#141b2e]"
           >
             {LANGS.map((l) => (
               <button

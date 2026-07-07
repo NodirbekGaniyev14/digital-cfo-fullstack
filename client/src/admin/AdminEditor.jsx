@@ -247,7 +247,7 @@ export default function AdminEditor() {
       {/* Versiyalar modali */}
       {showRevisions && (
         <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/40 p-4" onClick={() => setShowRevisions(false)}>
-          <div className="max-h-[70vh] w-full max-w-[440px] overflow-y-auto rounded-2xl bg-white p-5 shadow-xl dark:bg-[#0d182b]" onClick={(e) => e.stopPropagation()}>
+          <div className="max-h-[70vh] w-full max-w-[440px] overflow-y-auto rounded-2xl bg-white p-5 shadow-xl dark:bg-[#141b2e]" onClick={(e) => e.stopPropagation()}>
             <h3 className="mb-3 font-heading text-[16px] font-bold text-navy dark:text-white">Versiya tarixi</h3>
             {revisions === null ? (
               <div className="flex justify-center py-8 text-slate-400"><Loader2 className="h-5 w-5 animate-spin" /></div>
@@ -307,7 +307,7 @@ export default function AdminEditor() {
           </Field>
 
           {/* FAQ builder — Google FAQ Schema uchun */}
-          <div className="rounded-2xl border border-navy/[.08] bg-white p-5 dark:border-white/[.08] dark:bg-[#0d182b]">
+          <div className="rounded-2xl border border-navy/[.08] bg-white p-5 dark:border-white/[.08] dark:bg-[#141b2e]">
             <div className="mb-3 flex items-center justify-between">
               <h3 className="font-heading text-[15px] font-bold text-navy dark:text-white">
                 FAQ (savol-javob)
@@ -353,7 +353,7 @@ export default function AdminEditor() {
           </div>
 
           {/* SEO */}
-          <div className="rounded-2xl border border-navy/[.08] bg-white p-5 dark:border-white/[.08] dark:bg-[#0d182b]">
+          <div className="rounded-2xl border border-navy/[.08] bg-white p-5 dark:border-white/[.08] dark:bg-[#141b2e]">
             <h3 className="mb-3 font-heading text-[15px] font-bold text-navy dark:text-white">SEO</h3>
             <Field label="SEO sarlavha (title)" hint={`${(form.seo_title || form.title).length}/60 — bo'sh bo'lsa sarlavha ishlatiladi`}>
               <input
@@ -407,7 +407,7 @@ export default function AdminEditor() {
 
         {/* Yon panel */}
         <aside className="space-y-5">
-          <div className="rounded-2xl border border-navy/[.08] bg-white p-5 dark:border-white/[.08] dark:bg-[#0d182b]">
+          <div className="rounded-2xl border border-navy/[.08] bg-white p-5 dark:border-white/[.08] dark:bg-[#141b2e]">
             <h3 className="mb-3 font-heading text-[14px] font-bold text-navy dark:text-white">Chop etish</h3>
             <Field label="Holat">
               <select
@@ -453,7 +453,7 @@ export default function AdminEditor() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-navy/[.08] bg-white p-5 dark:border-white/[.08] dark:bg-[#0d182b]">
+          <div className="rounded-2xl border border-navy/[.08] bg-white p-5 dark:border-white/[.08] dark:bg-[#141b2e]">
             <h3 className="mb-3 font-heading text-[14px] font-bold text-navy dark:text-white">Ko'rinish</h3>
 
             <Field label="Muqova (oldindan ko'rish)">
@@ -541,7 +541,7 @@ export default function AdminEditor() {
                     type="button"
                     title={o.label}
                     onClick={() => set("icon_color", o.key)}
-                    className={`h-8 w-8 rounded-lg ring-2 ring-offset-2 transition-all dark:ring-offset-[#0d182b] ${
+                    className={`h-8 w-8 rounded-lg ring-2 ring-offset-2 transition-all dark:ring-offset-[#141b2e] ${
                       form.icon_color === o.key ? "ring-navy dark:ring-white" : "ring-transparent"
                     }`}
                     style={{ background: SWATCH[o.key] }}
@@ -575,7 +575,7 @@ export default function AdminEditor() {
           </div>
 
           {/* Muallif */}
-          <div className="rounded-2xl border border-navy/[.08] bg-white p-5 dark:border-white/[.08] dark:bg-[#0d182b]">
+          <div className="rounded-2xl border border-navy/[.08] bg-white p-5 dark:border-white/[.08] dark:bg-[#141b2e]">
             <h3 className="mb-3 font-heading text-[14px] font-bold text-navy dark:text-white">Muallif</h3>
             <div className="mb-4 flex items-center gap-3">
               {form.author_avatar ? (

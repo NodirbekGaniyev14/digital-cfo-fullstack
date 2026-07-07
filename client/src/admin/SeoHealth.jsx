@@ -87,7 +87,7 @@ export default function SeoHealth({ form }) {
   const scoreColor = a.score >= 80 ? "text-emerald-500" : a.score >= 50 ? "text-amber-500" : "text-red-500";
 
   return (
-    <div className="rounded-2xl border border-navy/[.08] bg-white p-5 dark:border-white/[.08] dark:bg-[#0d182b]">
+    <div className="rounded-2xl border border-navy/[.08] bg-white p-5 dark:border-white/[.08] dark:bg-[#141b2e]">
       <div className="mb-4 flex items-center justify-between">
         <h3 className="font-heading text-[15px] font-bold text-navy dark:text-white">SEO sog'lig'i</h3>
         <span className={`font-heading text-[22px] font-extrabold ${scoreColor}`}>{a.score}<span className="text-[13px] text-slate-400">/100</span></span>

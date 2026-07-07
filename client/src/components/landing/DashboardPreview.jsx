@@ -102,7 +102,7 @@ export default function DashboardPreview() {
           whileInView="show"
           viewport={viewportOnce}
           variants={fadeUp}
-          className="overflow-hidden rounded-[18px] border border-white/10 bg-[#0b1220] shadow-[0_40px_80px_rgba(0,0,0,.4)]"
+          className="overflow-hidden rounded-[18px] border border-white/10 bg-[#0c111f] shadow-[0_40px_80px_rgba(0,0,0,.4)]"
         >
           <div className="flex items-center gap-2.5 border-b border-white/[.07] bg-white/[.03] px-[18px] py-3.5">
             <span className="h-[11px] w-[11px] rounded-full bg-red-500" />

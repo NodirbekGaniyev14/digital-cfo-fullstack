@@ -15,7 +15,7 @@ export default function ThemeToggle({ className = "" }) {
       localStorage.setItem("theme", dark ? "dark" : "light");
     } catch {}
     const meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.setAttribute("content", dark ? "#070b16" : "#0F172A");
+    if (meta) meta.setAttribute("content", dark ? "#0a0e1a" : "#0F172A");
   }, [dark]);
 
   return (
