@@ -10,7 +10,7 @@ import fs from "node:fs";
 import { fileURLToPath } from "node:url";
 import { execFile } from "node:child_process";
 import { timingSafeEqual } from "node:crypto";
-import db, { Articles, Authors, Tags, Subscribers, Revisions, cleanHtml, uniqueSlug } from "./db.js";
+import db, { Articles, Authors, Tags, Categories, Subscribers, Revisions, cleanHtml, uniqueSlug } from "./db.js";
 import { loginHandler, requireAdmin } from "./auth.js";
 import { renderArticle, renderList, buildSitemap, hasTemplate } from "./ssr.js";
 
@@ -716,11 +716,30 @@ app.get("/api/admin/articles/:id", requireAdmin, (req, res) => {
 
 // Editor uchun meta: mavjud mualliflar, teglar, kategoriyalar (datalist).
 app.get("/api/admin/meta", requireAdmin, (_req, res) => {
-  const categories = db
-    .prepare("SELECT DISTINCT category FROM articles WHERE category != '' ORDER BY category")
-    .all()
-    .map((r) => r.category);
-  res.json({ authors: Authors.list(), tags: Tags.all(), categories });
+  res.json({ authors: Authors.list(), tags: Tags.all(), categories: Categories.names() });
+});
+
+// ---- Kategoriyalar CRUD (admin) ----------------------------------------------
+app.get("/api/admin/categories", requireAdmin, (_req, res) => {
+  res.json({ categories: Categories.list() });
+});
+app.post("/api/admin/categories", requireAdmin, (req, res) => {
+  const name = clean(req.body?.name, 80);
+  if (!name) return res.status(400).json({ error: "Nom majburiy" });
+  const c = Categories.create(name);
+  if (!c) return res.status(409).json({ error: "Bunday kategoriya allaqachon bor" });
+  res.json({ ok: true, category: c });
+});
+app.put("/api/admin/categories/:id", requireAdmin, (req, res) => {
+  const name = clean(req.body?.name, 80);
+  if (!name) return res.status(400).json({ error: "Nom majburiy" });
+  const c = Categories.rename(Number(req.params.id), name);
+  if (!c) return res.status(404).json({ error: "Topilmadi" });
+  res.json({ ok: true, category: c });
+});
+app.delete("/api/admin/categories/:id", requireAdmin, (req, res) => {
+  Categories.remove(Number(req.params.id));
+  res.json({ ok: true });
 });
 
 app.post("/api/admin/articles", requireAdmin, (req, res) => {

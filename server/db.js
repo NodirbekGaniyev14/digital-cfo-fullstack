@@ -202,6 +202,7 @@ export const Articles = {
     const author = Authors.upsertByName(a.author, { avatar: a.author_avatar, bio: a.author_bio });
     const p = _articleParams(a, now);
     p.author = author.name;
+    if (p.category) Categories.ensureName(p.category);
     const info = db
       .prepare(
         `INSERT INTO articles (${ALL_COLS.join(", ")}, created_at, updated_at)
@@ -221,6 +222,7 @@ export const Articles = {
     const author = Authors.upsertByName(a.author, { avatar: a.author_avatar, bio: a.author_bio });
     const p = _articleParams(a, now);
     p.author = author.name;
+    if (p.category) Categories.ensureName(p.category);
     db.prepare(
       `UPDATE articles SET ${ALL_COLS.map((c) => `${c}=@${c}`).join(", ")}, author_id=@author_id, updated_at=@updated_at WHERE id=@id`
     ).run({ ...p, id, author_id: author.id, updated_at: now });
@@ -390,6 +392,65 @@ export const Tags = {
   },
 };
 
+// --- Kategoriyalar (boshqariladigan) ---
+// Maqolalar `category` matnini saqlaydi; bu jadval kanonik ro'yxat.
+export const Categories = {
+  list: () =>
+    db.prepare(
+      `SELECT c.id, c.name, c.slug,
+         (SELECT COUNT(*) FROM articles a WHERE a.category = c.name) AS count
+       FROM categories c ORDER BY c.name`
+    ).all(),
+  names: () => db.prepare("SELECT name FROM categories ORDER BY name").all().map((r) => r.name),
+  getById: (id) => db.prepare("SELECT * FROM categories WHERE id=?").get(id),
+  // Nom bo'lmasa yaratadi (editor'da yangi kategoriya yozilganda).
+  ensureName: (name) => {
+    const nm = String(name || "").trim();
+    if (!nm) return;
+    const ex = db.prepare("SELECT id FROM categories WHERE name=? COLLATE NOCASE").get(nm);
+    if (!ex) {
+      db.prepare("INSERT INTO categories (name, slug, created_at) VALUES (?,?,?)")
+        .run(nm, uniqueSlugIn("categories", nm), new Date().toISOString());
+    }
+  },
+  create: (name) => {
+    const nm = String(name || "").trim();
+    if (!nm) return null;
+    if (db.prepare("SELECT id FROM categories WHERE name=? COLLATE NOCASE").get(nm)) return null;
+    const info = db.prepare("INSERT INTO categories (name, slug, created_at) VALUES (?,?,?)")
+      .run(nm, uniqueSlugIn("categories", nm), new Date().toISOString());
+    return Categories.getById(info.lastInsertRowid);
+  },
+  // Nomni o'zgartiradi — barcha maqolalardagi category matnini ham yangilaydi.
+  rename: (id, newName) => {
+    const nm = String(newName || "").trim();
+    const old = Categories.getById(id);
+    if (!old || !nm) return null;
+    const tx = db.transaction(() => {
+      db.prepare("UPDATE articles SET category=? WHERE category=?").run(nm, old.name);
+      db.prepare("UPDATE categories SET name=?, slug=? WHERE id=?")
+        .run(nm, uniqueSlugIn("categories", nm, id), id);
+    });
+    tx();
+    return Categories.getById(id);
+  },
+  // O'chiradi — o'sha kategoriyadagi maqolalarni "kategoriyasiz" qiladi.
+  remove: (id) => {
+    const c = Categories.getById(id);
+    if (!c) return;
+    const tx = db.transaction(() => {
+      db.prepare("UPDATE articles SET category='' WHERE category=?").run(c.name);
+      db.prepare("DELETE FROM categories WHERE id=?").run(id);
+    });
+    tx();
+  },
+  // Mavjud maqolalardagi kategoriyalarni jadvalga kiritadi (startda bir marta).
+  backfill: () => {
+    const rows = db.prepare("SELECT DISTINCT category FROM articles WHERE category != ''").all();
+    for (const r of rows) Categories.ensureName(r.category);
+  },
+};
+
 // --- Versiya tarixi (revisions) ---
 export const Revisions = {
   // Maqolaning joriy holatini tarixga yozadi (o'zgartirishdan OLDIN).
@@ -467,5 +528,8 @@ if (Articles.count() === 0) {
     console.warn("⚠️ Seed o'tkazib yuborildi:", err.message);
   }
 }
+
+// Mavjud maqolalardagi kategoriyalarni boshqariladigan jadvalga kiritamiz.
+Categories.backfill();
 
 export default db;
