@@ -3,14 +3,17 @@ import { useNavigate, useParams, Link } from "react-router-dom";
 import { toast } from "sonner";
 import {
   ArrowLeft, Loader2, Save, Upload, X, Plus, Trash2, ChevronDown, History, User,
+  Sparkles, Copy,
 } from "lucide-react";
 import AdminShell from "./AdminShell";
 import TiptapEditor from "./TiptapEditor";
 import SeoHealth from "./SeoHealth";
+import SocialPanel from "./SocialPanel";
+import QualityPanel from "./QualityPanel";
 import {
   ArticleCover, ArticleIcon, ICON_OPTIONS, COLOR_OPTIONS,
 } from "@/components/ArticleCard";
-import { adminGetArticle, adminCreate, adminUpdate, uploadImage, adminMeta, adminRevisions, adminRevision } from "@/lib/api";
+import { adminGetArticle, adminCreate, adminUpdate, uploadImage, adminMeta, adminRevisions, adminRevision, aiStatus, aiGenerate } from "@/lib/api";
 
 const DEFAULT_CATEGORIES = ["Asoslar", "Likvidlik", "Risk", "Rentabellik", "Barqarorlik", "Amaliyot", "CFO", "IFRS", "KPI", "Budget", "Case Study"];
 
@@ -51,8 +54,16 @@ export default function AdminEditor() {
   const slugTouched = useRef(false);
   const AUTOSAVE_KEY = `cfo_autosave_${id || "new"}`;
 
+  // AI generator (DCOS) holati
+  const [aiOn, setAiOn] = useState(null); // null=yuklanmoqda, true/false
+  const [aiOpen, setAiOpen] = useState(!isEdit); // yangi maqolada ochiq
+  const [aiBusy, setAiBusy] = useState(false);
+  const [ai, setAi] = useState({ topic: "", keyword: "", length: "standard", notes: "" });
+  const [aiImagePrompt, setAiImagePrompt] = useState("");
+
   useEffect(() => {
     adminMeta().then(setMeta).catch(() => {});
+    aiStatus().then(setAiOn).catch(() => setAiOn(false));
   }, []);
 
   useEffect(() => {
@@ -153,6 +164,45 @@ export default function AdminEditor() {
   const updateFaq = (i, k, v) =>
     set("faqs", form.faqs.map((f, idx) => (idx === i ? { ...f, [k]: v } : f)));
   const removeFaq = (i) => set("faqs", form.faqs.filter((_, idx) => idx !== i));
+
+  // AI generatsiya — natijani forma maydonlariga qo'shadi (mavjudlarini ustidan bosmaydi
+  // agar AI bo'sh qaytarsa). Foydalanuvchi keyin ko'rib, tahrirlab saqlaydi.
+  const runAi = async () => {
+    if (!ai.topic.trim()) return toast.error("Mavzu majburiy");
+    setAiBusy(true);
+    setAiImagePrompt("");
+    try {
+      const a = await aiGenerate({
+        topic: ai.topic.trim(),
+        keyword: ai.keyword.trim(),
+        category: form.category,
+        length: ai.length,
+        notes: ai.notes.trim(),
+      });
+      setForm((f) => ({
+        ...f,
+        title: a.title || f.title,
+        slug: a.slug ? slugify(a.slug) : f.slug,
+        excerpt: a.excerpt || f.excerpt,
+        content: a.content || f.content,
+        category: a.category || f.category,
+        seo_title: a.seo_title || f.seo_title,
+        seo_description: a.seo_description || f.seo_description,
+        focus_keyword: a.focus_keyword || f.focus_keyword,
+        cover_alt: a.cover_alt || f.cover_alt,
+        cover_caption: a.cover_caption || f.cover_caption,
+        tags: Array.isArray(a.tags) && a.tags.length ? a.tags : f.tags,
+        faqs: Array.isArray(a.faqs) && a.faqs.length ? a.faqs : f.faqs,
+      }));
+      slugTouched.current = true;
+      if (a.featured_image_prompt) setAiImagePrompt(a.featured_image_prompt);
+      toast.success("Maqola yaratildi — ko'rib chiqing va tahrirlang");
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setAiBusy(false);
+    }
+  };
 
   const restoreAutosave = () => {
     if (autosaveFound?.form) {
@@ -274,6 +324,101 @@ export default function AdminEditor() {
       <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
         {/* Asosiy ustun */}
         <div className="space-y-5">
+          {/* AI generator (DCOS) */}
+          {aiOn === false && (
+            <div className="rounded-2xl border border-navy/[.08] bg-white p-4 text-[13px] text-slate-500 dark:border-white/[.08] dark:bg-[#141b2e] dark:text-slate-400">
+              <span className="inline-flex items-center gap-1.5">
+                <Sparkles className="h-4 w-4 text-slate-400" />
+                AI yordamchi o'chirilgan — <code className="rounded bg-navy/[.06] px-1 dark:bg-white/[.06]">server/.env</code> ga <code className="rounded bg-navy/[.06] px-1 dark:bg-white/[.06]">ANTHROPIC_API_KEY</code> qo'shing.
+              </span>
+            </div>
+          )}
+          {aiOn === true && (
+            <div className="overflow-hidden rounded-2xl border border-azure/25 bg-gradient-to-br from-azure/[.05] to-emerald-500/[.04] dark:border-azure/25">
+              <button
+                type="button"
+                onClick={() => setAiOpen((v) => !v)}
+                className="flex w-full items-center justify-between gap-2 px-5 py-3.5"
+              >
+                <span className="inline-flex items-center gap-2 font-heading text-[15px] font-bold text-navy dark:text-white">
+                  <Sparkles className="h-[18px] w-[18px] text-azure" /> AI bilan yaratish
+                  <span className="rounded-md bg-azure/10 px-1.5 py-0.5 text-[11px] font-semibold text-azure">DCOS</span>
+                </span>
+                <ChevronDown className={`h-5 w-5 text-slate-400 transition-transform ${aiOpen ? "rotate-180" : ""}`} />
+              </button>
+              {aiOpen && (
+                <div className="space-y-3 border-t border-azure/15 px-5 py-4">
+                  <Field label="Mavzu" hint="Nima haqida maqola? (majburiy)">
+                    <input
+                      value={ai.topic}
+                      onChange={(e) => setAi((s) => ({ ...s, topic: e.target.value }))}
+                      className="w-full rounded-xl border border-navy/15 bg-white px-4 py-2.5 text-[15px] outline-none focus:border-azure dark:border-white/15 dark:bg-white/[.03] dark:text-white"
+                      placeholder="Masalan: Kichik biznes uchun pul oqimini boshqarish"
+                    />
+                  </Field>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <Field label="Asosiy kalit so'z (ixtiyoriy)">
+                      <input
+                        value={ai.keyword}
+                        onChange={(e) => setAi((s) => ({ ...s, keyword: e.target.value }))}
+                        className="w-full rounded-xl border border-navy/15 bg-white px-4 py-2.5 text-[14px] outline-none focus:border-azure dark:border-white/15 dark:bg-white/[.03] dark:text-white"
+                        placeholder="masalan: pul oqimi"
+                      />
+                    </Field>
+                    <Field label="Uzunlik">
+                      <select
+                        value={ai.length}
+                        onChange={(e) => setAi((s) => ({ ...s, length: e.target.value }))}
+                        className="w-full rounded-xl border border-navy/15 bg-white px-3 py-2.5 text-[14px] outline-none focus:border-azure dark:border-white/15 dark:bg-white/[.03] dark:text-white"
+                      >
+                        <option value="short">Ixcham (~1500 so'z)</option>
+                        <option value="standard">Standart (~2500 so'z)</option>
+                        <option value="pillar">Pillar (~4000 so'z)</option>
+                      </select>
+                    </Field>
+                  </div>
+                  <Field label="Qo'shimcha ko'rsatmalar (ixtiyoriy)">
+                    <textarea
+                      value={ai.notes}
+                      onChange={(e) => setAi((s) => ({ ...s, notes: e.target.value }))}
+                      rows={2}
+                      className="w-full resize-y rounded-xl border border-navy/15 bg-white px-4 py-2.5 text-[14px] outline-none focus:border-azure dark:border-white/15 dark:bg-white/[.03] dark:text-white"
+                      placeholder="Masalan: ishlab chiqarish korxonasi misolida, jadval bilan"
+                    />
+                  </Field>
+                  <button
+                    type="button"
+                    onClick={runAi}
+                    disabled={aiBusy}
+                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-azure to-emerald-500 py-2.5 font-semibold text-white transition-transform hover:-translate-y-0.5 disabled:translate-y-0 disabled:opacity-60"
+                  >
+                    {aiBusy ? <><Loader2 className="h-4 w-4 animate-spin" /> Yozilmoqda… (1–2 daqiqa)</> : <><Sparkles className="h-4 w-4" /> Maqola yaratish</>}
+                  </button>
+                  {isEdit && (
+                    <p className="text-[12px] text-amber-600 dark:text-amber-400">
+                      ⚠️ Diqqat: generatsiya joriy maydonlar (sarlavha, matn, SEO…) ustidan yozadi.
+                    </p>
+                  )}
+                  {aiImagePrompt && (
+                    <div className="rounded-xl border border-navy/[.08] bg-white/70 p-3 dark:border-white/[.08] dark:bg-white/[.03]">
+                      <div className="mb-1.5 flex items-center justify-between">
+                        <span className="text-[12px] font-semibold text-slate-500 dark:text-slate-400">🖼️ Muqova rasmi uchun prompt (tavsiya)</span>
+                        <button
+                          type="button"
+                          onClick={() => { navigator.clipboard?.writeText(aiImagePrompt); toast.success("Nusxalandi"); }}
+                          className="inline-flex items-center gap-1 text-[12px] font-medium text-azure hover:underline"
+                        >
+                          <Copy className="h-3.5 w-3.5" /> Nusxalash
+                        </button>
+                      </div>
+                      <p className="text-[12.5px] leading-relaxed text-slate-600 dark:text-slate-300">{aiImagePrompt}</p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
           <Field label="Sarlavha">
             <input
               value={form.title}
@@ -403,6 +548,10 @@ export default function AdminEditor() {
           </div>
 
           <SeoHealth form={form} />
+
+          {/* Sifat bahosi + Social paket (DCOS Part 9/7) — saqlangan maqola uchun */}
+          {isEdit && <QualityPanel articleId={Number(id)} />}
+          {isEdit && <SocialPanel articleId={Number(id)} />}
         </div>
 
         {/* Yon panel */}

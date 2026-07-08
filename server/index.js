@@ -10,9 +10,11 @@ import fs from "node:fs";
 import { fileURLToPath } from "node:url";
 import { execFile } from "node:child_process";
 import { timingSafeEqual } from "node:crypto";
-import db, { Articles, Authors, Tags, Categories, Subscribers, Revisions, cleanHtml, uniqueSlug } from "./db.js";
+import db, { Articles, Authors, Tags, Categories, Subscribers, Revisions, AutopilotTopics, cleanHtml, uniqueSlug } from "./db.js";
 import { loginHandler, requireAdmin } from "./auth.js";
 import { renderArticle, renderList, buildSitemap, hasTemplate } from "./ssr.js";
+import { aiEnabled, generateArticle, generateSocialPackage, scoreArticle } from "./anthropic.js";
+import { startAutopilot, autopilotStatus, setAutopilotSettings, seedStarterTopics, runGuarded } from "./autopilot.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 4000;
@@ -291,6 +293,9 @@ function runScheduler() {
 }
 runScheduler(); // startda bir marta
 setInterval(runScheduler, 60 * 1000); // har daqiqa
+
+// Avtopilot (DCOS Faza 2) — standart holatda O'CHIQ; yoqilsa slotlarda ishlaydi.
+startAutopilot();
 
 // ---- Routes -------------------------------------------------------------------
 app.get("/api/health", (_req, res) => res.json({ ok: true }));
@@ -717,6 +722,145 @@ app.get("/api/admin/articles/:id", requireAdmin, (req, res) => {
 // Editor uchun meta: mavjud mualliflar, teglar, kategoriyalar (datalist).
 app.get("/api/admin/meta", requireAdmin, (_req, res) => {
   res.json({ authors: Authors.list(), tags: Tags.all(), categories: Categories.names() });
+});
+
+// ---- AI kontent generatori (DCOS) --------------------------------------------
+// ANTHROPIC_API_KEY bo'lmasa — o'chiq (status:false). Editor buni tekshirib panelni
+// ko'rsatadi/yashiradi. Generatsiya qimmat/sekin bo'lgani uchun rate-limit qo'yildi.
+const aiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 15,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Juda ko'p AI so'rovi. Birozdan so'ng qayta urinib ko'ring." },
+});
+
+app.get("/api/admin/ai/status", requireAdmin, (_req, res) => {
+  res.json({ enabled: aiEnabled() });
+});
+
+app.post("/api/admin/ai/generate", requireAdmin, aiLimiter, async (req, res) => {
+  if (!aiEnabled()) {
+    return res.status(503).json({ error: "AI o'chirilgan. server/.env ga ANTHROPIC_API_KEY qo'shing." });
+  }
+  const topic = clean(req.body?.topic, 300);
+  if (!topic) return res.status(400).json({ error: "Mavzu majburiy" });
+  const keyword = clean(req.body?.keyword, 120);
+  const category = clean(req.body?.category, 80);
+  const length = clean(req.body?.length, 20);
+  const notes = clean(req.body?.notes, 1000);
+  try {
+    const article = await generateArticle({ topic, keyword, category, length, notes });
+    console.log("🤖 AI maqola generatsiya qilindi:", topic);
+    res.json({ ok: true, article });
+  } catch (err) {
+    console.warn("⚠️ AI generatsiya xatosi:", err.message);
+    res.status(502).json({ error: err.message || "AI generatsiya muvaffaqiyatsiz" });
+  }
+});
+
+// ---- Avtopilot (DCOS Faza 2) -------------------------------------------------
+app.get("/api/admin/autopilot", requireAdmin, (_req, res) => {
+  res.json(autopilotStatus());
+});
+
+app.post("/api/admin/autopilot/settings", requireAdmin, (req, res) => {
+  const enabled = req.body?.enabled === undefined ? undefined : Boolean(req.body.enabled);
+  const mode = req.body?.mode === undefined ? undefined : clean(req.body.mode, 20);
+  const social = req.body?.social === undefined ? undefined : Boolean(req.body.social);
+  const qgate = req.body?.qgate === undefined ? undefined : Boolean(req.body.qgate);
+  const qgateMin = req.body?.qgateMin === undefined ? undefined : Number(req.body.qgateMin);
+  res.json(setAutopilotSettings({ enabled, mode, social, qgate, qgateMin }));
+});
+
+app.get("/api/admin/autopilot/topics", requireAdmin, (_req, res) => {
+  res.json({ topics: AutopilotTopics.list() });
+});
+
+app.post("/api/admin/autopilot/topics", requireAdmin, (req, res) => {
+  const topic = clean(req.body?.topic, 300);
+  if (!topic) return res.status(400).json({ error: "Mavzu majburiy" });
+  const added = AutopilotTopics.add({
+    topic,
+    keyword: clean(req.body?.keyword, 120),
+    category: clean(req.body?.category, 80),
+    length: clean(req.body?.length, 20) || "standard",
+  });
+  res.json({ ok: true, topic: added });
+});
+
+app.delete("/api/admin/autopilot/topics/:id", requireAdmin, (req, res) => {
+  AutopilotTopics.remove(Number(req.params.id));
+  res.json({ ok: true });
+});
+
+app.post("/api/admin/autopilot/topics/:id/retry", requireAdmin, (req, res) => {
+  AutopilotTopics.retry(Number(req.params.id));
+  res.json({ ok: true });
+});
+
+app.post("/api/admin/autopilot/seed-starter", requireAdmin, (_req, res) => {
+  const added = seedStarterTopics();
+  res.json({ ok: true, added, topics: AutopilotTopics.list() });
+});
+
+// Qo'lda bitta generatsiya (test uchun) — navbatdan keyingi mavzuni yaratadi.
+app.post("/api/admin/autopilot/run", requireAdmin, aiLimiter, async (_req, res) => {
+  if (!aiEnabled()) {
+    return res.status(503).json({ error: "AI o'chirilgan. server/.env ga ANTHROPIC_API_KEY qo'shing." });
+  }
+  const result = await runGuarded({ slot: "manual", manual: true });
+  res.json(result);
+});
+
+// ---- Social paket (DCOS Part 7 — Faza 3) -------------------------------------
+app.get("/api/admin/articles/:id/social", requireAdmin, (req, res) => {
+  const a = Articles.getById(Number(req.params.id));
+  if (!a) return res.status(404).json({ error: "Maqola topilmadi" });
+  res.json({ social: Articles.getSocial(a.id) });
+});
+
+app.post("/api/admin/articles/:id/social/generate", requireAdmin, aiLimiter, async (req, res) => {
+  if (!aiEnabled()) {
+    return res.status(503).json({ error: "AI o'chirilgan. server/.env ga ANTHROPIC_API_KEY qo'shing." });
+  }
+  const a = Articles.getById(Number(req.params.id));
+  if (!a) return res.status(404).json({ error: "Maqola topilmadi" });
+  try {
+    const contentText = String(a.content || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().slice(0, 5000);
+    const social = await generateSocialPackage({
+      title: a.title,
+      excerpt: a.excerpt,
+      keyword: a.focus_keyword,
+      url: `https://digitalcfo.uz/blog/${a.slug}`,
+      contentText,
+    });
+    Articles.setSocial(a.id, social);
+    console.log("📣 Social paket yaratildi:", a.slug);
+    res.json({ ok: true, social });
+  } catch (err) {
+    console.warn("⚠️ Social generatsiya xatosi:", err.message);
+    res.status(502).json({ error: err.message || "Social generatsiya muvaffaqiyatsiz" });
+  }
+});
+
+// ---- Sifat bahosi (DCOS Part 9 — Quality Gate) -------------------------------
+app.post("/api/admin/articles/:id/quality", requireAdmin, aiLimiter, async (req, res) => {
+  if (!aiEnabled()) {
+    return res.status(503).json({ error: "AI o'chirilgan. server/.env ga ANTHROPIC_API_KEY qo'shing." });
+  }
+  const a = Articles.getById(Number(req.params.id));
+  if (!a) return res.status(404).json({ error: "Maqola topilmadi" });
+  try {
+    const contentText = String(a.content || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().slice(0, 8000);
+    const result = await scoreArticle({ title: a.title, contentText, keyword: a.focus_keyword });
+    Articles.setQuality(a.id, result.total);
+    console.log(`🏅 Sifat bahosi: ${a.slug} → ${result.total}/100`);
+    res.json({ ok: true, ...result });
+  } catch (err) {
+    console.warn("⚠️ Sifat baholash xatosi:", err.message);
+    res.status(502).json({ error: err.message || "Baholash muvaffaqiyatsiz" });
+  }
 });
 
 // ---- Kategoriyalar CRUD (admin) ----------------------------------------------

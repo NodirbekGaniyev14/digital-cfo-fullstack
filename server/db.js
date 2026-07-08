@@ -57,6 +57,8 @@ _addCol("articles", "views", "views INTEGER DEFAULT 0");
 _addCol("articles", "is_featured", "is_featured INTEGER DEFAULT 0");
 _addCol("articles", "published_at", "published_at TEXT");
 _addCol("articles", "reading_minutes", "reading_minutes INTEGER DEFAULT 0");
+_addCol("articles", "social_json", "social_json TEXT DEFAULT ''"); // social paket (DCOS Part 7)
+_addCol("articles", "quality_score", "quality_score INTEGER DEFAULT 0"); // sifat bahosi (DCOS Part 9)
 
 // Yangi jadvallar: mualliflar, kategoriyalar, teglar (M2M), FAQ
 db.exec(`
@@ -99,6 +101,36 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_rev_article ON article_revisions(article_id);
   CREATE INDEX IF NOT EXISTS idx_faqs_article ON article_faqs(article_id);
   CREATE INDEX IF NOT EXISTS idx_atags_article ON article_tags(article_id);
+
+  -- Umumiy sozlamalar (key/value) — avtopilot toggle/rejim va h.k.
+  CREATE TABLE IF NOT EXISTS settings (
+    key TEXT PRIMARY KEY,
+    value TEXT DEFAULT ''
+  );
+  -- Avtopilot (DCOS Faza 2): mavzu navbati va ishga tushirish jurnali.
+  CREATE TABLE IF NOT EXISTS autopilot_topics (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    topic TEXT NOT NULL,
+    keyword TEXT DEFAULT '',
+    category TEXT DEFAULT '',
+    length TEXT DEFAULT 'standard',
+    status TEXT NOT NULL DEFAULT 'pending',   -- pending | done | failed
+    article_id INTEGER,
+    error TEXT DEFAULT '',
+    position INTEGER DEFAULT 0,
+    created_at TEXT NOT NULL,
+    done_at TEXT
+  );
+  CREATE TABLE IF NOT EXISTS autopilot_runs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    ran_at TEXT NOT NULL,
+    slot TEXT DEFAULT '',
+    topic_id INTEGER,
+    article_id INTEGER,
+    status TEXT NOT NULL,                      -- ok | skipped | error
+    message TEXT DEFAULT ''
+  );
+  CREATE INDEX IF NOT EXISTS idx_ap_topics_status ON autopilot_topics(status);
 `);
 
 // --- HTML tozalash (stored-XSS himoyasi) — admin matni bazaga yozilishdan oldin ---
@@ -270,6 +302,25 @@ export const Articles = {
     return db.prepare(
       "UPDATE articles SET status='published' WHERE status='scheduled' AND published_at IS NOT NULL AND published_at <= ?"
     ).run(now).changes;
+  },
+  // Dublikat sarlavha bormi? (avtopilot dedup uchun, katta-kichik harfga befarq)
+  titleExists: (title) =>
+    Boolean(db.prepare("SELECT 1 FROM articles WHERE lower(title)=lower(?) LIMIT 1").get(String(title || ""))),
+
+  // Social paket (DCOS Part 7) — JSON obyekt sifatida saqlash/o'qish.
+  getSocial: (id) => {
+    const r = db.prepare("SELECT social_json FROM articles WHERE id=?").get(id);
+    if (!r || !r.social_json) return null;
+    try { return JSON.parse(r.social_json); } catch { return null; }
+  },
+  setSocial: (id, obj) => {
+    db.prepare("UPDATE articles SET social_json=?, updated_at=? WHERE id=?")
+      .run(JSON.stringify(obj || {}), new Date().toISOString(), id);
+  },
+
+  // Sifat bahosi (0–100) — DCOS Part 9.
+  setQuality: (id, score) => {
+    db.prepare("UPDATE articles SET quality_score=? WHERE id=?").run(Math.max(0, Math.min(100, Math.round(Number(score) || 0))), id);
   },
 };
 
@@ -484,6 +535,72 @@ export const Subscribers = {
   },
   count: () => db.prepare("SELECT COUNT(*) c FROM subscribers").get().c,
   list: () => db.prepare("SELECT id, email, source, created_at FROM subscribers ORDER BY datetime(created_at) DESC").all(),
+};
+
+// --- Umumiy sozlamalar (key/value) ---
+export const Settings = {
+  get: (key, fallback = "") => {
+    const r = db.prepare("SELECT value FROM settings WHERE key=?").get(key);
+    return r ? r.value : fallback;
+  },
+  set: (key, value) => {
+    db.prepare(
+      "INSERT INTO settings (key, value) VALUES (?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value"
+    ).run(key, String(value));
+  },
+};
+
+// --- Avtopilot mavzu navbati (DCOS Faza 2) ---
+export const AutopilotTopics = {
+  list: () => db.prepare("SELECT * FROM autopilot_topics ORDER BY position, id").all(),
+  pending: () => db.prepare("SELECT * FROM autopilot_topics WHERE status='pending' ORDER BY position, id").all(),
+  add: ({ topic, keyword = "", category = "", length = "standard" }) => {
+    const max = db.prepare("SELECT COALESCE(MAX(position),0) m FROM autopilot_topics").get().m;
+    const info = db
+      .prepare(
+        "INSERT INTO autopilot_topics (topic, keyword, category, length, status, position, created_at) VALUES (?,?,?,?, 'pending', ?, ?)"
+      )
+      .run(topic, keyword, category, length || "standard", max + 1, new Date().toISOString());
+    return db.prepare("SELECT * FROM autopilot_topics WHERE id=?").get(info.lastInsertRowid);
+  },
+  remove: (id) => db.prepare("DELETE FROM autopilot_topics WHERE id=?").run(id).changes,
+  markDone: (id, articleId) =>
+    db.prepare("UPDATE autopilot_topics SET status='done', article_id=?, error='', done_at=? WHERE id=?")
+      .run(articleId, new Date().toISOString(), id),
+  markFailed: (id, error) =>
+    db.prepare("UPDATE autopilot_topics SET status='failed', error=? WHERE id=?")
+      .run(String(error || "").slice(0, 500), id),
+  // Yana urinish uchun: failed → pending.
+  retry: (id) =>
+    db.prepare("UPDATE autopilot_topics SET status='pending', error='' WHERE id=? AND status='failed'").run(id).changes,
+  counts: () => {
+    const out = { pending: 0, done: 0, failed: 0, total: 0 };
+    for (const r of db.prepare("SELECT status, COUNT(*) c FROM autopilot_topics GROUP BY status").all()) {
+      out[r.status] = r.c;
+      out.total += r.c;
+    }
+    return out;
+  },
+};
+
+// --- Avtopilot ishga tushirish jurnali ---
+export const AutopilotRuns = {
+  log: ({ slot = "", topic_id = null, article_id = null, status, message = "" }) =>
+    db
+      .prepare("INSERT INTO autopilot_runs (ran_at, slot, topic_id, article_id, status, message) VALUES (?,?,?,?,?,?)")
+      .run(new Date().toISOString(), slot, topic_id, article_id, status, String(message || "").slice(0, 500)),
+  list: (limit = 30) =>
+    db.prepare("SELECT * FROM autopilot_runs ORDER BY id DESC LIMIT ?").all(limit),
+  // Oxirgi muvaffaqiyatli avtopilot maqolasi kategoriyasi (kategoriya rotatsiyasi uchun).
+  lastCategory: () => {
+    const r = db
+      .prepare(
+        `SELECT a.category c FROM autopilot_runs r JOIN articles a ON a.id = r.article_id
+         WHERE r.status='ok' AND r.article_id IS NOT NULL ORDER BY r.id DESC LIMIT 1`
+      )
+      .get();
+    return r ? r.c : "";
+  },
 };
 
 // --- Dastlabki seed: mavjud 6 maqolani client'dagi articles.js dan ko'chiramiz ---

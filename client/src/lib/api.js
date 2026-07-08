@@ -78,6 +78,40 @@ export const adminRevisions = (id) =>
 export const adminRevision = (revId) =>
   request(`/api/admin/revisions/${revId}`, { admin: true }).then((d) => d.revision);
 
+// AI kontent generatori (DCOS) — status va generatsiya.
+export const aiStatus = () =>
+  request("/api/admin/ai/status", { admin: true }).then((d) => Boolean(d?.enabled));
+export const aiGenerate = (payload) =>
+  request("/api/admin/ai/generate", { method: "POST", body: payload, admin: true }).then((d) => d.article);
+
+// Avtopilot (DCOS Faza 2) — status, sozlamalar, mavzu navbati, qo'lda ishga tushirish.
+export const autopilotGet = () =>
+  request("/api/admin/autopilot", { admin: true });
+export const autopilotSettings = (payload) =>
+  request("/api/admin/autopilot/settings", { method: "POST", body: payload, admin: true });
+export const autopilotTopics = () =>
+  request("/api/admin/autopilot/topics", { admin: true }).then((d) => d.topics || []);
+export const autopilotAddTopic = (payload) =>
+  request("/api/admin/autopilot/topics", { method: "POST", body: payload, admin: true });
+export const autopilotRemoveTopic = (id) =>
+  request(`/api/admin/autopilot/topics/${id}`, { method: "DELETE", admin: true });
+export const autopilotRetryTopic = (id) =>
+  request(`/api/admin/autopilot/topics/${id}/retry`, { method: "POST", admin: true });
+export const autopilotSeedStarter = () =>
+  request("/api/admin/autopilot/seed-starter", { method: "POST", admin: true });
+export const autopilotRunNow = () =>
+  request("/api/admin/autopilot/run", { method: "POST", admin: true });
+
+// Social paket (DCOS Part 7) — maqola bo'yicha olish/generatsiya.
+export const socialGet = (id) =>
+  request(`/api/admin/articles/${id}/social`, { admin: true }).then((d) => d.social || null);
+export const socialGenerate = (id) =>
+  request(`/api/admin/articles/${id}/social/generate`, { method: "POST", admin: true }).then((d) => d.social);
+
+// Sifat bahosi (DCOS Part 9) — maqolani baholaydi.
+export const qualityScore = (id) =>
+  request(`/api/admin/articles/${id}/quality`, { method: "POST", admin: true });
+
 // Rasm yuklash (FormData) — muqova uchun.
 export async function uploadImage(file) {
   const fd = new FormData();

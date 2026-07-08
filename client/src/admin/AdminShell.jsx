@@ -1,5 +1,5 @@
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import { BarChart3, LogOut, ExternalLink, FileText, Image, LayoutDashboard, FolderTree } from "lucide-react";
+import { BarChart3, LogOut, ExternalLink, FileText, Image, LayoutDashboard, FolderTree, Rocket } from "lucide-react";
 import { auth } from "@/lib/api";
 
 // Admin sahifalari uchun umumiy header + konteyner.
@@ -25,6 +25,7 @@ export default function AdminShell({ children }) {
             <ShellLink to="/admin" end icon={LayoutDashboard}>Dashboard</ShellLink>
             <ShellLink to="/admin/articles" icon={FileText}>Maqolalar</ShellLink>
             <ShellLink to="/admin/categories" icon={FolderTree}>Kategoriyalar</ShellLink>
+            <ShellLink to="/admin/autopilot" icon={Rocket}>Avtopilot</ShellLink>
             <ShellLink to="/admin/media" icon={Image}>Media</ShellLink>
           </nav>
           <div className="flex items-center gap-2">

@@ -78,10 +78,49 @@ to'liq admin panelga** ko'chirildi. Deyarli butun PRD amalga oshirildi.
 - `/reports_formulalar` (va `/formulalar`) endi barcha hisob-kitob fayllarini
   **bitta ZIP arxivda** yuboradi (`index.txt` metama'lumot bilan). **Jonli.**
 
+### Sayt — AI kontent generatori (DCOS, Faza 1) — YANGI
+`/admin` editoriga **DCOS** (DigitalCFO AI Content Operating System v1.0) asosidagi
+AI maqola generatori qo'shildi. DCOS — 10 qismli enterprise SEO kontent system prompt
+(`server/prompts/dcos.md`, ~6900 so'z). Editorda "✨ AI bilan yaratish" paneli: mavzu +
+kalit so'z + uzunlik kiritiladi → Claude to'liq maqola (title, slug, HTML matn, SEO
+maydonlar, teglar, FAQ, muqova ALT + rasm prompti) qaytaradi → forma maydonlariga
+to'ldiriladi (inson ko'rib, tahrirlab saqlaydi). Strukturaviy chiqish "tool use" bilan;
+HTML faqat Tiptap qo'llagan teglar (h2/h3/p/ul/ol/table…). Prompt caching yoqilgan.
+- **Holat:** kod tayyor, build+server sinovdan o'tdi. **Ishlashi uchun `ANTHROPIC_API_KEY`
+  kerak** (yo'q bo'lsa panel jimgina "o'chirilgan" holatda ko'rinadi — graceful).
+
+### Sayt — Avtopilot (DCOS Faza 2) — YANGI
+Rejalashtirilgan avtomatik maqola generatsiyasi. `/admin/autopilot` sahifasi: mavzu
+navbati (topic queue) boshqaruvi, yoqish/o'chirish toggle, nashr rejimi (draft/scheduled/
+published), "hozir bitta yaratish" (test), ishga tushirish jurnali. Scheduler kunlik 4
+slotda ishlaydi (08:00/12:25/17:00/20:30 Toshkent), kategoriya rotatsiyasi bilan navbatdan
+mavzu oladi → DCOS orqali maqola yaratadi → **standart holatda `draft`** qilib qo'yadi
+(inson chop etadi). Dedup (sarlavha), sanitize (`cleanHtml`), unikal slug qo'llanadi.
+- **Xavfsizlik:** standart holatda **O'CHIQ** (`settings.autopilot_enabled='0'`) —
+  kutilmagan xarajat yo'q. Yoqilishi uchun `ANTHROPIC_API_KEY` + admin panelda toggle.
+- **Yangi DB:** `settings`, `autopilot_topics`, `autopilot_runs` jadvallari.
+- **Yangi fayl:** `server/autopilot.js`. **Holat:** kod tayyor, build+server+DB sinovdan
+  o'tdi (haqiqiy generatsiya kalit yo'qligi sabab sinalmagan).
+
+### Sayt — Social paket (DCOS Part 7, Faza 3) + Sifat nazorati (Part 9) — YANGI
+- **Social paket:** har maqola uchun 13 kanal kontenti (LinkedIn/Telegram/Instagram/X/
+  email/Reels/Shorts/podkast/hashtag) generatsiyasi. Editorda "Social paket" paneli
+  (tahrirlash rejimida): "Yaratish" → JSON DB'ga (`articles.social_json`) saqlanadi va
+  copy-paste uchun ko'rsatiladi. `server/anthropic.js` → `generateSocialPackage` (tool).
+  **Tashqi platformalarga avto-post YO'Q** (OAuth/kredensiallar kerak — "Faza 3b").
+- **Sifat nazorati (quality gate):** maqolani DCOS 10 mezoni bo'yicha 0–100 baholaydi
+  (`scoreArticle` tool). Editorда "Sifat bahosi" paneli (manual). Avtopilotda ixtiyoriy
+  q-gate: baho `qgateMin`dan past bo'lsa maqola avtomatik qayta yoziladi (≤2 marta,
+  eng yaxshi versiya saqlanadi); 'published' rejimда past baho → xavfsizlik uchun draft.
+  Baho `articles.quality_score`da saqlanadi.
+- **Yangi:** `client/src/admin/SocialPanel.jsx`, `QualityPanel.jsx`. **Holat:** kod tayyor,
+  build+server+DB sinovdan o'tdi (haqiqiy generatsiya kalit yo'qligi sabab sinalmagan).
+
 ### Yoqilmagan / kutilmoqda (oldingi sessiyalardan)
 - 🔴 **Bot tokeni REVOKE qilinmagan** — avvalgi suhbatda oshkor bo'lgan.
 - 🟠 **Event Engine (agent)** — `ENGINE_ENABLED=1` + `backfill_stages.py --apply` kerak.
-- 🟠 **`ANTHROPIC_API_KEY` yo'q** — chatbot + AI CMS yordamchi uchun kerak (ixtiyoriy).
+- 🟠 **`ANTHROPIC_API_KEY` yo'q** — AI kontent generatori (DCOS) uchun kerak; qo'shilsa
+  `/admin` da AI panel avtomatik yoqiladi. Xarajat: har maqola generatsiyasi Claude API.
 
 ---
 
@@ -176,8 +215,14 @@ to'liq admin panelga** ko'chirildi. Deyarli butun PRD amalga oshirildi.
 2. Kategoriya CRUD + SEO sog'lig'i (`b7497fc`, `4c007ff`) jonliligini tasdiqlang.
 3. **Google Search Console + Yandex Webmaster**'ga `digitalcfo.uz/sitemap.xml`
    yuboring (yangi `/blog` URL'lar tez indekslanishi uchun).
-4. (Ixtiyoriy) AI CMS yordamchi — `ANTHROPIC_API_KEY` bilan meta generator, SEO
-   tavsiyalar. Kalit + xarajat kerak.
+4. **AI kontent generatori (DCOS, Faza 1) + Avtopilot (Faza 2) — QURILDI.** Yoqish
+   uchun VPS `server/.env` ga `ANTHROPIC_API_KEY` (ixtiyoriy `ANTHROPIC_MODEL`,
+   standart `claude-sonnet-5`) qo'shing → `pm2 restart digital-cfo`. Keyin: (a)
+   `/admin` editorда AI panel; (b) `/admin/autopilot` da navbatga mavzu qo'shib,
+   toggle bilan yoqing (standart draft rejim); (c) editorда "Social paket" va "Sifat
+   bahosi" panellari; (d) avtopilotда social + quality-gate toggle'lari.
+   **DCOS Faza 1–3 + quality-gate qurildi.** Qolgan (ixtiyoriy): social avto-post
+   (Faza 3b — platforma OAuth/kredensiallari kerak).
 5. (Tozalash) `react-quill-new` paketi endi ishlatilmaydi — `npm uninstall` mumkin.
 
 **Oldingi sessiyalardan (hali dolzarb):**
