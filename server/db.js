@@ -131,6 +131,17 @@ db.exec(`
     message TEXT DEFAULT ''
   );
   CREATE INDEX IF NOT EXISTS idx_ap_topics_status ON autopilot_topics(status);
+
+  -- Social tarqatish jurnali (DCOS Faza 3b) — nima qayerga joylandi.
+  CREATE TABLE IF NOT EXISTS social_posts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    article_id INTEGER NOT NULL,
+    platform TEXT NOT NULL,
+    status TEXT NOT NULL,                      -- ok | error
+    message TEXT DEFAULT '',
+    created_at TEXT NOT NULL
+  );
+  CREATE INDEX IF NOT EXISTS idx_social_posts_article ON social_posts(article_id);
 `);
 
 // --- HTML tozalash (stored-XSS himoyasi) — admin matni bazaga yozilishdan oldin ---
@@ -601,6 +612,21 @@ export const AutopilotRuns = {
       .get();
     return r ? r.c : "";
   },
+};
+
+// --- Social tarqatish jurnali (DCOS Faza 3b) ---
+export const SocialPosts = {
+  log: ({ article_id, platform, status, message = "" }) =>
+    db
+      .prepare("INSERT INTO social_posts (article_id, platform, status, message, created_at) VALUES (?,?,?,?,?)")
+      .run(article_id, platform, status, String(message || "").slice(0, 500), new Date().toISOString()),
+  // Shu maqola shu platformaga muvaffaqiyatli joylanganmi? (dublikat oldini olish)
+  exists: (articleId, platform) =>
+    Boolean(
+      db.prepare("SELECT 1 FROM social_posts WHERE article_id=? AND platform=? AND status='ok' LIMIT 1").get(articleId, platform)
+    ),
+  forArticle: (articleId) =>
+    db.prepare("SELECT platform, status, message, created_at FROM social_posts WHERE article_id=? ORDER BY id DESC").all(articleId),
 };
 
 // --- Dastlabki seed: mavjud 6 maqolani client'dagi articles.js dan ko'chiramiz ---

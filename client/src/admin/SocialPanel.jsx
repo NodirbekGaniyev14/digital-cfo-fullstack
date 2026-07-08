@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Share2, Loader2, Sparkles, Copy, ChevronDown, RefreshCw } from "lucide-react";
-import { socialGet, socialGenerate } from "@/lib/api";
+import { Share2, Loader2, Sparkles, Copy, ChevronDown, RefreshCw, Send, Check } from "lucide-react";
+import { socialGet, socialGenerate, socialPublisherStatus, socialPosts, socialPublish } from "@/lib/api";
 
 // Har platforma uchun ko'rsatiladigan bo'limlar (tartib bilan).
 const SECTIONS = [
@@ -47,10 +47,41 @@ export default function SocialPanel({ articleId }) {
   const [social, setSocial] = useState(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
+  const [adapters, setAdapters] = useState([]); // tarqatish platformalari
+  const [posted, setPosted] = useState({}); // {platform: 'ok'|'error'}
+  const [publishing, setPublishing] = useState(null); // platform key
 
   useEffect(() => {
     socialGet(articleId).then(setSocial).catch(() => {}).finally(() => setLoading(false));
+    socialPublisherStatus().then((s) => setAdapters(s?.adapters || [])).catch(() => {});
+    refreshPosts();
   }, [articleId]);
+
+  const refreshPosts = () => {
+    socialPosts(articleId)
+      .then((list) => {
+        const map = {};
+        for (const p of list) if (!map[p.platform]) map[p.platform] = p.status; // eng oxirgisi
+        setPosted(map);
+      })
+      .catch(() => {});
+  };
+
+  const publish = async (platform) => {
+    setPublishing(platform);
+    try {
+      const r = await socialPublish(articleId, [platform]);
+      const res = (r.results || [])[0];
+      if (res?.status === "ok") toast.success(`${platform}ga joylandi`);
+      else if (res?.status === "skipped") toast(`${platform}: allaqachon joylangan`);
+      else toast.error(`${platform}: ${res?.message || r.message || "xato"}`);
+      refreshPosts();
+    } catch (e) {
+      toast.error(e.message);
+    } finally {
+      setPublishing(null);
+    }
+  };
 
   const generate = async () => {
     setBusy(true);
@@ -106,7 +137,40 @@ export default function SocialPanel({ articleId }) {
               {!has ? (
                 <p className="py-3 text-center text-[13px] text-slate-400">Hali yaratilmagan. "Yaratish"ni bosing.</p>
               ) : (
-                <div className="space-y-2.5">
+                <>
+                  {/* Tarqatish (Faza 3b) */}
+                  <div className="mb-4 rounded-xl border border-azure/20 bg-azure/[.04] p-3">
+                    <p className="mb-2 text-[12.5px] font-semibold text-navy dark:text-white">📤 Tarqatish</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {adapters.map((ad) => {
+                        const done = posted[ad.key] === "ok";
+                        if (!ad.enabled) {
+                          return (
+                            <span key={ad.key} title={ad.hint} className="inline-flex items-center gap-1 rounded-lg border border-navy/10 px-2.5 py-1.5 text-[12px] text-slate-400 dark:border-white/10">
+                              {ad.label} <span className="text-[10px]">🔒</span>
+                            </span>
+                          );
+                        }
+                        return (
+                          <button
+                            key={ad.key}
+                            type="button"
+                            onClick={() => publish(ad.key)}
+                            disabled={publishing === ad.key}
+                            className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[12px] font-semibold transition-all disabled:opacity-60 ${
+                              done ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400" : "bg-azure text-white hover:brightness-110"
+                            }`}
+                          >
+                            {publishing === ad.key ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : done ? <Check className="h-3.5 w-3.5" /> : <Send className="h-3.5 w-3.5" />}
+                            {ad.label}{done ? " ✓" : ""}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <p className="mt-1.5 text-[11.5px] text-slate-400">🔒 = OAuth kaliti kerak (server/.env). Telegram uchun <code className="rounded bg-navy/[.06] px-1 dark:bg-white/[.06]">TELEGRAM_CHANNEL_ID</code> qo'shing.</p>
+                  </div>
+
+                  <div className="space-y-2.5">
                   {SECTIONS.filter((s) => social[s.key] != null && (Array.isArray(social[s.key]) ? social[s.key].length : true)).map((s) => {
                     const text = toText(s.key, social[s.key]);
                     return (
@@ -121,7 +185,8 @@ export default function SocialPanel({ articleId }) {
                       </div>
                     );
                   })}
-                </div>
+                  </div>
+                </>
               )}
             </>
           )}

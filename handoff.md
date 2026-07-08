@@ -116,6 +116,15 @@ mavzu oladi → DCOS orqali maqola yaratadi → **standart holatda `draft`** qil
 - **Yangi:** `client/src/admin/SocialPanel.jsx`, `QualityPanel.jsx`. **Holat:** kod tayyor,
   build+server+DB sinovdan o'tdi (haqiqiy generatsiya kalit yo'qligi sabab sinalmagan).
 
+### Sayt — Social avto-post (DCOS Faza 3b) — YANGI
+Social paketni tashqi platformalarga joylash. `server/publisher.js` — adapter arxitekturasi:
+**Telegram adapteri to'liq ishlaydi** (mavjud bot bilan), qolgan 6 platforma (LinkedIn/FB/
+IG/X/Threads/YouTube) — **stub** (OAuth kaliti kelgach ulanadi). SocialPanel'da "📤 Tarqatish"
+bo'limi: yoqilgan platformaga "Yuborish" tugmasi, joylanganlar "✓". Dublikat oldini olinadi
+(`social_posts` jadvali). **Telegram avto-post uchun `TELEGRAM_CHANNEL_ID` (.env) + bot kanalда
+admin bo'lishi kerak** — yo'q bo'lsa graceful off. **Holat:** kod+build+server sinovdan o'tdi
+(haqiqiy post kanal ID yo'qligi sabab sinalmagan).
+
 ### Yoqilmagan / kutilmoqda (oldingi sessiyalardan)
 - 🔴 **Bot tokeni REVOKE qilinmagan** — avvalgi suhbatda oshkor bo'lgan.
 - 🟠 **Event Engine (agent)** — `ENGINE_ENABLED=1` + `backfill_stages.py --apply` kerak.

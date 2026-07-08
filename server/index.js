@@ -10,11 +10,12 @@ import fs from "node:fs";
 import { fileURLToPath } from "node:url";
 import { execFile } from "node:child_process";
 import { timingSafeEqual } from "node:crypto";
-import db, { Articles, Authors, Tags, Categories, Subscribers, Revisions, AutopilotTopics, cleanHtml, uniqueSlug } from "./db.js";
+import db, { Articles, Authors, Tags, Categories, Subscribers, Revisions, AutopilotTopics, SocialPosts, cleanHtml, uniqueSlug } from "./db.js";
 import { loginHandler, requireAdmin } from "./auth.js";
 import { renderArticle, renderList, buildSitemap, hasTemplate } from "./ssr.js";
 import { aiEnabled, generateArticle, generateSocialPackage, scoreArticle } from "./anthropic.js";
 import { startAutopilot, autopilotStatus, setAutopilotSettings, seedStarterTopics, runGuarded } from "./autopilot.js";
+import { publisherStatus, publishArticleSocial } from "./publisher.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 4000;
@@ -841,6 +842,28 @@ app.post("/api/admin/articles/:id/social/generate", requireAdmin, aiLimiter, asy
   } catch (err) {
     console.warn("⚠️ Social generatsiya xatosi:", err.message);
     res.status(502).json({ error: err.message || "Social generatsiya muvaffaqiyatsiz" });
+  }
+});
+
+// ---- Social tarqatish (DCOS Faza 3b) -----------------------------------------
+app.get("/api/admin/social/status", requireAdmin, (_req, res) => {
+  res.json(publisherStatus());
+});
+
+app.get("/api/admin/articles/:id/social/posts", requireAdmin, (req, res) => {
+  res.json({ posts: SocialPosts.forArticle(Number(req.params.id)) });
+});
+
+app.post("/api/admin/articles/:id/social/publish", requireAdmin, async (req, res) => {
+  const platforms = Array.isArray(req.body?.platforms) ? req.body.platforms.map((p) => clean(p, 20)).filter(Boolean) : null;
+  const force = Boolean(req.body?.force);
+  try {
+    const result = await publishArticleSocial(Number(req.params.id), { platforms, force });
+    console.log("📤 Social tarqatildi:", req.params.id, JSON.stringify(result.results || []));
+    res.json({ ok: true, ...result });
+  } catch (err) {
+    console.warn("⚠️ Social tarqatish xatosi:", err.message);
+    res.status(400).json({ error: err.message || "Tarqatish muvaffaqiyatsiz" });
   }
 });
 

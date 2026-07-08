@@ -112,6 +112,14 @@ export const socialGenerate = (id) =>
 export const qualityScore = (id) =>
   request(`/api/admin/articles/${id}/quality`, { method: "POST", admin: true });
 
+// Social tarqatish (DCOS Faza 3b) — platformalar holati, joylash, jurnal.
+export const socialPublisherStatus = () =>
+  request("/api/admin/social/status", { admin: true });
+export const socialPosts = (id) =>
+  request(`/api/admin/articles/${id}/social/posts`, { admin: true }).then((d) => d.posts || []);
+export const socialPublish = (id, platforms) =>
+  request(`/api/admin/articles/${id}/social/publish`, { method: "POST", body: platforms ? { platforms } : {}, admin: true });
+
 // Rasm yuklash (FormData) — muqova uchun.
 export async function uploadImage(file) {
   const fd = new FormData();
