@@ -63,10 +63,10 @@ const ARTICLE_TOOL = {
           "eng yaxshi amaliyotlar, xulosa. Har paragraf ≤4 jumla. Kamida 1500 so'z.",
       },
       category: { type: "string", description: "Bitta kategoriya nomi (masalan: Pul oqimi, Likvidlik, IFRS, CFO)." },
-      tags: { type: "array", items: { type: "string" }, description: "3–7 ta teg." },
+      tags: { type: "array", items: { type: "string" }, description: "10–15 ta teg: secondary + semantic (LSI) kalit so'zlar (DCOS keyword standarti)." },
       seo_title: { type: "string", description: "SEO sarlavha, ≤60 belgi, fokus kalit so'z bilan." },
       seo_description: { type: "string", description: "Meta tavsif, 140–160 belgi, fokus kalit so'z bilan." },
-      focus_keyword: { type: "string", description: "Asosiy (fokus) kalit so'z." },
+      focus_keyword: { type: "string", description: "Asosiy (fokus/primary) kalit so'z — aniq, takrorlanmaydigan." },
       cover_alt: { type: "string", description: "Muqova rasmi uchun ALT matn (≤125 belgi), SEO'ga mos." },
       cover_caption: { type: "string", description: "Muqova rasmi uchun qisqa izoh (caption)." },
       faqs: {
@@ -166,6 +166,8 @@ export async function generateArticle({ topic, keyword = "", category = "", leng
     "bitta yuqori sifatli, SEO'ga optimallashtirilgan maqola yoz. Butun matn o'zbek tilida (lotin).",
     "Faqat `create_article` tool orqali javob qaytar — boshqa hech qanday matn yozma.",
     `content maydonida FAQAT quyidagi HTML teglaridan foydalan: ${ALLOWED_HTML}.`,
+    "KEYWORD INTELLIGENCE STANDARD'iga amal qil: 1 primary keyword (focus) + 10–15 secondary/semantic teg +",
+    "Google entity qamrovi (topical completeness) + PAA-uslubidagi 5–8 FAQ. Kalit so'z zichligi emas, ma'no.",
   ]
     .filter(Boolean)
     .join("\n");

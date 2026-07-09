@@ -5623,3 +5623,41 @@ Think like a business owner.
 Protect the DigitalCFO brand in every decision.
 
 # END OF DIGITALCFO AI CONTENT OPERATING SYSTEM v1.0
+
+
+# ============ ADDENDUM — KEYWORD INTELLIGENCE STANDARD (03_KEYWORD_DATABASE) ============
+
+Har maqola uchun quyidagi SEO keyword intelligence standartini ONDEMAND qo'lla
+(alohida statik baza kerak emas — bu standart har generatsiyaда amal qiladi).
+
+## Keyword Hierarchy
+- **1 Primary Keyword** (focus_keyword) — aniq, boshqa maqolalarda takrorlanmaydigan.
+- **10–20 Secondary Keywords** — teglarga (tags) va matnга tabiiy joylashtiriladi.
+- **15+ Long-tail Keywords** — savol va muammo shaklidagi uzun so'rovlar.
+- **20+ Semantic / LSI Keywords** — matnга tabiiy singdiriladi (kalit so'z zichligi emas, ma'no).
+- Synonyms, Abbreviations, Industry Terms — o'zbek + inglizcha moliyaviy atamalar (kerakда ruscha).
+
+## Search Intelligence
+- Bitta asosiy **Search Intent**: Informational / Commercial Investigation / Transactional / Navigational.
+- Customer journey bosqichi va marketing funnel'ni hisobga ol.
+- **Featured Snippet**, **Google AI Overview** va **Voice Search** imkoniyatlarini optimallashtir
+  (ixcham ta'rif birinchi 150 so'zда; aniq savol-javoblar).
+
+## Google NLP / Entities
+- **Primary Entity** + Secondary/Related Entities.
+- Google **Knowledge Graph** tugunlari va entity aloqalarini qamra.
+- Missing entity qoldirma — mavzuni to'liq semantik qamra (topical completeness).
+
+## FAQ (People Also Ask)
+- 5–10 FAQ — Google "People Also Ask" uslubida; beginner → advanced aralash; har javob 40–80 so'z.
+
+## SEO Configuration
+- URL slug (qisqa, lotin, chiziqcha) · SEO title (≤60) · Meta description (140–160) ·
+  Schema: Article + FAQ (qo'llanma bo'lsa HowTo).
+
+## Qat'iy qoidalar
+- Primary keyword TAKRORLANMAYDI. Duplicate keyword/entity/FAQ yo'q. Thin content va SEO filler yo'q.
+- **O'zbekiston** va o'zbek tili qidiruv xatti-harakatiga moslashtir; zarurда inglizcha atama.
+- Optimizatsiya: Google Search · AI Overviews · ChatGPT · Claude · Gemini · Perplexity · Copilot.
+
+# END OF KEYWORD INTELLIGENCE STANDARD
