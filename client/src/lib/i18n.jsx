@@ -129,6 +129,7 @@ const DICT = {
 
     "demo.title": "Namunaviy hisobot", "demo.close": "Yopish",
     "demo.fallback": "Brauzeringiz PDF'ni shu yerda ko'rsata olmadi — namunaviy hisobotni yuklab olib ko'ring.",
+    "demo.videoTitle": "Demo video", "demo.videoSub": "Digital CFO · Namuna",
 
     "tm.eyebrow": "Sharhlar", "tm.title": "Mijozlarimiz fikri",
     "tm.sample": "Namuna sharhlar — tez orada haqiqiy mijoz fikrlari bilan to'ldiriladi",
@@ -288,6 +289,7 @@ const DICT = {
 
     "demo.title": "Образец отчёта", "demo.close": "Закрыть",
     "demo.fallback": "Ваш браузер не может показать PDF здесь — скачайте образец отчёта.",
+    "demo.videoTitle": "Демо-видео", "demo.videoSub": "Digital CFO · Пример",
 
     "tm.eyebrow": "Отзывы", "tm.title": "Мнения наших клиентов",
     "tm.sample": "Образцы отзывов — скоро будут заполнены реальными мнениями клиентов",
@@ -447,6 +449,7 @@ const DICT = {
 
     "demo.title": "Sample report", "demo.close": "Close",
     "demo.fallback": "Your browser can't display the PDF here — download the sample report instead.",
+    "demo.videoTitle": "Demo video", "demo.videoSub": "Digital CFO · Sample",
 
     "tm.eyebrow": "Reviews", "tm.title": "What our clients say",
     "tm.sample": "Sample reviews — to be filled with real client feedback soon",

@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { fadeUpDelay } from "@/lib/motion";
 import { useApp } from "@/lib/i18n";
-import DemoReportModal from "@/components/DemoReportModal";
+import DemoVideoModal from "@/components/DemoVideoModal";
 
 const TRUST_ICONS = [ShieldCheck, Brain, Zap, FileText];
 const HERO_KPIS = [
@@ -197,8 +197,8 @@ export default function HeroSection() {
         </motion.div>
       </div>
 
-      {/* Demo ko'rish -> namunaviy PDF hisobot sayt ichida */}
-      <DemoReportModal open={demoOpen} onClose={() => setDemoOpen(false)} />
+      {/* Demo ko'rish -> demo video sayt ichida */}
+      <DemoVideoModal open={demoOpen} onClose={() => setDemoOpen(false)} />
     </section>
   );
 }
