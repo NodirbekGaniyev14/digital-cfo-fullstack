@@ -157,7 +157,8 @@ DCOS system prompt (turli tool sabab kesh ulanmaydi). Haiku'да 1 draft maqola 
 | 03 | KEYWORD_DATABASE | ✅ **on-demand** — standart dcos.md ga qo'shildi (300 statik record generatsiya QILINMADI) |
 | 04 | MASTER_ARTICLE_TEMPLATE | ✅ `04_MASTER_ARTICLE_TEMPLATE.md` — maqola yozish tizimi (12 qism) |
 | 05 | CLAUDE_CODE_AUTOMATION | ✅ `05_CLAUDE_CODE_AUTOMATION.md` — automation manuali (15 qism; ~70% kodda bor) |
-| 05–08 (reja) | INTERNAL_LINK_GRAPH · SCHEMA · IMAGE_PROMPTS · DCF_PROMPTS(300) | ⏳ foydalanuvchi keyin yuboradi |
+| 06 | PROJECT_STRUCTURE | ✅ `06_PROJECT_STRUCTURE.md` — enterprise repo arxitektura blueprint (12 qism; ma'lumotnoma, kodga ta'sir qilmaydi) |
+| 07+ (reja) | INTERNAL_LINK_GRAPH · SCHEMA · IMAGE_PROMPTS · DCF_PROMPTS(300) | ⏳ foydalanuvchi keyin yuboradi |
 
 > ⚠️ **DCF ID nizosi hal qilindi:** keyword DB fayldagi ID→mavzu kalendardan farq qilardi →
 > **`01_CONTENT_CALENDAR.md` USTUN** (asosiy manba). Keyword DB mapping'i e'tiborga olinmaydi.
@@ -219,7 +220,7 @@ navbatiga DCF tartibida yuklaydi (`npm --prefix server run import:calendar`; `--
 - **O'zgartirilgan (client):** `AdminEditor.jsx` (AI panel + Social/Quality panellar),
   `AdminApp.jsx` (autopilot route), `AdminShell.jsx` (nav), `lib/api.js` (yangi helperlar).
 - **Yangi (repo ildizi hujjatlar):** `01_CONTENT_CALENDAR.md`, `02_TOPIC_MAP.md`,
-  `04_MASTER_ARTICLE_TEMPLATE.md`, `05_CLAUDE_CODE_AUTOMATION.md`.
+  `04_MASTER_ARTICLE_TEMPLATE.md`, `05_CLAUDE_CODE_AUTOMATION.md`, `06_PROJECT_STRUCTURE.md`.
 - **Yangi npm paket YO'Q** (global `fetch` ishlatildi — deploy'da native modul muammosi yo'q).
 
 ---
