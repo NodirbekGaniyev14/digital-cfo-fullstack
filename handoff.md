@@ -1,11 +1,17 @@
 # Digital CFO — Handoff (topshirish hujjati)
 
-> Oxirgi yangilanish: 2026-07-07. Bir sessiyada bajarilgan ishlar, joriy holat va
+> Oxirgi yangilanish: 2026-07-10. Bir sessiyada bajarilgan ishlar, joriy holat va
 > keyingi qadamlar. Yangi ishlovchi shu hujjatdan kontekstni tiklashi mumkin.
 >
-> Bu sessiya asosan **sayt maqolalari tizimini to'liq professional SEO CMS'ga
-> (CMS v2)** aylantirishga bag'ishlandi, hamda bot va sayt UI'siga bir nechta
-> yaxshilanishlar kiritildi.
+> **⭐ Oxirgi sessiya (2026-07-10) — DCOS: AI kontent avtomatlashtirish tizimi.**
+> Saytga to'liq **avtonom SEO kontent dvigateli** qo'shildi (AI generator + avtopilot +
+> 13-kanal social paket + Telegram avto-post + sifat nazorati) va **DCOS hujjat modullari
+> (00–05)** yaratildi. **Jonli sinovdan o'tdi** (ANTHROPIC_API_KEY qo'shildi, Telegram
+> post kanalда chiqdi). ⚠️ **BARCHA ISH `feat/dcos-ai-content` BRANCH'IDA — main'ga
+> MERGE QILINMAGAN, production'ga chiqmagan.** Batafsil: §3 (DCOS bloki) va §9.
+>
+> Avvalgi sessiya sayt maqolalari tizimini **SQLite CMS v2 (/admin)** ga aylantirgan
+> edi — u JONLI (§3 boshi).
 
 ---
 
@@ -125,11 +131,45 @@ bo'limi: yoqilgan platformaga "Yuborish" tugmasi, joylanganlar "✓". Dublikat o
 admin bo'lishi kerak** — yo'q bo'lsa graceful off. **Holat:** kod+build+server sinovdan o'tdi
 (haqiqiy post kanal ID yo'qligi sabab sinalmagan).
 
+### ⭐ DCOS — jonli sinov, hujjat modullari & BRANCH holati (eng muhim)
+
+**JONLI SINOV (2026-07-10):** `server/.env` ga `ANTHROPIC_API_KEY` qo'shildi → yuqoridagi
+**barcha Faza (1, 2, 3, 3b, quality-gate) real Claude API bilan sinovdan o'tdi.** Bitta
+buyruq bilan maqola yaratildi (draft) → 72/100 baholandi → 14 kanallik social → **Telegram
+kanalда post chiqdi**. Ya'ni yuqoridagi "…sinalmagan" eslatmalar ENDI ESKIRGAN — hammasi ishlaydi.
+
+**`.env` sozlamalari (lokal, VPS'ga ham kerak):**
+- `ANTHROPIC_API_KEY=sk-ant-...` (qo'shilgan)
+- `ANTHROPIC_MODEL=claude-haiku-4-5` — ⚠️ **to'g'ri ID chiziqcha bilan** (`4.5` EMAS — 404 beradi).
+  Haiku arzon (~$0.03/maqola) lekin o'zbekcha sifati pastroq; sifatли kontent uchun `claude-sonnet-5`.
+- `TELEGRAM_CHANNEL_ID=@digitalcfoconsulting` — bot **@Moliyaviy_Tahlilchi_bot** shu kanalда
+  ADMIN (Post Messages) bo'lishi shart, aks holda "Forbidden: bot is not a member".
+
+**Xarajat:** sinov ~$0.43 (Sonnet 5, 4 chaqiruv). Asosiy xarajat — har chaqiruvdagi ~15–25k tokenlik
+DCOS system prompt (turli tool sabab kesh ulanmaydi). Haiku'да 1 draft maqola ~$0.03.
+
+**DCOS hujjat modullari** (foydalanuvchi qismlarga bo'lib beradi; men yig'ib commit qilaman):
+| # | Modul | Joyi / holati |
+|---|---|---|
+| 00 | SYSTEM (10 qism) | ✅ `server/prompts/dcos.md` — AI system prompt (~15k token) |
+| 01 | CONTENT_CALENDAR | ✅ `01_CONTENT_CALENDAR.md` — 300 maqola, boyitilgan (foydalanuvchi kalendari) |
+| 02 | TOPIC_MAP | ✅ `02_TOPIC_MAP.md` — Knowledge Graph, 5 klaster |
+| 03 | KEYWORD_DATABASE | ✅ **on-demand** — standart dcos.md ga qo'shildi (300 statik record generatsiya QILINMADI) |
+| 04 | MASTER_ARTICLE_TEMPLATE | ✅ `04_MASTER_ARTICLE_TEMPLATE.md` — maqola yozish tizimi (12 qism) |
+| 05 | CLAUDE_CODE_AUTOMATION | ✅ `05_CLAUDE_CODE_AUTOMATION.md` — automation manuali (15 qism; ~70% kodda bor) |
+| 05–08 (reja) | INTERNAL_LINK_GRAPH · SCHEMA · IMAGE_PROMPTS · DCF_PROMPTS(300) | ⏳ foydalanuvchi keyin yuboradi |
+
+> ⚠️ **DCF ID nizosi hal qilindi:** keyword DB fayldagi ID→mavzu kalendardan farq qilardi →
+> **`01_CONTENT_CALENDAR.md` USTUN** (asosiy manba). Keyword DB mapping'i e'tiborga olinmaydi.
+
+**Import skript:** `server/scripts/import-calendar.mjs` — kalendardagi 300 mavzuni avtopilot
+navbatiga DCF tartibida yuklaydi (`npm --prefix server run import:calendar`; `--dry-run/--replace/
+--limit=N`). Dev navbatga import qilingan (298 pending; 2 dublikat sarlavha o'tkazildi).
+
 ### Yoqilmagan / kutilmoqda (oldingi sessiyalardan)
 - 🔴 **Bot tokeni REVOKE qilinmagan** — avvalgi suhbatda oshkor bo'lgan.
 - 🟠 **Event Engine (agent)** — `ENGINE_ENABLED=1` + `backfill_stages.py --apply` kerak.
-- 🟠 **`ANTHROPIC_API_KEY` yo'q** — AI kontent generatori (DCOS) uchun kerak; qo'shilsa
-  `/admin` da AI panel avtomatik yoqiladi. Xarajat: har maqola generatsiyasi Claude API.
+- 🟢 **`ANTHROPIC_API_KEY`** — lokal `.env`ga qo'shildi (jonli sinov o'tdi). VPS'ga ham kerak.
 
 ---
 
@@ -163,6 +203,24 @@ admin bo'lishi kerak** — yo'q bo'lsa graceful off. **Holat:** kod+build+server
 ### Bot (`CFO_final`)
 - **O'zgartirilgan:** `bot.py` — `cmd_reports_formulalar` bitta ZIP yasaydi
   (`io`, `zipfile` importlari qo'shildi).
+
+### DCOS sessiyasi fayllari (2026-07-10, `feat/dcos-ai-content` branch)
+- **Yangi (server):** `prompts/dcos.md` (10-qismli AI system prompt + keyword standarti addendum),
+  `anthropic.js` (Claude klienti — fetch, tool-use `generateArticle`/`generateSocialPackage`/
+  `scoreArticle`, prompt caching), `autopilot.js` (scheduler, 4 slot, kategoriya rotatsiyasi,
+  q-gate loop, social integratsiya), `publisher.js` (social avto-post: Telegram + 6 stub),
+  `scripts/import-calendar.mjs`.
+- **O'zgartirilgan (server):** `db.js` (yangi jadvallar: `settings`/`autopilot_topics`/
+  `autopilot_runs`/`social_posts` + ustunlar `social_json`/`quality_score`; helperlar Settings/
+  AutopilotTopics/AutopilotRuns/SocialPosts + Articles.getSocial/setSocial/setQuality/titleExists),
+  `index.js` (AI/avtopilot/social/quality endpointlar + scheduler start), `.env.example`
+  (ANTHROPIC_API_KEY/MODEL, TELEGRAM_CHANNEL_ID), `package.json` (import:calendar skripti).
+- **Yangi (client admin):** `AdminAutopilot.jsx`, `SocialPanel.jsx`, `QualityPanel.jsx`.
+- **O'zgartirilgan (client):** `AdminEditor.jsx` (AI panel + Social/Quality panellar),
+  `AdminApp.jsx` (autopilot route), `AdminShell.jsx` (nav), `lib/api.js` (yangi helperlar).
+- **Yangi (repo ildizi hujjatlar):** `01_CONTENT_CALENDAR.md`, `02_TOPIC_MAP.md`,
+  `04_MASTER_ARTICLE_TEMPLATE.md`, `05_CLAUDE_CODE_AUTOMATION.md`.
+- **Yangi npm paket YO'Q** (global `fetch` ishlatildi — deploy'da native modul muammosi yo'q).
 
 ---
 
@@ -224,21 +282,18 @@ admin bo'lishi kerak** — yo'q bo'lsa graceful off. **Holat:** kod+build+server
 2. Kategoriya CRUD + SEO sog'lig'i (`b7497fc`, `4c007ff`) jonliligini tasdiqlang.
 3. **Google Search Console + Yandex Webmaster**'ga `digitalcfo.uz/sitemap.xml`
    yuboring (yangi `/blog` URL'lar tez indekslanishi uchun).
-4. **AI kontent generatori (DCOS, Faza 1) + Avtopilot (Faza 2) — QURILDI.** Yoqish
-   uchun VPS `server/.env` ga `ANTHROPIC_API_KEY` (ixtiyoriy `ANTHROPIC_MODEL`,
-   standart `claude-sonnet-5`) qo'shing → `pm2 restart digital-cfo`. Keyin: (a)
-   `/admin` editorда AI panel; (b) `/admin/autopilot` da navbatga mavzu qo'shib,
-   toggle bilan yoqing (standart draft rejim); (c) editorда "Social paket" va "Sifat
-   bahosi" panellari; (d) avtopilotда social + quality-gate toggle'lari.
-   **DCOS Faza 1–3 + quality-gate qurildi.** Qolgan (ixtiyoriy): social avto-post
-   (Faza 3b — platforma OAuth/kredensiallari kerak).
-5. (Tozalash) `react-quill-new` paketi endi ishlatilmaydi — `npm uninstall` mumkin.
+4. **DCOS AI kontent tizimi (Faza 1–3b + quality-gate) — QURILDI va JONLI SINALDI**, lekin
+   `feat/dcos-ai-content` branch'ida — **production'ga chiqarish uchun §9'ga qarang.**
+5. **Qolgan DCOS modullari** (05_INTERNAL_LINK_GRAPH, 06_SCHEMA, 07_IMAGE_PROMPTS,
+   08_DCF_PROMPTS(300)) — foydalanuvchi tayyor bo'lgach yuboradi; men yig'ib branch'ga commit
+   qilaman. Ixtiyoriy: 04 article template'ni generatorga qat'iy integratsiya (keyword'lar kabi).
+6. (Tozalash) `react-quill-new` paketi endi ishlatilmaydi — `npm uninstall` mumkin.
 
 **Oldingi sessiyalardan (hali dolzarb):**
-6. 🔴 **Bot tokenini REVOKE qiling** (@BotFather → Revoke → yangi token `.env`ga).
-7. 🟠 **Event Engine (agent)** — `.env`: `ENGINE_ENABLED=1` + `backfill_stages.py --apply`.
-8. Xavfsizlik: helmet CSP yoqish; `/api/leads` timing-safe; `npm audit fix`.
-9. Texnik qarz: engine dublikatsiyasini (bot vs sayt) yagona paketga birlashtirish.
+7. 🔴 **Bot tokenini REVOKE qiling** (@BotFather → Revoke → yangi token `.env`ga).
+8. 🟠 **Event Engine (agent)** — `.env`: `ENGINE_ENABLED=1` + `backfill_stages.py --apply`.
+9. Xavfsizlik: helmet CSP yoqish; `/api/leads` timing-safe; `npm audit fix`.
+10. Texnik qarz: engine dublikatsiyasini (bot vs sayt) yagona paketga birlashtirish.
 
 ---
 
@@ -258,3 +313,42 @@ admin bo'lishi kerak** — yo'q bo'lsa graceful off. **Holat:** kod+build+server
 - **URL:** maqola canonical `/blog/<slug>`. Ro'yxat `/blog`.
 - **Test:** har o'zgarishdan keyin saytda `npm run build`; botda `pytest`.
 - **Vaqt zonasi:** Toshkent (UTC+5) hamma joyda.
+
+---
+
+## 9. ⭐ DCOS branch → production deploy (2026-07-10 sessiyasi)
+
+**Barcha DCOS ishi `feat/dcos-ai-content` branch'ida** (main'ga MERGE QILINMAGAN, VPS'ga
+chiqmagan). Branch GitHub'da push qilingan. Commitlar (eng yangi tepada):
+`2bba1de` keyword integ · `c0da91b`→`973425d` 04/05 modullar · `ff0132a` topic map ·
+`624952c` boyitilgan kalendar · `c9dfb7d` import · `696cee3` kalendar · `2b651c0` social 3b ·
+`c5d752c` DCOS tizimi. *(`5147317` demo-tugma landing commit ham shu branch'da.)*
+
+**Production'ga chiqarish qadamlari:**
+1. **PR yaratib main'ga merge:** github.com/NodirbekGaniyev14/digital-cfo-fullstack (yoki
+   lokalда `git checkout main && git merge feat/dcos-ai-content && git push`).
+2. **VPS `server/.env`** ga qo'shing:
+   ```
+   ANTHROPIC_API_KEY=sk-ant-...
+   ANTHROPIC_MODEL=claude-sonnet-5        # yoki claude-haiku-4-5 (arzon)
+   TELEGRAM_CHANNEL_ID=@digitalcfoconsulting
+   ```
+3. **VPS'da deploy:** `git checkout -- client/package-lock.json server/package-lock.json &&
+   git pull && npm run build && pm2 restart digital-cfo`. (Yangi npm paket YO'Q → tez;
+   DB migratsiyalari idempotent → mavjud `articles.db` avtomatik yangilanadi.)
+4. **Navbatni to'ldirish:** VPS'da `npm --prefix server run import:calendar` (300 mavzu).
+5. **Yoqish:** `/admin/autopilot` → toggle (standart **draft** rejim — inson chop etadi).
+   Social/quality-gate toggle'lari ixtiyoriy. Telegram: bot allaqachon kanalда admin.
+
+**Xavfsizlik nuqtalari:**
+- Avtopilot **standart holatда O'CHIQ** (`settings.autopilot_enabled='0'`) — yoqmaguningizcha
+  hech narsa generatsiya qilmaydi (xarajat yo'q).
+- Standart rejim **draft** — kontent inson tasdig'isiz jonli chiqmaydi.
+- Kalitsiz — AI panellari graceful o'chiq.
+
+**Ochiq qarorlar:**
+- 04 article template'ni generatorга **qat'iy integratsiya** qilinsinmi (hozir dcos.md bilan
+  qisman ustma-ust — maqolalar taxminan shu tuzilma bo'yicha)?
+- Kalendardagi **tematik kunlar** (16 kun 4-bir-xil klaster) — foydalanuvchi dizayni,
+  o'zgartirilmadi. Qat'iy rotatsiya kerak bo'lsa qayta aralashtirilishi mumkin (IDlar o'zgaradi).
+- Social avto-post: qolgan 6 platforma (LinkedIn/FB/IG/X/Threads/YouTube) — OAuth app+token kerak.
