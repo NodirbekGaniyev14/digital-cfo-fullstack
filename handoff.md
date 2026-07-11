@@ -7,8 +7,9 @@
 > Saytga to'liq **avtonom SEO kontent dvigateli** qo'shildi (AI generator + avtopilot +
 > 13-kanal social paket + Telegram avto-post + sifat nazorati) va **DCOS hujjat modullari
 > (00–05)** yaratildi. **Jonli sinovdan o'tdi** (ANTHROPIC_API_KEY qo'shildi, Telegram
-> post kanalда chiqdi). ⚠️ **BARCHA ISH `feat/dcos-ai-content` BRANCH'IDA — main'ga
-> MERGE QILINMAGAN, production'ga chiqmagan.** Batafsil: §3 (DCOS bloki) va §9.
+> post kanalда chiqdi). ✅ **2026-07-11: `feat/dcos-ai-content` → main'ga MERGE QILINDI
+> (fast-forward, commit fb0612f) + hujjatlar to'plami TO'LIQ (00–12, 13 modul).**
+> ⚠️ VPS'ga hali deploy QILINMAGAN — qadamlar §9 da. Batafsil: §3 (DCOS bloki) va §9.
 >
 > Avvalgi sessiya sayt maqolalari tizimini **SQLite CMS v2 (/admin)** ga aylantirgan
 > edi — u JONLI (§3 boshi).
@@ -329,28 +330,26 @@ navbatiga DCF tartibida yuklaydi (`npm --prefix server run import:calendar`; `--
 
 ---
 
-## 9. ⭐ DCOS branch → production deploy (2026-07-10 sessiyasi)
+## 9. ⭐ DCOS → production deploy holati
 
-**Barcha DCOS ishi `feat/dcos-ai-content` branch'ida** (main'ga MERGE QILINMAGAN, VPS'ga
-chiqmagan). Branch GitHub'da push qilingan. Commitlar (eng yangi tepada):
-`2bba1de` keyword integ · `c0da91b`→`973425d` 04/05 modullar · `ff0132a` topic map ·
-`624952c` boyitilgan kalendar · `c9dfb7d` import · `696cee3` kalendar · `2b651c0` social 3b ·
-`c5d752c` DCOS tizimi. *(`5147317` demo-tugma landing commit ham shu branch'da.)*
+✅ **2026-07-11: `feat/dcos-ai-content` main'ga MERGE QILINDI** (fast-forward `9b05531`→
+`fb0612f`, 25 commit, 33 fayl, +126k satr) va GitHub'ga push qilindi. Lokal `npm run build`
+o'tdi (8.2s). Hujjatlar to'plami TO'LIQ: 00–12 (13 modul, §3 jadval).
 
-**Production'ga chiqarish qadamlari:**
-1. **PR yaratib main'ga merge:** github.com/NodirbekGaniyev14/digital-cfo-fullstack (yoki
-   lokalда `git checkout main && git merge feat/dcos-ai-content && git push`).
-2. **VPS `server/.env`** ga qo'shing:
+⚠️ **VPS'ga hali deploy QILINMAGAN** (SSH agentда yo'q — quyidagilarni serverда bajaring):
+
+**Qolgan qadamlar (VPS'da):**
+1. **VPS `server/.env`** ga qo'shing:
    ```
    ANTHROPIC_API_KEY=sk-ant-...
    ANTHROPIC_MODEL=claude-sonnet-5        # yoki claude-haiku-4-5 (arzon)
    TELEGRAM_CHANNEL_ID=@digitalcfoconsulting
    ```
-3. **VPS'da deploy:** `git checkout -- client/package-lock.json server/package-lock.json &&
+2. **Deploy:** `git checkout -- client/package-lock.json server/package-lock.json &&
    git pull && npm run build && pm2 restart digital-cfo`. (Yangi npm paket YO'Q → tez;
    DB migratsiyalari idempotent → mavjud `articles.db` avtomatik yangilanadi.)
-4. **Navbatni to'ldirish:** VPS'da `npm --prefix server run import:calendar` (300 mavzu).
-5. **Yoqish:** `/admin/autopilot` → toggle (standart **draft** rejim — inson chop etadi).
+3. **Navbatni to'ldirish:** VPS'da `npm --prefix server run import:calendar` (300 mavzu).
+4. **Yoqish:** `/admin/autopilot` → toggle (standart **draft** rejim — inson chop etadi).
    Social/quality-gate toggle'lari ixtiyoriy. Telegram: bot allaqachon kanalда admin.
 
 **Xavfsizlik nuqtalari:**
