@@ -161,7 +161,8 @@ DCOS system prompt (turli tool sabab kesh ulanmaydi). Haiku'да 1 draft maqola 
 | 07 | AGENT_PROMPTS | ✅ `07_AGENT_PROMPTS.md` — AI agent prompt kutubxonasi (20 qism, 29k satr; 12 agent + tizim qoidalari; ma'lumotnoma) |
 | 08 | INTERNAL_LINK_GRAPH | ✅ `08_INTERNAL_LINK_GRAPH.md` — ichki havola grafi strategiyasi (20 qism, 24.5k satr; 2 bo'lim qilib kelgan, yig'ildi) |
 | 09 | KEYWORD_INTELLIGENCE | ✅ `09_KEYWORD_INTELLIGENCE.md` — kalit so'z razvedka framework'i (10 qism, 15k satr; metodologiya, 03'ni to'ldiradi) |
-| 10+ (reja) | SCHEMA · IMAGE_PROMPTS · DCF_PROMPTS(300) | ⏳ foydalanuvchi keyin yuboradi |
+| 10 | RAG_ARCHITECTURE | ✅ `10_RAG_ARCHITECTURE.md` — enterprise RAG arxitekturasi (5 qism, 7.4k satr; grounding standarti) |
+| 11+ (reja) | SCHEMA · IMAGE_PROMPTS · DCF_PROMPTS(300) | ⏳ foydalanuvchi keyin yuboradi |
 
 > ⚠️ **DCF ID nizosi hal qilindi:** keyword DB fayldagi ID→mavzu kalendardan farq qilardi →
 > **`01_CONTENT_CALENDAR.md` USTUN** (asosiy manba). Keyword DB mapping'i e'tiborga olinmaydi.
@@ -224,7 +225,8 @@ navbatiga DCF tartibida yuklaydi (`npm --prefix server run import:calendar`; `--
   `AdminApp.jsx` (autopilot route), `AdminShell.jsx` (nav), `lib/api.js` (yangi helperlar).
 - **Yangi (repo ildizi hujjatlar):** `01_CONTENT_CALENDAR.md`, `02_TOPIC_MAP.md`,
   `04_MASTER_ARTICLE_TEMPLATE.md`, `05_CLAUDE_CODE_AUTOMATION.md`, `06_PROJECT_STRUCTURE.md`,
-  `07_AGENT_PROMPTS.md`, `08_INTERNAL_LINK_GRAPH.md`, `09_KEYWORD_INTELLIGENCE.md`.
+  `07_AGENT_PROMPTS.md`, `08_INTERNAL_LINK_GRAPH.md`, `09_KEYWORD_INTELLIGENCE.md`,
+  `10_RAG_ARCHITECTURE.md`.
 - **Yangi npm paket YO'Q** (global `fetch` ishlatildi — deploy'da native modul muammosi yo'q).
 
 ---
