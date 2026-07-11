@@ -163,7 +163,12 @@ DCOS system prompt (turli tool sabab kesh ulanmaydi). Haiku'да 1 draft maqola 
 | 09 | KEYWORD_INTELLIGENCE | ✅ `09_KEYWORD_INTELLIGENCE.md` — kalit so'z razvedka framework'i (10 qism, 15k satr; metodologiya, 03'ni to'ldiradi) |
 | 10 | RAG_ARCHITECTURE | ✅ `10_RAG_ARCHITECTURE.md` — enterprise RAG arxitekturasi (5 qism, 7.4k satr; grounding standarti) |
 | 11 | AUTOMATION_WORKFLOWS | ✅ `11_AUTOMATION_WORKFLOWS.md` — avtomatlashtirish ish jarayonlari (5 qism, 7.1k satr; event-driven orkestratsiya) |
-| 12+ (reja) | SCHEMA · IMAGE_PROMPTS · DCF_PROMPTS(300) | ⏳ foydalanuvchi keyin yuboradi |
+| 12 | OPERATIONS_MANUAL | ✅ `12_OPERATIONS_MANUAL.md` — operatsiyalar qo'llanmasi (5 qism, 6.1k satr; SOP, kunlik workflow, governance) |
+
+**✅ HUJJATLAR TO'PLAMI TO'LIQ (2026-07-11):** foydalanuvchi "12 oxirgisi edi" dedi — 00–12
+(13 modul) yakunlandi. Eski rejadagi SCHEMA/IMAGE_PROMPTS/DCF_PROMPTS(300) alohida modullar
+sifatida KELMAYDI (yangi tuzilma ularni qamrab olgan: schema 04/07 ichida, image prompts 07
+IMAGE AGENT ichida). Endi "to'liq ishga tushirish" bosqichi — §9 ga qarang.
 
 > ⚠️ **DCF ID nizosi hal qilindi:** keyword DB fayldagi ID→mavzu kalendardan farq qilardi →
 > **`01_CONTENT_CALENDAR.md` USTUN** (asosiy manba). Keyword DB mapping'i e'tiborga olinmaydi.
@@ -227,7 +232,7 @@ navbatiga DCF tartibida yuklaydi (`npm --prefix server run import:calendar`; `--
 - **Yangi (repo ildizi hujjatlar):** `01_CONTENT_CALENDAR.md`, `02_TOPIC_MAP.md`,
   `04_MASTER_ARTICLE_TEMPLATE.md`, `05_CLAUDE_CODE_AUTOMATION.md`, `06_PROJECT_STRUCTURE.md`,
   `07_AGENT_PROMPTS.md`, `08_INTERNAL_LINK_GRAPH.md`, `09_KEYWORD_INTELLIGENCE.md`,
-  `10_RAG_ARCHITECTURE.md`, `11_AUTOMATION_WORKFLOWS.md`.
+  `10_RAG_ARCHITECTURE.md`, `11_AUTOMATION_WORKFLOWS.md`, `12_OPERATIONS_MANUAL.md`.
 - **Yangi npm paket YO'Q** (global `fetch` ishlatildi — deploy'da native modul muammosi yo'q).
 
 ---
