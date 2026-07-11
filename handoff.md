@@ -332,25 +332,21 @@ navbatiga DCF tartibida yuklaydi (`npm --prefix server run import:calendar`; `--
 
 ## 9. ⭐ DCOS → production deploy holati
 
-✅ **2026-07-11: `feat/dcos-ai-content` main'ga MERGE QILINDI** (fast-forward `9b05531`→
-`fb0612f`, 25 commit, 33 fayl, +126k satr) va GitHub'ga push qilindi. Lokal `npm run build`
-o'tdi (8.2s). Hujjatlar to'plami TO'LIQ: 00–12 (13 modul, §3 jadval).
+✅ **2026-07-11: MERGE + VPS DEPLOY BAJARILDI.**
+- `feat/dcos-ai-content` → main fast-forward (`9b05531`→`fb0612f`, 25 commit, 33 fayl, +126k satr), push.
+- **VPS yo'li: `/var/www/digital-cfo`** (pm2 app nomi `digital-cfo`, `exec cwd=/var/www/digital-cfo`,
+  script `server/index.js`). ⚠️ `/root/digital-cfo-fullstack` MAVJUD EMAS — o'sha placeholder edi.
+- VPS'da: `git pull` + `npm run build` (24.6s) + `pm2 restart digital-cfo` bajarildi.
+- **VPS `server/.env`** ga qo'shildi (avval bo'sh edi): `ANTHROPIC_API_KEY` (haqiqiy) +
+  `ANTHROPIC_MODEL=claude-sonnet-5` + `TELEGRAM_CHANNEL_ID=@digitalcfoconsulting`.
+- `npm --prefix server run import:calendar` → **298 mavzu navbatga** (300 o'qildi, 2 dublikat).
 
-⚠️ **VPS'ga hali deploy QILINMAGAN** (SSH agentда yo'q — quyidagilarni serverда bajaring):
+**Qolgan yagona qadam:** brauzerda `/admin/autopilot` → toggle **ON** (standart **draft** rejim —
+maqolalar qoralama, inson tasdiqlaydi). Social/quality-gate toggle'lari ixtiyoriy. Telegram bot
+allaqachon kanalда admin. Slotlar: 08:00 / 12:25 / 17:00 / 20:30 (Toshkent).
 
-**Qolgan qadamlar (VPS'da):**
-1. **VPS `server/.env`** ga qo'shing:
-   ```
-   ANTHROPIC_API_KEY=sk-ant-...
-   ANTHROPIC_MODEL=claude-sonnet-5        # yoki claude-haiku-4-5 (arzon)
-   TELEGRAM_CHANNEL_ID=@digitalcfoconsulting
-   ```
-2. **Deploy:** `git checkout -- client/package-lock.json server/package-lock.json &&
-   git pull && npm run build && pm2 restart digital-cfo`. (Yangi npm paket YO'Q → tez;
-   DB migratsiyalari idempotent → mavjud `articles.db` avtomatik yangilanadi.)
-3. **Navbatni to'ldirish:** VPS'da `npm --prefix server run import:calendar` (300 mavzu).
-4. **Yoqish:** `/admin/autopilot` → toggle (standart **draft** rejim — inson chop etadi).
-   Social/quality-gate toggle'lari ixtiyoriy. Telegram: bot allaqachon kanalда admin.
+**Qayta deploy (kelajakda):** `cd /var/www/digital-cfo && git checkout -- client/package-lock.json
+server/package-lock.json && git pull && npm run build && pm2 restart digital-cfo`.
 
 **Xavfsizlik nuqtalari:**
 - Avtopilot **standart holatда O'CHIQ** (`settings.autopilot_enabled='0'`) — yoqmaguningizcha
