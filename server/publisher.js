@@ -6,7 +6,7 @@
 // Xavfsizlik: hech qanday kredensial kodda yo'q — hammasi .env dan. Adapter kaliti bo'lmasa
 // jimgina o'chiq. Dublikat post oldini olinadi (SocialPosts.exists).
 
-import { Articles, SocialPosts } from "./db.js";
+import { Articles, SocialPosts, Settings } from "./db.js";
 
 const SITE = "https://digitalcfo.uz";
 
@@ -67,6 +67,41 @@ export function publisherStatus() {
     adapters: ADAPTERS.map((a) => ({ key: a.key, label: a.label, enabled: a.enabled(), hint: a.hint })),
     anyEnabled: ADAPTERS.some((a) => a.enabled()),
   };
+}
+
+export function telegramReady() {
+  return telegram.enabled();
+}
+
+/**
+ * Telegram avto-post — BEPUL oddiy rejim (AI chaqirilmaydi, xarajat 0).
+ * Maqola chop etilganda kanalga sarlavha + qisqacha + havola yuboriladi.
+ * Toggle: settings.autopilot_telegram ('0' standart — o'chiq).
+ * Dublikat oldini olinadi (SocialPosts.exists) — qo'lda joylangan bo'lsa ham qayta yubormaydi.
+ * Hech qachon throw qilmaydi — chaqiruvchini buzmaydi.
+ */
+export async function autoPostArticleTelegram(article) {
+  try {
+    if (Settings.get("autopilot_telegram", "0") !== "1") return { status: "off" };
+    if (!telegram.enabled()) return { status: "skipped", message: "Telegram sozlanmagan" };
+    if (!article || article.status !== "published") return { status: "skipped", message: "published emas" };
+    if (SocialPosts.exists(article.id, "telegram")) return { status: "skipped", message: "allaqachon joylangan" };
+
+    // Oddiy matn — maqolada allaqachon bor ma'lumotdan (adapter havolani o'zi qo'shadi).
+    const simple = {
+      telegram: [`📊 ${article.title}`, String(article.excerpt || "").trim()].filter(Boolean).join("\n\n"),
+    };
+    const r = await telegram.post(article, simple);
+    SocialPosts.log({ article_id: article.id, platform: "telegram", status: "ok", message: JSON.stringify(r || {}) });
+    console.log("📣 Telegram avto-post (bepul):", article.slug);
+    return { status: "ok" };
+  } catch (err) {
+    try {
+      SocialPosts.log({ article_id: article?.id, platform: "telegram", status: "error", message: err.message });
+    } catch {}
+    console.warn("⚠️ Telegram avto-post xatosi:", err.message);
+    return { status: "error", message: err.message };
+  }
 }
 
 /**

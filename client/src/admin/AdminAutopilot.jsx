@@ -279,6 +279,23 @@ export default function AdminAutopilot() {
             </label>
             <p className="mt-1.5 text-[12px] text-slate-400">Har maqola bilan 13 kanal uchun kontent (qo'shimcha xarajat).</p>
 
+            {/* Telegram avto-post (bepul) */}
+            <label className="mt-3 flex items-center justify-between gap-2 rounded-xl border border-navy/10 px-3 py-2.5 dark:border-white/10">
+              <span className="text-[13px] font-medium text-slate-600 dark:text-slate-300">Telegram avto-post (bepul)</span>
+              <input
+                type="checkbox"
+                checked={!!s.telegram}
+                disabled={busy || !s.telegramReady}
+                onChange={(e) => setSetting({ telegram: e.target.checked })}
+                className="h-5 w-5 accent-azure disabled:opacity-40"
+              />
+            </label>
+            <p className="mt-1.5 text-[12px] text-slate-400">
+              {s.telegramReady
+                ? "Maqola chop etilganda kanalga sarlavha + qisqacha + havola ketadi (AI'siz, xarajat 0)."
+                : "TELEGRAM_BOT_TOKEN va TELEGRAM_CHANNEL_ID sozlanmagan."}
+            </p>
+
             {/* Quality gate */}
             <label className="mt-3 flex items-center justify-between gap-2 rounded-xl border border-navy/10 px-3 py-2.5 dark:border-white/10">
               <span className="text-[13px] font-medium text-slate-600 dark:text-slate-300">Sifat nazorati (quality gate)</span>

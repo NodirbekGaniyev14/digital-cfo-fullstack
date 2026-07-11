@@ -308,11 +308,18 @@ export const Articles = {
   incrementViews: (id) => db.prepare("UPDATE articles SET views=views+1 WHERE id=?").run(id),
 
   // Rejalashtirilgan maqolalarni vaqti kelganda 'published' ga o'tkazadi.
+  // Chop etilgan ID'lar ro'yxatini qaytaradi (Telegram avto-post uchun).
   publishDue: () => {
     const now = new Date().toISOString();
-    return db.prepare(
-      "UPDATE articles SET status='published' WHERE status='scheduled' AND published_at IS NOT NULL AND published_at <= ?"
-    ).run(now).changes;
+    const due = db.prepare(
+      "SELECT id FROM articles WHERE status='scheduled' AND published_at IS NOT NULL AND published_at <= ?"
+    ).all(now).map((r) => r.id);
+    if (due.length) {
+      db.prepare(
+        "UPDATE articles SET status='published' WHERE status='scheduled' AND published_at IS NOT NULL AND published_at <= ?"
+      ).run(now);
+    }
+    return due;
   },
   // Dublikat sarlavha bormi? (avtopilot dedup uchun, katta-kichik harfga befarq)
   titleExists: (title) =>

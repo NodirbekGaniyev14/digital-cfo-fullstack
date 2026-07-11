@@ -12,6 +12,7 @@
 
 import { Articles, AutopilotTopics, AutopilotRuns, Settings, cleanHtml, uniqueSlug } from "./db.js";
 import { aiEnabled, generateArticle, generateSocialPackage, scoreArticle } from "./anthropic.js";
+import { autoPostArticleTelegram, telegramReady } from "./publisher.js";
 
 const QGATE_MAX_RETRIES = 2; // sifat past bo'lsa ko'pi bilan shuncha marta qayta yoziladi
 
@@ -179,6 +180,9 @@ export async function runOnce({ slot = "", manual = false } = {}) {
     AutopilotRuns.log({ slot, topic_id: topic.id, article_id: created.id, status: "ok", message });
     console.log(`🤖 Avtopilot maqola yaratdi: ${message}`);
 
+    // Telegram avto-post (bepul rejim) — faqat darhol jonli chiqqanda; hech qachon throw qilmaydi.
+    if (effMode === "published") await autoPostArticleTelegram(created);
+
     // Ixtiyoriy: social paketni ham yaratamiz (best-effort — maqolani buzmaydi).
     if (Settings.get("autopilot_social", "0") === "1") {
       try {
@@ -227,6 +231,8 @@ export function autopilotStatus() {
     active: autopilotEnabled(), // enabled && aiEnabled — haqiqatan ishlaydimi
     mode: getMode(),
     social: Settings.get("autopilot_social", "0") === "1",
+    telegram: Settings.get("autopilot_telegram", "0") === "1",
+    telegramReady: telegramReady(),
     qgate: Settings.get("autopilot_qgate", "0") === "1",
     qgateMin: clampScore(Settings.get("autopilot_qgate_min", "70"), 90),
     slots: SLOTS,
@@ -240,10 +246,11 @@ export function autopilotStatus() {
 }
 
 // Sozlamalarni o'rnatish (validatsiya bilan).
-export function setAutopilotSettings({ enabled, mode, social, qgate, qgateMin }) {
+export function setAutopilotSettings({ enabled, mode, social, qgate, qgateMin, telegram }) {
   if (enabled !== undefined) Settings.set("autopilot_enabled", enabled ? "1" : "0");
   if (mode !== undefined && VALID_MODES.includes(mode)) Settings.set("autopilot_mode", mode);
   if (social !== undefined) Settings.set("autopilot_social", social ? "1" : "0");
+  if (telegram !== undefined) Settings.set("autopilot_telegram", telegram ? "1" : "0");
   if (qgate !== undefined) Settings.set("autopilot_qgate", qgate ? "1" : "0");
   if (qgateMin !== undefined) Settings.set("autopilot_qgate_min", String(clampScore(qgateMin, 90)));
   return autopilotStatus();

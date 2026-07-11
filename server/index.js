@@ -15,7 +15,7 @@ import { loginHandler, requireAdmin } from "./auth.js";
 import { renderArticle, renderList, buildSitemap, hasTemplate } from "./ssr.js";
 import { aiEnabled, generateArticle, generateSocialPackage, scoreArticle } from "./anthropic.js";
 import { startAutopilot, autopilotStatus, setAutopilotSettings, seedStarterTopics, runGuarded } from "./autopilot.js";
-import { publisherStatus, publishArticleSocial } from "./publisher.js";
+import { publisherStatus, publishArticleSocial, autoPostArticleTelegram } from "./publisher.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 4000;
@@ -286,8 +286,14 @@ setInterval(() => {
 // Rejalashtirilgan maqolalar (scheduled) — vaqti kelganda avtomatik chop etamiz.
 function runScheduler() {
   try {
-    const n = Articles.publishDue();
-    if (n) console.log(`🕒 ${n} ta rejalashtirilgan maqola chop etildi`);
+    const ids = Articles.publishDue();
+    if (ids.length) {
+      console.log(`🕒 ${ids.length} ta rejalashtirilgan maqola chop etildi`);
+      // Telegram avto-post (bepul rejim; toggle o'chiq bo'lsa jim o'tadi, hech qachon throw qilmaydi)
+      (async () => {
+        for (const id of ids) await autoPostArticleTelegram(Articles.getById(id));
+      })();
+    }
   } catch (err) {
     console.warn("⚠️ Scheduler xatosi:", err.message);
   }
@@ -771,7 +777,8 @@ app.post("/api/admin/autopilot/settings", requireAdmin, (req, res) => {
   const social = req.body?.social === undefined ? undefined : Boolean(req.body.social);
   const qgate = req.body?.qgate === undefined ? undefined : Boolean(req.body.qgate);
   const qgateMin = req.body?.qgateMin === undefined ? undefined : Number(req.body.qgateMin);
-  res.json(setAutopilotSettings({ enabled, mode, social, qgate, qgateMin }));
+  const telegram = req.body?.telegram === undefined ? undefined : Boolean(req.body.telegram);
+  res.json(setAutopilotSettings({ enabled, mode, social, qgate, qgateMin, telegram }));
 });
 
 app.get("/api/admin/autopilot/topics", requireAdmin, (_req, res) => {
@@ -914,16 +921,20 @@ app.post("/api/admin/articles", requireAdmin, (req, res) => {
   if (error) return res.status(400).json({ error });
   const created = Articles.insert(data);
   console.log("📝 Yangi maqola:", created.slug, `(${created.status})`);
+  if (created.status === "published") autoPostArticleTelegram(created); // bepul avto-post (toggle o'chiq bo'lsa jim)
   res.json({ ok: true, article: created });
 });
 
 app.put("/api/admin/articles/:id", requireAdmin, (req, res) => {
   const id = Number(req.params.id);
-  if (!Articles.getById(id)) return res.status(404).json({ error: "Maqola topilmadi" });
+  const prev = Articles.getById(id);
+  if (!prev) return res.status(404).json({ error: "Maqola topilmadi" });
   const { data, error } = parseArticleInput(req.body || {}, { forId: id });
   if (error) return res.status(400).json({ error });
   const updated = Articles.update(id, data);
   console.log("✏️ Maqola tahrirlandi:", updated.slug, `(${updated.status})`);
+  // Faqat draft/scheduled → published O'TISHIDA avto-post (eski maqola tahririda emas).
+  if (updated.status === "published" && prev.status !== "published") autoPostArticleTelegram(updated);
   res.json({ ok: true, article: updated });
 });
 
