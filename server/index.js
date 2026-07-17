@@ -807,6 +807,37 @@ app.post("/api/admin/autopilot/topics/:id/retry", requireAdmin, (req, res) => {
   res.json({ ok: true });
 });
 
+// Mavzudan bo'sh qoralama yaratish — QO'LDA yozish yo'li (AI/API kalitisiz ishlaydi).
+// Sarlavha/kalit so'z/kategoriya mavzudan to'ldiriladi; mavzu navbatdan chiqadi (done).
+app.post("/api/admin/autopilot/topics/:id/draft", requireAdmin, (req, res) => {
+  const t = AutopilotTopics.get(Number(req.params.id));
+  if (!t) return res.status(404).json({ error: "Mavzu topilmadi" });
+  if (t.status === "done" && t.article_id)
+    return res.json({ ok: true, articleId: t.article_id, existing: true });
+  if (Articles.titleExists(t.topic))
+    return res.status(409).json({ error: "Bu sarlavhali maqola allaqachon mavjud" });
+  const created = Articles.insert({
+    title: String(t.topic).slice(0, 200),
+    slug: uniqueSlug(t.topic),
+    excerpt: "",
+    content: "<p></p>",
+    category: String(t.category || "").slice(0, 80),
+    author: "Digital CFO",
+    status: "draft",
+    published_at: null,
+    seo_title: "",
+    seo_description: "",
+    focus_keyword: String(t.keyword || "").slice(0, 120),
+    cover_alt: "",
+    cover_caption: "",
+    tags: [],
+    faqs: [],
+  });
+  AutopilotTopics.markDone(t.id, created.id);
+  console.log("✍️ Mavzudan qo'lda qoralama:", created.slug);
+  res.json({ ok: true, articleId: created.id });
+});
+
 app.post("/api/admin/autopilot/seed-starter", requireAdmin, (_req, res) => {
   const added = seedStarterTopics();
   res.json({ ok: true, added, topics: AutopilotTopics.list() });

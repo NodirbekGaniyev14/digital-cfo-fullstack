@@ -571,6 +571,7 @@ export const Settings = {
 // --- Avtopilot mavzu navbati (DCOS Faza 2) ---
 export const AutopilotTopics = {
   list: () => db.prepare("SELECT * FROM autopilot_topics ORDER BY position, id").all(),
+  get: (id) => db.prepare("SELECT * FROM autopilot_topics WHERE id=?").get(id),
   pending: () => db.prepare("SELECT * FROM autopilot_topics WHERE status='pending' ORDER BY position, id").all(),
   add: ({ topic, keyword = "", category = "", length = "standard" }) => {
     const max = db.prepare("SELECT COALESCE(MAX(position),0) m FROM autopilot_topics").get().m;

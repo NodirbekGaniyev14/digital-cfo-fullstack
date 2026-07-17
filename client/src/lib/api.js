@@ -97,6 +97,8 @@ export const autopilotRemoveTopic = (id) =>
   request(`/api/admin/autopilot/topics/${id}`, { method: "DELETE", admin: true });
 export const autopilotRetryTopic = (id) =>
   request(`/api/admin/autopilot/topics/${id}/retry`, { method: "POST", admin: true });
+export const autopilotTopicDraft = (id) =>
+  request(`/api/admin/autopilot/topics/${id}/draft`, { method: "POST", admin: true });
 export const autopilotSeedStarter = () =>
   request("/api/admin/autopilot/seed-starter", { method: "POST", admin: true });
 export const autopilotRunNow = () =>

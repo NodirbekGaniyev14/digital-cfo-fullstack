@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import {
   Rocket, Play, Loader2, Plus, Trash2, RotateCcw, Check, Clock,
-  AlertTriangle, Sparkles, ListPlus,
+  AlertTriangle, Sparkles, ListPlus, PenLine,
 } from "lucide-react";
 import AdminShell from "./AdminShell";
 import {
   autopilotGet, autopilotSettings, autopilotTopics, autopilotAddTopic,
   autopilotRemoveTopic, autopilotRetryTopic, autopilotSeedStarter, autopilotRunNow,
+  autopilotTopicDraft,
 } from "@/lib/api";
 
 const MODE_LABEL = {
@@ -17,6 +19,7 @@ const MODE_LABEL = {
 };
 
 export default function AdminAutopilot() {
+  const navigate = useNavigate();
   const [status, setStatus] = useState(null);
   const [topics, setTopics] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -70,6 +73,14 @@ export default function AdminAutopilot() {
   const retryTopic = async (id) => {
     try { await autopilotRetryTopic(id); toast.success("Qayta navbatga qo'yildi"); refresh(); }
     catch (e) { toast.error(e.message); }
+  };
+  // Qo'lda yozish: mavzudan tayyor qoralama ochadi (AI/API kalitisiz ishlaydi)
+  const draftTopic = async (id) => {
+    try {
+      const r = await autopilotTopicDraft(id);
+      toast.success(r.existing ? "Maqola allaqachon bor — ochilmoqda" : "Qoralama yaratildi");
+      navigate(`/admin/articles/${r.articleId}/edit`);
+    } catch (e) { toast.error(e.message); }
   };
   const seedStarter = async () => {
     try {
@@ -192,6 +203,11 @@ export default function AdminAutopilot() {
                         {t.status === "failed" && t.error ? ` — ${t.error}` : ""}
                       </p>
                     </div>
+                    {t.status !== "done" && (
+                      <button onClick={() => draftTopic(t.id)} title="Qo'lda yozish — qoralama ochish" className="rounded-lg p-1.5 text-slate-400 hover:text-emerald-500">
+                        <PenLine className="h-4 w-4" />
+                      </button>
+                    )}
                     {t.status === "failed" && (
                       <button onClick={() => retryTopic(t.id)} title="Qayta urinish" className="rounded-lg p-1.5 text-slate-400 hover:text-azure">
                         <RotateCcw className="h-4 w-4" />
