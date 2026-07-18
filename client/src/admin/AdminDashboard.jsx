@@ -3,18 +3,20 @@ import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import {
   Loader2, FileText, CheckCircle2, FileEdit, Eye, Mail, Image, Clock,
-  Plus, TrendingUp,
+  Plus, TrendingUp, Users, BarChart3, MousePointerClick,
 } from "lucide-react";
 import AdminShell from "./AdminShell";
-import { adminStats } from "@/lib/api";
+import { adminStats, adminAnalytics } from "@/lib/api";
 import { formatDateUz } from "@/data/articles";
 
 // /admin — statistika boshqaruv paneli.
 export default function AdminDashboard() {
   const [s, setS] = useState(null);
+  const [a, setA] = useState(null);
 
   useEffect(() => {
     adminStats().then(setS).catch((e) => { toast.error(e.message); setS({}); });
+    adminAnalytics(30).then(setA).catch(() => setA({}));
   }, []);
 
   if (!s) {
@@ -57,6 +59,9 @@ export default function AdminDashboard() {
         ))}
       </div>
 
+      {/* Sayt tashriflari analitikasi */}
+      <AnalyticsBlock a={a} />
+
       <div className="mt-6 grid gap-6 lg:grid-cols-2">
         {/* Top maqolalar (views) */}
         <Panel title="Ommabop maqolalar" icon={TrendingUp}>
@@ -89,6 +94,78 @@ export default function AdminDashboard() {
         </Panel>
       </div>
     </AdminShell>
+  );
+}
+
+// Sayt tashriflari: bugungi/oylik tashrifchi + ko'rishlar, 30 kunlik grafik, top sahifalar.
+function AnalyticsBlock({ a }) {
+  if (!a) {
+    return (
+      <div className="mt-6 flex justify-center rounded-2xl border border-navy/[.08] bg-white py-10 dark:border-white/[.08] dark:bg-[#141b2e]">
+        <Loader2 className="h-5 w-5 animate-spin text-slate-400" />
+      </div>
+    );
+  }
+  const series = a.series || [];
+  const maxV = Math.max(1, ...series.map((d) => d.views || 0));
+  const tiles = [
+    { label: "Bugun tashrifchi", value: a.todayVisitors || 0, Icon: Users, color: "text-azure" },
+    { label: "Bugun ko'rishlar", value: a.todayViews || 0, Icon: MousePointerClick, color: "text-emerald-500" },
+    { label: `${a.days || 30} kun tashrifchi`, value: a.rangeVisitors || 0, Icon: Users, color: "text-violet-500" },
+    { label: "Jami ko'rishlar", value: a.totalViews || 0, Icon: BarChart3, color: "text-cyan-500" },
+  ];
+  return (
+    <div className="mt-6 rounded-2xl border border-navy/[.08] bg-white p-5 dark:border-white/[.08] dark:bg-[#141b2e]">
+      <h2 className="mb-4 flex items-center gap-2 font-heading text-[15px] font-bold text-navy dark:text-white">
+        <BarChart3 className="h-4 w-4 text-azure" /> Sayt tashriflari
+      </h2>
+
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {tiles.map((t) => (
+          <div key={t.label} className="rounded-xl border border-navy/[.06] p-4 dark:border-white/[.06]">
+            <t.Icon className={`mb-2 h-5 w-5 ${t.color}`} />
+            <p className="font-heading text-[22px] font-extrabold text-navy dark:text-white">{t.value.toLocaleString("uz")}</p>
+            <p className="text-[12px] text-slate-400">{t.label}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* 30 kunlik grafik */}
+      {series.length > 0 ? (
+        <div className="mt-5">
+          <p className="mb-2 text-[12.5px] font-medium text-slate-500 dark:text-slate-400">Kunlik ko'rishlar ({a.days} kun)</p>
+          <div className="flex h-28 items-end gap-[3px]">
+            {series.map((d) => (
+              <div key={d.ymd} className="group relative flex-1" title={`${d.ymd}: ${d.views} ko'rish, ${d.visitors} tashrifchi`}>
+                <div
+                  className="w-full rounded-t bg-gradient-to-t from-azure to-emerald-400 transition-opacity hover:opacity-80"
+                  style={{ height: `${Math.max(4, ((d.views || 0) / maxV) * 100)}%` }}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <p className="mt-5 rounded-xl bg-navy/[.03] px-4 py-6 text-center text-[13px] text-slate-400 dark:bg-white/[.03]">
+          Hali tashrif ma'lumoti yo'q. Saytga tashriflar kela boshlagach, bu yerda dinamika ko'rinadi.
+        </p>
+      )}
+
+      {/* Top sahifalar */}
+      {a.topPages?.length > 0 && (
+        <div className="mt-5">
+          <p className="mb-2 text-[12.5px] font-medium text-slate-500 dark:text-slate-400">Eng ko'p ochilgan sahifalar</p>
+          <ul className="space-y-0.5">
+            {a.topPages.slice(0, 6).map((p) => (
+              <li key={p.path} className="flex items-center gap-3 rounded-lg px-2 py-1.5 text-[13px] hover:bg-navy/[.03] dark:hover:bg-white/[.03]">
+                <span className="flex-1 truncate font-mono text-[12.5px] text-slate-600 dark:text-slate-300">{p.path}</span>
+                <span className="flex-none text-slate-400">{p.views.toLocaleString("uz")}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
   );
 }
 

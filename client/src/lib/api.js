@@ -65,6 +65,8 @@ export const adminSubscribers = () =>
   request("/api/admin/subscribers", { admin: true });
 export const adminStats = () =>
   request("/api/admin/stats", { admin: true });
+export const adminAnalytics = (days = 30) =>
+  request(`/api/admin/analytics?days=${days}`, { admin: true });
 export const adminCategories = () =>
   request("/api/admin/categories", { admin: true }).then((d) => d.categories || []);
 export const adminCreateCategory = (name) =>

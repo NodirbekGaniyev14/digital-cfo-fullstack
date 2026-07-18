@@ -9,8 +9,8 @@ import path from "node:path";
 import fs from "node:fs";
 import { fileURLToPath } from "node:url";
 import { execFile } from "node:child_process";
-import { timingSafeEqual } from "node:crypto";
-import db, { Articles, Authors, Tags, Categories, Subscribers, Revisions, AutopilotTopics, SocialPosts, cleanHtml, uniqueSlug } from "./db.js";
+import { timingSafeEqual, createHash } from "node:crypto";
+import db, { Articles, Authors, Tags, Categories, Subscribers, Revisions, AutopilotTopics, SocialPosts, PageViews, cleanHtml, uniqueSlug } from "./db.js";
 import { loginHandler, requireAdmin } from "./auth.js";
 import { renderArticle, renderList, buildSitemap, hasTemplate } from "./ssr.js";
 import { aiEnabled, generateArticle, generateSocialPackage, scoreArticle } from "./anthropic.js";
@@ -637,6 +637,42 @@ app.get("/api/articles/:slug", (req, res) => {
   res.json({ article: a });
 });
 
+// ---- Sayt tashriflari analitikasi (maxfiylikka mos, o'zimizniki) --------------
+// Toshkent sanasi (YYYY-MM-DD) — analitika kunini birlashtirish uchun.
+function tashkentYmd() {
+  return new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Tashkent" });
+}
+// Tashrifchi identifikatori: IP+UA ning KUNLIK-tuzli hashi. Kunlik tuz (salt)
+// tufayli u har kuni o'zgaradi — barqaror kuzatuv EMAS, faqat kunlik noyoblik uchun.
+function visitorHash(req, ymd) {
+  const salt = process.env.JWT_SECRET || "dcfo";
+  const ua = req.get("user-agent") || "";
+  return createHash("sha256").update(`${salt}|${ymd}|${req.ip}|${ua}`).digest("hex").slice(0, 16);
+}
+
+// Tashrif beacon'i uchun yumshoq rate-limit (bot spam'ini cheklaydi).
+const trackLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 40,
+  standardHeaders: false,
+  legacyHeaders: false,
+  message: {},
+});
+
+// Public: sahifa ko'rishini qayd etadi (frontend har route almashganda chaqiradi).
+app.post("/api/track", trackLimiter, (req, res) => {
+  try {
+    let p = String(req.body?.path || "/").split("?")[0].slice(0, 300) || "/";
+    // Admin va API yo'llarini hisoblamaymiz — faqat public sahifalar.
+    if (p.startsWith("/admin") || p.startsWith("/api")) return res.json({ ok: true });
+    const ymd = tashkentYmd();
+    PageViews.record({ path: p, visitor: visitorHash(req, ymd), ymd });
+  } catch (e) {
+    /* analitika hech qachon foydalanuvchini buzmasin */
+  }
+  res.json({ ok: true });
+});
+
 // Public: teglar ro'yxati (frontend filtr uchun)
 app.get("/api/tags", (_req, res) => res.json({ tags: Tags.all() }));
 
@@ -1067,6 +1103,12 @@ app.get("/api/admin/stats", requireAdmin, (_req, res) => {
     top,
     newest,
   });
+});
+
+// Sayt tashriflari analitikasi — umumiy tashrifchi, ko'rishlar, kunlik dinamika.
+app.get("/api/admin/analytics", requireAdmin, (req, res) => {
+  const days = Math.min(90, Math.max(7, Number(req.query.days) || 30));
+  res.json(PageViews.summary(days, tashkentYmd()));
 });
 
 // ---- Multer/umumiy xatolarni chiroyli qaytarish ------------------------------

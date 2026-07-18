@@ -142,6 +142,17 @@ db.exec(`
     created_at TEXT NOT NULL
   );
   CREATE INDEX IF NOT EXISTS idx_social_posts_article ON social_posts(article_id);
+
+  -- Sayt tashriflari analitikasi (maxfiylikka mos: visitor = kunlik-tuzli hash).
+  CREATE TABLE IF NOT EXISTS page_views (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    path TEXT NOT NULL,
+    visitor TEXT NOT NULL,        -- IP+UA ning kunlik-tuzli hashi (barqaror kuzatuv EMAS)
+    ymd TEXT NOT NULL,            -- YYYY-MM-DD (Toshkent)
+    created_at TEXT NOT NULL
+  );
+  CREATE INDEX IF NOT EXISTS idx_pv_ymd ON page_views(ymd);
+  CREATE INDEX IF NOT EXISTS idx_pv_path ON page_views(path);
 `);
 
 // --- HTML tozalash (stored-XSS himoyasi) — admin matni bazaga yozilishdan oldin ---
@@ -636,6 +647,43 @@ export const SocialPosts = {
   forArticle: (articleId) =>
     db.prepare("SELECT platform, status, message, created_at FROM social_posts WHERE article_id=? ORDER BY id DESC").all(articleId),
 };
+
+// --- Sayt tashriflari analitikasi ---
+export const PageViews = {
+  record: ({ path, visitor, ymd }) =>
+    db
+      .prepare("INSERT INTO page_views (path, visitor, ymd, created_at) VALUES (?,?,?,?)")
+      .run(String(path || "/").slice(0, 300), String(visitor || "").slice(0, 64), ymd, new Date().toISOString()),
+
+  // Umumiy va davr bo'yicha statistika (dashboard uchun).
+  summary: (days = 30, todayYmd) => {
+    const totalViews = db.prepare("SELECT COUNT(*) c FROM page_views").get().c;
+    const todayViews = db.prepare("SELECT COUNT(*) c FROM page_views WHERE ymd=?").get(todayYmd).c;
+    const todayVisitors = db.prepare("SELECT COUNT(DISTINCT visitor) c FROM page_views WHERE ymd=?").get(todayYmd).c;
+    // Kunlik qator (oxirgi `days` kun): ko'rishlar + noyob tashrifchi
+    const series = db
+      .prepare(
+        "SELECT ymd, COUNT(*) views, COUNT(DISTINCT visitor) visitors FROM page_views WHERE ymd >= ? GROUP BY ymd ORDER BY ymd"
+      )
+      .all(shiftYmd(todayYmd, -(days - 1)));
+    // Eng ko'p ochilgan sahifalar
+    const topPages = db
+      .prepare("SELECT path, COUNT(*) views FROM page_views GROUP BY path ORDER BY views DESC LIMIT 10")
+      .all();
+    // Davr yig'indisi
+    const rangeStart = shiftYmd(todayYmd, -(days - 1));
+    const rangeViews = db.prepare("SELECT COUNT(*) c FROM page_views WHERE ymd >= ?").get(rangeStart).c;
+    const rangeVisitors = db.prepare("SELECT COUNT(DISTINCT visitor) c FROM page_views WHERE ymd >= ?").get(rangeStart).c;
+    return { totalViews, todayViews, todayVisitors, rangeViews, rangeVisitors, days, series, topPages };
+  },
+};
+
+// YYYY-MM-DD ni n kun surish (analitika qatori uchun).
+function shiftYmd(ymd, n) {
+  const d = new Date(ymd + "T00:00:00Z");
+  d.setUTCDate(d.getUTCDate() + n);
+  return d.toISOString().slice(0, 10);
+}
 
 // --- Dastlabki seed: mavjud 6 maqolani client'dagi articles.js dan ko'chiramiz ---
 // Faqat jadval bo'sh bo'lsa bir marta ishlaydi.

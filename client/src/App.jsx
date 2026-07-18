@@ -32,6 +32,24 @@ function ScrollManager() {
   return null;
 }
 
+// Sayt tashriflari analitikasi: har route almashganda public sahifa ko'rishini
+// serverga xabar qiladi (admin sahifalar hisoblanmaydi). Xato foydalanuvchini buzmaydi.
+function PageTracker() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    if (pathname.startsWith("/admin")) return;
+    try {
+      const body = JSON.stringify({ path: pathname });
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon("/api/track", new Blob([body], { type: "application/json" }));
+      } else {
+        fetch("/api/track", { method: "POST", headers: { "Content-Type": "application/json" }, body, keepalive: true });
+      }
+    } catch { /* analitika jim ishlaydi */ }
+  }, [pathname]);
+  return null;
+}
+
 // Eski /article/:slug -> /blog/:slug (slug saqlanadi).
 function RedirectToBlog() {
   const { slug } = useParams();
@@ -60,6 +78,7 @@ export default function App() {
         <BrowserRouter>
           <MotionConfig reducedMotion="user">
             <ScrollManager />
+            <PageTracker />
             <div className="print:hidden"><ScrollProgress /></div>
             <Routes>
               <Route path="/" element={<Home />} />
