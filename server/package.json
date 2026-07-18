@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node index.js",
     "dev": "node --watch index.js",
-    "import:calendar": "node scripts/import-calendar.mjs"
+    "import:calendar": "node scripts/import-calendar.mjs",
+    "import:drafts": "node scripts/import-drafts.mjs"
   },
   "dependencies": {
     "better-sqlite3": "^12.11.1",
