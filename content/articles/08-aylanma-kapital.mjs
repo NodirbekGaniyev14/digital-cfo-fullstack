@@ -40,7 +40,7 @@ export default {
   content: `
 <p>Biznes foyda qilishi mumkin, o'sishi mumkin, mashhur bo'lishi mumkin — lekin agar kundalik hisob-kitoblar uchun puli bo'lmasa, u to'xtaydi. Aynan shu kundalik "kislorod" — <strong>aylanma kapital</strong>.</p>
 
-<p>Ko'p biznes foyda yo'qligidan emas, aylanma kapital yetishmasligidan qulaydi. Keling, bu tushunchani chuqur o'rganamiz.</p>
+<p>Statistika buni tasdiqlaydi: bankrot bo'lgan bizneslarning katta qismi aslida <em>foydali</em> edi. Ular foyda yo'qligidan emas, aylanma kapital — kundalik ish uchun pul — yetishmasligidan qulagan. Keling, bu hayotiy muhim tushunchani chuqur o'rganamiz.</p>
 
 <h2>Aylanma kapital nima?</h2>
 
@@ -50,12 +50,18 @@ export default {
 
 <ul>
 <li><strong>Joriy aktivlar</strong> — 1 yil ichida pulga aylanadigan narsalar: kassa, bank, <a href="/blog/debitorlik-qarzlari">debitorlik</a>, <a href="/blog/zaxiralarni-boshqarish">zaxira</a>.</li>
-<li><strong>Joriy majburiyatlar</strong> — 1 yil ichida to'lanadigan qarzlar: <a href="/blog/kreditorlik-qarzlari">kreditorlik</a>, qisqa muddatli kredit, soliq.</li>
+<li><strong>Joriy majburiyatlar</strong> — 1 yil ichida to'lanadigan qarzlar: <a href="/blog/kreditorlik-qarzlari">kreditorlik</a>, qisqa muddatli kredit, joriy soliq.</li>
 </ul>
 
 <blockquote>
 <p>Foyda — bu marra chizig'i. Aylanma kapital — bu poyga davomida nafas olish qobiliyati. Nafas yetmasa, marraga yetib bo'lmaydi.</p>
 </blockquote>
+
+<h2>Nega aylanma kapital hal qiluvchi ahamiyatga ega?</h2>
+
+<p>Tasavvur qiling: siz katta buyurtma oldingiz. Uni bajarish uchun xomashyo sotib olishingiz (pul chiqadi), ishchilarga ish haqi to'lashingiz (pul chiqadi) va tayyor mahsulotni yetkazishingiz kerak. Mijoz esa 45 kundan keyin to'laydi. Shu 45 kun ichida barcha xarajatni <em>o'z pulingizdan</em> qoplaysiz.</p>
+
+<p>Agar aylanma kapitalingiz yetarli bo'lsa — buyurtmani bemalol bajarasiz. Yetmasa — foydali buyurtmani rad etishga majbur bo'lasiz yoki qimmat kreditga murojaat qilasiz. Aynan shu yerda ko'p biznes "o'sish tuzog'i"ga tushadi: sotuv o'sadi, lekin pul yetmay qoladi.</p>
 
 <h2>Amaliy misol</h2>
 
@@ -75,45 +81,79 @@ export default {
 </tbody>
 </table>
 
-<p>Bu biznesda 100 mln so'm "erkin" aylanma kapital bor — u kundalik ishlarni bemalol olib bora oladi. Buni <a href="/blog/likvidlik-koeffitsienti">joriy likvidlik koeffitsienti</a> (300 ÷ 200 = 1,5) ham tasdiqlaydi.</p>
+<p>Bu biznesda 100 mln so'm "erkin" aylanma kapital bor — u kundalik ishlarni bemalol olib bora oladi. Buni <a href="/blog/likvidlik-koeffitsienti">joriy likvidlik koeffitsienti</a> (300 ÷ 200 = 1,5) ham tasdiqlaydi: har 1 so'm joriy qarzga 1,5 so'm joriy aktiv to'g'ri keladi.</p>
 
-<h2>Pul aylanish sikli</h2>
+<h2>Musbat va manfiy aylanma kapital</h2>
 
-<p>Aylanma kapital sifatini eng yaxshi ko'rsatadigan narsa — <strong>pul aylanish sikli</strong> (Cash Conversion Cycle). U pul zaxiraga sarflangandan to mijozdan qaytguncha o'tadigan kunlarni o'lchaydi:</p>
+<p>Ko'pchilik "aylanma kapital doim musbat bo'lishi kerak" deb o'ylaydi. Aslida bu biznes modeliga bog'liq:</p>
 
-<p><strong>Sikl = DIO + DSO − DPO</strong></p>
+<table>
+<thead>
+<tr><th>Holat</th><th>Ma'nosi</th><th>Kimga xos</th></tr>
+</thead>
+<tbody>
+<tr><td>Musbat (yuqori)</td><td>Xavfsiz, lekin pul "band"</td><td>Ishlab chiqarish, ulgurji savdo</td></tr>
+<tr><td>Musbat (o'rtacha)</td><td>Sog'lom muvozanat</td><td>Ko'pchilik biznes</td></tr>
+<tr><td>Manfiy</td><td>Mijoz oldin to'laydi, yetkazib beruvchiga kech to'laysiz</td><td>Supermarket, obuna xizmatlari</td></tr>
+</tbody>
+</table>
+
+<p>Manfiy aylanma kapital har doim yomon emas — masalan, supermarket tovarni naqd sotadi, lekin yetkazib beruvchiga 30–60 kunda to'laydi. Bu "boshqalar puli hisobiga" sog'lom o'sish modeli. Lekin oddiy ishlab chiqarish biznesida manfiy aylanma kapital — jiddiy likvidlik signali.</p>
+
+<h2>Pul aylanish sikli: aylanma kapitalning yuragi</h2>
+
+<p>Aylanma kapital sifatini eng yaxshi ko'rsatadigan narsa — <strong>pul aylanish sikli</strong> (Cash Conversion Cycle, CCC). U pul zaxiraga sarflangandan to mijozdan qaytguncha o'tadigan kunlarni o'lchaydi:</p>
+
+<p><strong>CCC = DIO + DSO − DPO</strong></p>
 
 <ul>
-<li><strong>DIO</strong> — zaxira necha kun turadi</li>
+<li><strong>DIO</strong> — zaxira necha kun omborda turadi</li>
 <li><strong>DSO</strong> — mijoz necha kunda to'laydi</li>
 <li><strong>DPO</strong> — siz yetkazib beruvchiga necha kunda to'laysiz</li>
 </ul>
 
-<p>Sikl qancha qisqa bo'lsa, pul shuncha tez aylanadi va shuncha kam aylanma kapital kerak bo'ladi.</p>
+<h3>To'liq misol</h3>
+
+<p>Aytaylik: zaxira o'rtacha 50 kun turadi (DIO), mijozlar 40 kunda to'laydi (DSO), siz yetkazib beruvchiga 30 kunda to'laysiz (DPO):</p>
+
+<p>CCC = 50 + 40 − 30 = <strong>60 kun</strong></p>
+
+<p>Ya'ni sizning pulingiz 60 kun davomida "band" bo'ladi — xomashyoga sarflangandan mijoz to'lovigacha. Bu 60 kunni moliyalashtirish uchun aynan aylanma kapital kerak. Agar siklni 40 kunga tushirsangiz, xuddi shu sotuv hajmi uchun 33% kam pul band bo'ladi — bo'shagan pulni o'sishga yo'naltirasiz.</p>
 
 <h2>Aylanma kapitalni boshqarish: 3 dastak</h2>
 
 <ol>
-<li><strong>Debitorlikni tezlashtiring (DSO ↓).</strong> Mijozlardan pulni tezroq oling — aniq shartlar, eslatmalar, erta to'lov chegirmasi.</li>
-<li><strong>Zaxirani optimallashtiring (DIO ↓).</strong> Ortiqcha tovar — muzlagan pul. Aylanish koeffitsientini kuzating.</li>
-<li><strong>Kreditorlikni oqilona cho'zing (DPO ↑).</strong> Yetkazib beruvchiga muddat ichida, lekin shoshmasdan to'lang.</li>
+<li><strong>Debitorlikni tezlashtiring (DSO ↓).</strong> Mijozlardan pulni tezroq oling — aniq to'lov shartlari, muddatdan oldin eslatma, erta to'lov chegirmasi, yangi mijozni tekshirish.</li>
+<li><strong>Zaxirani optimallashtiring (DIO ↓).</strong> Ortiqcha tovar — muzlagan pul. Aylanish koeffitsientini kuzating, sekin sotiladigan tovarni aniqlang.</li>
+<li><strong>Kreditorlikni oqilona cho'zing (DPO ↑).</strong> Yetkazib beruvchiga muddat ichida, lekin shoshmasdan to'lang — bu bepul qisqa muddatli moliyalashtirish.</li>
 </ol>
 
-<p>Bu uch dastak birga ishlaganda, biznes o'z o'sishini o'zi moliyalashtira boshlaydi — tashqi kreditga bog'liqlik kamayadi.</p>
+<p>Bu uch dastak birga ishlaganda, biznes o'z o'sishini o'zi moliyalashtira boshlaydi — tashqi kreditga bog'liqlik kamayadi. Bu — sog'lom moliyaviy boshqaruvning eng aniq belgilaridan biri.</p>
+
+<h2>Qancha aylanma kapital "yetarli"?</h2>
+
+<p>Universal raqam yo'q, lekin amaliy mo'ljal bor:</p>
+<ul>
+<li>Joriy likvidlik koeffitsienti <strong>1,2–2,0</strong> oralig'ida bo'lsa — odatda sog'lom.</li>
+<li>1,0 dan past — joriy qarzlar joriy aktivlardan ko'p, likvidlik xavfi.</li>
+<li>3,0 dan yuqori — pul haddan ortiq "band", uni samaraliroq ishlatish mumkin.</li>
+</ul>
+<p>Muhimi — mutlaq raqam emas, <em>dinamika</em>: ko'rsatkich vaqt o'tishi bilan yomonlashayotgan bo'lsa, bu birinchi ogohlantirish.</p>
 
 <h2>Xavf belgilari</h2>
 
 <ul>
-<li>Aylanma kapital manfiy yoki tez pasayyapti</li>
-<li>Pul aylanish sikli uzayyapti</li>
+<li>Aylanma kapital manfiy yoki tez pasayyapti (biznes modeli buni talab qilmasa)</li>
+<li>Pul aylanish sikli uzayib boryapti</li>
 <li>Foyda bor, lekin doim kredit hisobiga yashaysiz</li>
 <li>Ish haqi yoki soliq to'lash uchun har oy "pul qidirasiz"</li>
+<li>Sotuv o'syapti, lekin kassa doim bo'sh — klassik "o'sish tuzog'i"</li>
 </ul>
 
 <h2>Xulosa</h2>
 
-<p>Aylanma kapital — biznesning kundalik hayotiyligi o'lchovi. U foyda hisobotida ko'rinmaydi, lekin uning yetishmasligi eng foydali biznesni ham to'xtatadi.</p>
+<p>Aylanma kapital — biznesning kundalik hayotiyligi o'lchovi. U foyda hisobotida ko'rinmaydi, lekin uning yetishmasligi eng foydali biznesni ham to'xtatadi. Aynan shuning uchun tajribali moliyachilar foydadan oldin aylanma kapitalga qaraydi.</p>
 
-<p>Amaliy maslahat: har oy aylanma kapital va pul aylanish siklini hisoblang. Maqsad — siklni qisqartirish, ya'ni pulni imkon qadar tez aylantirish. Bu — moliyaviy sog'lomlikning eng amaliy ko'rsatkichlaridan biri.</p>
+<p>Amaliy maslahat: har oy aylanma kapital va pul aylanish siklini hisoblang. Maqsad — siklni qisqartirish, ya'ni pulni imkon qadar tez aylantirish. Bu tahlilni <a href="/blog/moliyaviy-hisobot-turlari">uchta moliyaviy hisobot</a> bilan birga o'qing — shunda biznesingizning to'liq pul manzarasini ko'rasiz.</p>
 `.trim(),
 };

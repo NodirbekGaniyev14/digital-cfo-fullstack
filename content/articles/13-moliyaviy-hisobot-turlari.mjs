@@ -38,13 +38,13 @@ export default {
     },
   ],
   content: `
-<p>Ko'p tadbirkor moliyaviy hisobotni "buxgalteriya uchun majburiy qog'oz" deb biladi. Aslida bu hujjatlar — biznesingiz haqidagi eng aniq hikoya. Faqat uni o'qishni bilish kerak.</p>
+<p>Ko'p tadbirkor moliyaviy hisobotni "buxgalteriya uchun majburiy qog'oz" deb biladi va uni auditorga topshirib, unutadi. Aslida bu hujjatlar — biznesingiz haqidagi eng aniq va halol hikoya. Faqat uni o'qishni bilish kerak.</p>
 
-<p>Uchta asosiy hisobot bor va ularning har biri boshqacha savolga javob beradi. Keling, ularni tushunamiz.</p>
+<p>Uchta asosiy hisobot bor va ularning har biri butunlay boshqacha savolga javob beradi. Bittasiga qarab qaror qabul qilish — xuddi filmni bitta kadr bo'yicha baholashdek. Keling, uchalasini ham tushunamiz.</p>
 
 <h2>Nega moliyaviy hisobot kerak?</h2>
 
-<p><strong>Moliyaviy hisobot</strong> — bu kompaniyaning moliyaviy holati va faoliyati natijalarini standartlashtirilgan shaklda ko'rsatuvchi hujjatlar. Ular investorlar, kreditorlar, rahbariyat va davlat organlari uchun bir xil "til"da yozilgan (ayniqsa <a href="/blog/ifrs-nima-xalqaro-moliyaviy-hisobot-standartlari">IFRS</a> bo'yicha).</p>
+<p><strong>Moliyaviy hisobot</strong> — bu kompaniyaning moliyaviy holati va faoliyati natijalarini standartlashtirilgan shaklda ko'rsatuvchi hujjatlar. Ular investorlar, kreditorlar, rahbariyat va davlat organlari uchun bir xil "til"da yozilgan (ayniqsa <a href="/blog/ifrs-nima-xalqaro-moliyaviy-hisobot-standartlari">IFRS</a> bo'yicha). Aynan shu standartlashtirish turli kompaniyalarni solishtirish imkonini beradi.</p>
 
 <blockquote>
 <p>Bitta hisobot — bitta nuqtai nazar. Faqat uchalasini birga o'qigandagina biznesning haqiqiy rasmini ko'rasiz.</p>
@@ -52,53 +52,70 @@ export default {
 
 <h2>1. Balans — "Nimaga egaman?"</h2>
 
-<p><strong>Balans</strong> (Balance Sheet) — ma'lum sanadagi moliyaviy holatni ko'rsatadi. U uchta qismdan iborat va doimo teng bo'ladi:</p>
+<p><strong>Balans</strong> (Balance Sheet) — ma'lum sanadagi moliyaviy holatni ko'rsatadi. U uchta qismdan iborat va doimo tenglik saqlanadi:</p>
 
 <p><strong>Aktivlar = Majburiyatlar + Kapital</strong></p>
 
 <ul>
-<li><strong>Aktivlar</strong> — nimaga egasiz (pul, zaxira, uskuna, debitorlik)</li>
-<li><strong>Majburiyatlar</strong> — kimga qarzdorsiz (kreditlar, kreditorlik)</li>
-<li><strong>Kapital</strong> — egalarga tegishli sof qiymat</li>
+<li><strong>Aktivlar</strong> — nimaga egasiz: pul, <a href="/blog/zaxiralarni-boshqarish">zaxira</a>, uskuna, bino, <a href="/blog/debitorlik-qarzlari">debitorlik</a>. Ular joriy (1 yil ichida pulga aylanadi) va uzoq muddatli aktivlarga bo'linadi.</li>
+<li><strong>Majburiyatlar</strong> — kimga qarzdorsiz: kreditlar, <a href="/blog/kreditorlik-qarzlari">kreditorlik</a>, soliq.</li>
+<li><strong>Kapital</strong> — barcha qarz to'langandan keyin egalarga qoladigan sof qiymat.</li>
 </ul>
 
-<p>Balans "suratga olish" kabi — bir ondagi holatni ko'rsatadi.</p>
+<p>Balans "suratga olish" kabi — faqat bir ondagi holatni ko'rsatadi. Ertaga u boshqacha bo'lishi mumkin. O'zbekistonda buni odatda "Shakl 1" deb ataydi.</p>
 
 <h2>2. Foyda va zarar hisoboti — "Qancha ishlab topdim?"</h2>
 
-<p><strong>Foyda va zarar hisoboti</strong> (Income Statement) — davr davomidagi natijani ko'rsatadi: daromad, xarajat va foyda. U <a href="/blog/sof-foyda-nima">sof foydagacha</a> bosqichma-bosqich boradi:</p>
+<p><strong>Foyda va zarar hisoboti</strong> (Income Statement, "Shakl 2") — davr davomidagi natijani ko'rsatadi: daromad, xarajat va foyda. U <a href="/blog/sof-foyda-nima">sof foydagacha</a> bosqichma-bosqich "tozalanadi":</p>
 
-<p>Daromad → Yalpi foyda → Operatsion foyda → Sof foyda</p>
+<p>Daromad → <a href="/blog/yalpi-foyda-marjasi">Yalpi foyda</a> → Operatsion foyda → Sof foyda</p>
 
-<p>Balansdan farqli, bu hisobot "video" kabi — butun davr mobaynidagi harakatni ko'rsatadi.</p>
+<p>Har bosqichda foydadan bir turdagi xarajat ayiriladi (avval tovar tannarxi, keyin operatsion xarajat, keyin foizlar, oxirida soliq). Balansdan farqli, bu hisobot "video" kabi — butun davr mobaynidagi harakatni ko'rsatadi.</p>
 
 <h2>3. Pul oqimi hisoboti — "Haqiqiy pul qayerda?"</h2>
 
-<p><strong><a href="/blog/pul-oqimi-hisoboti">Pul oqimi hisoboti</a></strong> (Cash Flow Statement) — faqat haqiqiy pul harakatini ko'rsatadi, uchta bo'limda: operatsion, investitsion va moliyaviy. U foyda va pul o'rtasidagi farqni ochib beradi.</p>
+<p><strong><a href="/blog/pul-oqimi-hisoboti">Pul oqimi hisoboti</a></strong> (Cash Flow Statement) — faqat haqiqiy pul harakatini ko'rsatadi, uchta bo'limda: operatsion (asosiy biznes), investitsion (aktivlar) va moliyaviy (kapital va qarz). U foyda va pul o'rtasidagi eng muhim farqni ochib beradi — chunki foyda "qog'ozda", pul esa bank hisobingizda.</p>
 
 <h2>Uchalasi qanday bog'lanadi?</h2>
 
 <table>
 <thead>
-<tr><th>Hisobot</th><th>Savol</th><th>Vaqt</th></tr>
+<tr><th>Hisobot</th><th>Savol</th><th>Vaqt</th><th>Asosiy o'lchov</th></tr>
 </thead>
 <tbody>
-<tr><td>Balans</td><td>Nimaga egaman va kimga qarzdorman?</td><td>Bir sana (surat)</td></tr>
-<tr><td>Foyda hisoboti</td><td>Qancha ishlab topdim?</td><td>Davr (video)</td></tr>
-<tr><td>Pul oqimi</td><td>Haqiqiy pul qancha kelib-ketdi?</td><td>Davr (video)</td></tr>
+<tr><td>Balans</td><td>Nimaga egaman va kimga qarzdorman?</td><td>Bir sana (surat)</td><td>Moliyaviy holat</td></tr>
+<tr><td>Foyda hisoboti</td><td>Qancha ishlab topdim?</td><td>Davr (video)</td><td>Rentabellik</td></tr>
+<tr><td>Pul oqimi</td><td>Haqiqiy pul qancha kelib-ketdi?</td><td>Davr (video)</td><td>Likvidlik</td></tr>
 </tbody>
 </table>
 
-<p>Ular yagona tizim: Foyda hisobotidagi sof foyda → Balansdagi kapitalni oshiradi. Pul oqimidagi yakuniy qoldiq → Balansdagi kassaga teng. Bir joydagi raqam boshqasida aks etadi.</p>
+<p>Ular yagona, o'zaro bog'langan tizim:</p>
+<ul>
+<li>Foyda hisobotidagi <strong>sof foyda</strong> → Balansdagi <strong>kapitalni</strong> oshiradi</li>
+<li>Pul oqimidagi <strong>yakuniy qoldiq</strong> → Balansdagi <strong>kassaga</strong> teng bo'ladi</li>
+<li>Balansdagi debitorlik/zaxira o'zgarishi → Pul oqimidagi <strong>operatsion oqimga</strong> ta'sir qiladi</li>
+</ul>
+<p>Shuning uchun bitta hisobotdagi raqam boshqasida albatta aks etadi — ular bir-birini "tekshiradi".</p>
 
 <h2>Amaliy misol: nega uchalasi kerak?</h2>
 
-<p>Kompaniya <strong>Foyda hisobotida</strong> 100 mln foyda ko'rsatdi — ajoyib. Lekin <strong>Pul oqimida</strong> operatsion oqim manfiy. <strong>Balansda</strong> esa debitorlik keskin oshgan. Xulosa: foyda bor, lekin u mijozlarda "qotib" qolgan — pul kelmayapti. Faqat bitta hisobotga qaraganingizda bu ko'rinmasdi.</p>
+<p>Kompaniya <strong>Foyda hisobotida</strong> 100 mln foyda ko'rsatdi — ajoyib natija. Lekin <strong>Pul oqimida</strong> operatsion oqim manfiy — kassaga pul kirmagan. <strong>Balansda</strong> esa debitorlik ikki baravar oshgan.</p>
+
+<p>Uchalasini birga o'qib, xulosa chiqadi: <em>foyda bor, lekin u mijozlarda "qotib" qolgan — mahsulot sotilgan, ammo pul to'lanmagan.</em> Bu — jiddiy likvidlik ogohlantirishi. Agar siz faqat Foyda hisobotiga qaraganingizda, "hammasi zo'r" deb o'ylab, xato qaror qabul qilardingiz.</p>
+
+<h2>Hisobotlarni qanday o'qish kerak?</h2>
+
+<ol>
+<li><strong>Dinamikada ko'ring.</strong> Bitta davrni emas, bir necha davrni yonma-yon qo'ying — o'zgarish yo'nalishi muhimroq.</li>
+<li><strong>Koeffitsientlarni hisoblang.</strong> Xom raqam emas, nisbatlar gapiradi: <a href="/blog/likvidlik-koeffitsienti">likvidlik</a>, <a href="/blog/rentabellik-korsatkichlari">rentabellik</a>, <a href="/blog/moliyaviy-barqarorlik">barqarorlik</a>.</li>
+<li><strong>Uchalasini bog'lang.</strong> Foyda o'sdi-yu, pul oqimi tushdimi? Sababni qidiring.</li>
+<li><strong>Tarmoq bilan solishtiring.</strong> "Yaxshi" yoki "yomon" — faqat kontekstda ma'noga ega.</li>
+</ol>
 
 <h2>Xulosa</h2>
 
-<p>Uchta moliyaviy hisobot — biznesingizni uch tomondan ko'rsatadigan uch oyna. Balans — mulk, Foyda hisoboti — natija, Pul oqimi — hayotiylik.</p>
+<p>Uchta moliyaviy hisobot — biznesingizni uch tomondan ko'rsatadigan uch oyna. Balans — mulk, Foyda hisoboti — natija, Pul oqimi — hayotiylik. Bittasi ham yolg'iz to'liq rasm bermaydi.</p>
 
-<p>Amaliy maslahat: har oy uchalasini birga o'qishni odat qiling. Boshlash uchun <a href="/blog/1c-hisobotdan-moliyaviy-tahlil">1C hisobotlaringizdan</a> foydalanib, oddiy tahlildan boshlang. Bir necha oydan keyin siz raqamlar ortidagi hikoyani o'qiy boshlaysiz.</p>
+<p>Amaliy maslahat: har oy uchalasini birga o'qishni odat qiling. Boshlash uchun <a href="/blog/1c-hisobotdan-moliyaviy-tahlil">1C hisobotlaringizdan</a> foydalanib, oddiy tahlildan boshlang. Bir necha oydan keyin siz raqamlar ortidagi hikoyani — biznesingizning haqiqiy holatini — o'qiy boshlaysiz.</p>
 `.trim(),
 };
