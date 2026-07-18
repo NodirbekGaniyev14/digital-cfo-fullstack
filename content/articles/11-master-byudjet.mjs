@@ -29,7 +29,7 @@ export default {
     {
       question: "Master byudjet qancha vaqtga tuziladi?",
       answer:
-        "<p>Odatda 1 yilga, oylar yoki chораklar bo'yicha taqsimlangan holda. Ba'zi kompaniyalar uni har chorakda yangilab boradi (rolling forecast usuli bilan birlashtiradi).</p>",
+        "<p>Odatda 1 yilga, oylar yoki choraklar bo'yicha taqsimlangan holda. Ba'zi kompaniyalar uni har chorakda yangilab boradi (rolling forecast usuli bilan birlashtiradi).</p>",
     },
     {
       question: "Kichik biznesga master byudjet kerakmi?",
@@ -38,7 +38,7 @@ export default {
     },
   ],
   content: `
-<p>Alohida byudjetlar — sotuv rejasi, xarajat rejasi, pul oqimi rejasi — foydali. Lekin ular alohida turганda to'liq rasm bermaydi. <strong>Master byudjet</strong> ularni yagona, o'zaro bog'langan tizimга birlashtiradi.</p>
+<p>Alohida byudjetlar — sotuv rejasi, xarajat rejasi, pul oqimi rejasi — foydali. Lekin ular alohida turganda to'liq rasm bermaydi. <strong>Master byudjet</strong> ularni yagona, o'zaro bog'langan tizimga birlashtiradi.</p>
 
 <p>Bu — kompaniyaning kelasi yil uchun to'liq moliyaviy xaritasi. Keling, u qanday tuzilishini ko'rib chiqamiz.</p>
 

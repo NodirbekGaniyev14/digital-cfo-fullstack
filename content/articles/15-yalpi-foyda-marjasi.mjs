@@ -68,7 +68,7 @@ export default {
 </tbody>
 </table>
 
-<p>Bir xil sotuv, lekin A do'kon uch baravar ko'p yalpi foyda qoldiradi. Ijara, ish haqi va boshqa xarajatlarni qoplashga A ancha ko'p mablag'ga ega. B do'kon esa "band, lekin foydasiz" tuzoqда.</p>
+<p>Bir xil sotuv, lekin A do'kon uch baravar ko'p yalpi foyda qoldiradi. Ijara, ish haqi va boshqa xarajatlarni qoplashga A ancha ko'p mablag'ga ega. B do'kon esa "band, lekin foydasiz" tuzoqda.</p>
 
 <h2>Nega yalpi marja muhim?</h2>
 

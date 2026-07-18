@@ -44,7 +44,7 @@ export default {
 
 <h2>Rolling forecast nima?</h2>
 
-<p><strong>Rolling forecast</strong> — bu doimiy yangilanadigan moliyaviy prognoz. Har davr (oy yoki chorak) o'tgach, o'tган davr olib tashlanadi va oxiriga yangi davr qo'shiladi. Natijada prognoz doim oldinga qarab belgilangan muddatni — masalan, keyingi 12 oyni — ko'rsatib turadi.</p>
+<p><strong>Rolling forecast</strong> — bu doimiy yangilanadigan moliyaviy prognoz. Har davr (oy yoki chorak) o'tgach, o'tgan davr olib tashlanadi va oxiriga yangi davr qo'shiladi. Natijada prognoz doim oldinga qarab belgilangan muddatni — masalan, keyingi 12 oyni — ko'rsatib turadi.</p>
 
 <blockquote>
 <p>An'anaviy byudjet — yil boshidagi fotosurat. Rolling forecast — doimiy oqim video: u har doim hozirgi haqiqatni aks ettiradi.</p>
