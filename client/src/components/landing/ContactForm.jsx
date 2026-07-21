@@ -36,7 +36,7 @@ const CONTACTS = [
   },
 ];
 
-const ACCEPT = ".xlsx,.xls,.csv";
+const ACCEPT = ".xlsx,.xls"; // parser.py faqat Excel o'qiydi — CSV va'da qilmaymiz
 const MAX_SIZE = 15 * 1024 * 1024; // 15 MB — backend bilan bir xil
 
 export default function ContactForm() {
@@ -167,7 +167,7 @@ export default function ContactForm() {
           {/* Fayllar — 1: Balans, 2: Moliyaviy hisobot (ikkalasi ixtiyoriy) */}
           <div className="sm:col-span-2">
             <div className="mb-2 text-[13px] font-semibold text-slate-700">
-              Moliyaviy fayllar (.xlsx, .xls, .csv)
+              Moliyaviy fayllar (.xlsx, .xls)
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
               <FileDrop

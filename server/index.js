@@ -12,7 +12,7 @@ import { execFile } from "node:child_process";
 import { timingSafeEqual, createHash } from "node:crypto";
 import db, { Articles, Authors, Tags, Categories, Subscribers, Revisions, AutopilotTopics, SocialPosts, PageViews, cleanHtml, uniqueSlug } from "./db.js";
 import { loginHandler, requireAdmin } from "./auth.js";
-import { renderArticle, renderList, buildSitemap, hasTemplate } from "./ssr.js";
+import { renderArticle, renderList, renderHome, buildSitemap, hasTemplate } from "./ssr.js";
 import { aiEnabled, generateArticle, generateSocialPackage, scoreArticle } from "./anthropic.js";
 import { startAutopilot, autopilotStatus, setAutopilotSettings, seedStarterTopics, runGuarded } from "./autopilot.js";
 import { publisherStatus, publishArticleSocial, autoPostArticleTelegram } from "./publisher.js";
@@ -97,12 +97,14 @@ const storage = multer.diskStorage({
     cb(null, `${Date.now()}-${safe}`);
   },
 });
-const ALLOWED_EXT = [".xlsx", ".xls", ".csv"];
+// CSV YO'Q: tahlil dvigateli (engine/parser.py) faqat Excel o'qiydi. CSV'ni
+// qabul qilib keyin "tahlil amalga oshmadi" deyish o'rniga kirishda aniq
+// xabar beramiz.
+const ALLOWED_EXT = [".xlsx", ".xls"];
 const ALLOWED_MIME = [
   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   "application/vnd.ms-excel",
-  "text/csv",
-  "application/octet-stream", // ba'zi brauzerlar csv/xls uchun shuni yuboradi
+  "application/octet-stream", // ba'zi brauzerlar xls uchun shuni yuboradi
 ];
 const upload = multer({
   storage,
@@ -115,7 +117,7 @@ const upload = multer({
     cb(
       extOk && mimeOk
         ? null
-        : new Error("Faqat .xlsx, .xls yoki .csv qabul qilinadi"),
+        : new Error("Faqat Excel fayl (.xlsx yoki .xls) qabul qilinadi"),
       extOk && mimeOk
     );
   },
@@ -152,10 +154,12 @@ function fmtTashkent(iso) {
 }
 
 // ---- Telegram bildirishnoma (ixtiyoriy) --------------------------------------
+// Qaytaradi: true — barcha yuklangan fayllar Telegram'ga hujjat sifatida yetib
+// bordi (lokal nusxani o'chirish xavfsiz); false — yetib bormadi (diskda qolsin).
 async function notifyTelegram(lead, files = []) {
   const token = process.env.TELEGRAM_BOT_TOKEN;
   const chatId = process.env.TELEGRAM_CHAT_ID;
-  if (!token || !chatId) return; // sozlanmagan bo'lsa — jim o'tkazib yuboramiz
+  if (!token || !chatId) return false; // sozlanmagan — fayllar diskda qoladi
 
   const text =
     `🆕 *Yangi so'rov — Digital CFO*\n\n` +
@@ -187,6 +191,7 @@ async function notifyTelegram(lead, files = []) {
     if (!res.ok) console.warn("⚠️ Telegram javobi:", res.status);
 
     // Yuklangan fayllarni ham hujjat sifatida yuboramiz (har biri alohida).
+    let allDelivered = true;
     for (const { label, file } of files) {
       if (!file?.path) continue;
       const fd = new FormData();
@@ -201,10 +206,15 @@ async function notifyTelegram(lead, files = []) {
         `https://api.telegram.org/bot${token}/sendDocument`,
         { method: "POST", body: fd }
       );
-      if (!docRes.ok) console.warn("⚠️ Telegram fayl javobi:", docRes.status);
+      if (!docRes.ok) {
+        allDelivered = false;
+        console.warn("⚠️ Telegram fayl javobi:", docRes.status);
+      }
     }
+    return allDelivered;
   } catch (err) {
     console.warn("⚠️ Telegram yuborilmadi:", err.message);
+    return false;
   }
 }
 
@@ -379,7 +389,12 @@ app.post(
       lead.email,
       lead.files.map((f) => f.filename).join(", ") || ""
     );
-    notifyTelegram(lead, uploaded); // fire-and-forget (fayllar bilan)
+    // Fayllar Telegram'ga hujjat sifatida YETIB BORGACH lokal nusxa o'chiriladi
+    // (maxfiylik: mijoz balansi serverda muddatsiz yotmasin). Yetib bormasa
+    // (token yo'q / tarmoq xatosi) — diskda qoladi, yagona nusxa yo'qolmasin.
+    notifyTelegram(lead, uploaded).then((delivered) => {
+      if (delivered && uploaded.length) cleanupFiles();
+    });
 
     // IP'ni javobda qaytarmaymiz
     const { ip, ...safe } = lead;
@@ -1138,6 +1153,18 @@ if (fs.existsSync(clientDist)) {
     }
   });
 
+  // Bosh sahifa — SSR. Avval bo'sh #root berilardi (robot 0 so'z ko'rardi);
+  // endi to'liq marketing matni + FAQ schema JS'siz ham ko'rinadi.
+  app.get("/", (_req, res, next) => {
+    if (!hasTemplate()) return next();
+    try {
+      res.type("html").send(renderHome());
+    } catch (e) {
+      console.warn("⚠️ SSR (bosh sahifa) xatosi:", e.message);
+      next(); // fallback: express.static index.html (SPA)
+    }
+  });
+
   // Ro'yxat sahifasi — /blog.
   app.get("/blog", (_req, res, next) => {
     if (!hasTemplate()) return next();
@@ -1156,7 +1183,14 @@ if (fs.existsSync(clientDist)) {
     if (!a) return next(); // topilmasa — SPA 404 sahifasi ko'rsatadi
     try {
       Articles.hydrate(a); // faqs (FAQ Schema) + tags + author_obj
-      res.type("html").send(renderArticle(a));
+      // O'xshash maqolalar: avval shu kategoriyadan, yetmasa eng yangilardan
+      // (Article.jsx dagi mantiq bilan bir xil — SSR va SPA bir narsani ko'rsatsin).
+      const pool = Articles.listPublished().filter((r) => r.slug !== a.slug);
+      const related = [
+        ...pool.filter((r) => r.category && r.category === a.category),
+        ...pool.filter((r) => !r.category || r.category !== a.category),
+      ].slice(0, 3);
+      res.type("html").send(renderArticle(a, related));
     } catch (e) {
       console.warn("⚠️ SSR (maqola) xatosi:", e.message);
       next();

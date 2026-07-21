@@ -106,8 +106,38 @@ function absUrl(u) {
   return u.startsWith("http") ? u : `${SITE_URL}${u}`;
 }
 
-// Bitta maqola sahifasi HTML'i.
-export function renderArticle(a) {
+// Maqola oxiri: botga CTA (kontent trafigi -> konversiya) + o'xshash maqolalar.
+// React (Article.jsx) o'z versiyasini ko'rsatadi; bu blok robotlar va JS'siz
+// foydalanuvchilar uchun — SSR ham xuddi shu yo'lni taklif qilsin.
+const BOT_URL = "https://t.me/Moliyaviy_Tahlilchi_bot";
+
+function ctaBlock() {
+  return (
+    `<aside style="margin:36px 0;padding:24px;border-radius:16px;background:linear-gradient(135deg,#eff6ff,#ecfdf5);border:1px solid #bfdbfe">` +
+    `<p style="font-weight:800;font-size:18px;color:#0f172a;margin:0 0 8px">Biznesingiz moliyaviy holatini 1 daqiqada tekshiring</p>` +
+    `<p style="color:#475569;margin:0 0 14px">Balans (Shakl 1) va Moliyaviy natijalar (Shakl 2) faylini Telegram botga yuboring — 40+ KPI, risk diagnostikasi va amaliy tavsiyalar bilan tayyor PDF hisobot oling. Hozircha to'liq bepul.</p>` +
+    `<a href="${BOT_URL}" style="display:inline-block;background:#3b82f6;color:#fff;font-weight:700;padding:10px 22px;border-radius:12px;text-decoration:none">Bepul tahlil qilish →</a>` +
+    `</aside>`
+  );
+}
+
+function relatedBlock(related) {
+  if (!related || !related.length) return "";
+  const items = related
+    .map(
+      (r) =>
+        `<li style="margin-bottom:12px"><a href="/blog/${r.slug}" style="font-weight:700;color:#0f172a;text-decoration:none">${escHtml(r.title)}</a><br><span style="color:#64748b;font-size:13px">${escHtml(r.category || "")}</span></li>`
+    )
+    .join("");
+  return (
+    `<section style="margin-top:8px;border-top:1px solid #e2e8f0;padding-top:20px">` +
+    `<h2 style="font-size:20px;font-weight:800;color:#0f172a;margin:0 0 14px">O'xshash maqolalar</h2>` +
+    `<ul style="list-style:none;padding:0;margin:0">${items}</ul></section>`
+  );
+}
+
+// Bitta maqola sahifasi HTML'i. related — shu kategoriyadan 3 tagacha maqola.
+export function renderArticle(a, related = []) {
   const canonical = a.canonical_url || `${SITE_URL}/blog/${a.slug}`;
   const title = a.seo_title || a.title;
   const description = a.seo_description || a.excerpt || a.title;
@@ -160,7 +190,7 @@ export function renderArticle(a) {
     `<nav style="font-size:13px;color:#64748b;margin-bottom:14px"><a href="/" style="color:#64748b">Bosh sahifa</a> › <a href="/blog" style="color:#64748b">Maqolalar</a> › ${escHtml(a.category)}</nav>` +
     `<article class="article-prose"><h1 style="font-size:34px;font-weight:800;line-height:1.2;color:#0f172a;margin:0 0 10px">${escHtml(a.title)}</h1>` +
     `<p style="color:#64748b;font-size:14px;margin:0 0 20px">${escHtml(a.author || "Digital CFO")} · ${formatDateUz(a.published_at || a.created_at)} · ${timeAgoUz(a.published_at || a.created_at)}</p>` +
-    `${cover}${a.content}</article></main>${SHELL_FOOTER}`;
+    `${cover}${a.content}</article>${ctaBlock()}${relatedBlock(related)}</main>${SHELL_FOOTER}`;
 
   return buildPage({
     title, description, canonical, robots, image,
@@ -207,6 +237,92 @@ export function renderList(list) {
   return buildPage({
     title: "Maqolalar — moliyaviy tahlil bo'yicha qo'llanmalar",
     description: "Moliyaviy tahlil, likvidlik, rentabellik, Altman Z-Score va 1C hisobotlari bo'yicha amaliy maqolalar — Digital CFO ekspertlaridan.",
+    canonical,
+    ogType: "website",
+    pageJsonLd,
+    rootHtml,
+  });
+}
+
+// Bosh sahifa SSR — Google JS'siz ham to'liq marketing matnini ko'rsin.
+// (Avval #root bo'sh edi: robot 0 so'z ko'rardi.) Matn client i18n (uz) bilan
+// mazmunan bir xil; React yuklangach #root'ni interaktiv versiya bilan almashtiradi.
+export function renderHome() {
+  const canonical = `${SITE_URL}/`;
+  // index.html'dagi FAQ bilan BIR XIL savol-javoblar (tuzatilgan, halol versiya).
+  const faqs = [
+    { q: "Qaysi fayl formatlari qabul qilinadi?", a: "Tizim .xlsx va .xls formatdagi moliyaviy fayllarni qabul qiladi. Fayl avtomatik tekshiriladi va validatsiyadan o'tkaziladi." },
+    { q: "Tahlil qancha vaqt oladi?", a: "Tahlilni atigi 1 daqiqada yetkazamiz — faylni yuborishingiz bilan hisobot tayyor bo'ladi." },
+    { q: "Xizmat pullikmi?", a: "Hozirda barcha tahlillar to'liq bepul. Pullik tariflar joriy etilganda saytda va botda oldindan e'lon qilamiz." },
+    { q: "Tahlil ishonchliligi qanchalik?", a: "Har bir hisobot tajribali mutaxassis nazoratidan o'tadi va natijalar benchmark ko'rsatkichlar bilan solishtirib tekshiriladi." },
+    { q: "Hisobotni yuklab olsa bo'ladimi?", a: "Ha, har bir tahlil yakunida professional PDF hisobotni bir tugma bilan yuklab olishingiz mumkin." },
+    { q: "Ma'lumotlarim xavfsizmi?", a: "Ma'lumotlaringiz himoyalangan (HTTPS) ulanish orqali uzatiladi, faqat tahlil maqsadida ishlatiladi va uchinchi shaxslarga berilmaydi." },
+  ];
+  const pageJsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "FAQPage",
+        mainEntity: faqs.map((f) => ({
+          "@type": "Question",
+          name: f.q,
+          acceptedAnswer: { "@type": "Answer", text: f.a },
+        })),
+      },
+    ],
+  };
+
+  const h2 = (t) => `<h2 style="font-size:24px;font-weight:800;color:#0f172a;margin:34px 0 12px">${t}</h2>`;
+  const p = (t) => `<p style="color:#475569;line-height:1.65;margin:0 0 10px">${t}</p>`;
+  const ul = (items) =>
+    `<ul style="color:#475569;line-height:1.7;padding-left:20px;margin:0 0 10px">${items.map((i) => `<li>${i}</li>`).join("")}</ul>`;
+
+  const rootHtml =
+    `${SHELL_HEADER}<main style="max-width:760px;margin:0 auto;padding:0 24px 40px">` +
+    `<h1 style="font-size:34px;font-weight:800;line-height:1.2;color:#0f172a;margin:0 0 12px">AI yordamida moliyaviy tahlil va CFO darajasidagi hisobot</h1>` +
+    p("Balans (Shakl 1) va Moliyaviy natijalar (Shakl 2) faylingizni yuboring — Digital CFO ularni chuqur tahlil qilib, 40+ KPI, risk diagnostikasi va amaliy tavsiyalar bilan tayyor PDF hisobotni bir daqiqada qaytaradi.") +
+    ctaBlock() +
+    h2("Qanday ishlaydi") +
+    ul([
+      "<b>Faylni yuklang</b> — Excel (.xlsx/.xls) moliyaviy faylingizni yuboring.",
+      "<b>Validatsiya</b> — tizim ma'lumotlarni avtomatik tekshiradi va tozalaydi.",
+      "<b>KPI hisoblash</b> — barcha asosiy moliyaviy ko'rsatkichlar hisoblanadi.",
+      "<b>AI tahlil</b> — kuchli AI holatni baholab, tavsiyalar tayyorlaydi.",
+      "<b>PDF hisobot</b> — professional hisobotni yuklab olasiz.",
+    ]) +
+    h2("Nimalarni tahlil qilamiz") +
+    ul([
+      "<b>Likvidlik va to'lov qobiliyati</b> — joriy, tezkor va mutlaq likvidlik, ishchi kapital.",
+      "<b>Moliyaviy barqarorlik</b> — avtonomiya, qarz yuki, manyovrlik koeffitsientlari.",
+      "<b>Rentabellik</b> — ROA, ROE, sof va yalpi foyda marjalari.",
+      "<b>Ishbilarmonlik faolligi</b> — aktivlar, zaxiralar, debitorlik aylanuvchanligi, pul aylanish sikli.",
+      "<b>O'sish dinamikasi</b> — tushum, foyda va kapital o'zgarishi.",
+    ]) +
+    h2("Hisobotda nimalar bor") +
+    ul([
+      "Boshqaruv xulosasi (Executive Summary)",
+      "Asosiy KPI ko'rsatkichlari jadvali",
+      "Likvidlik va to'lov qobiliyati tahlili",
+      "Rentabellik va foyda dinamikasi",
+      "Risk diagnostikasi va baholash",
+      "AI tavsiyalari va xulosalar",
+    ]) +
+    h2("Narx") +
+    p("Hozirda barcha tahlillar <b>to'liq bepul</b>. Pullik tariflar joriy etilganda oldindan e'lon qilamiz.") +
+    h2("Ko'p so'raladigan savollar") +
+    faqs
+      .map(
+        (f) =>
+          `<h3 style="font-size:17px;font-weight:700;color:#0f172a;margin:18px 0 6px">${f.q}</h3><p style="color:#475569;line-height:1.6;margin:0">${f.a}</p>`
+      )
+      .join("") +
+    `<p style="margin-top:30px"><a href="/blog" style="color:#3b82f6;font-weight:700">Moliyaviy tahlil bo'yicha maqolalar →</a></p>` +
+    `</main>${SHELL_FOOTER}`;
+
+  return buildPage({
+    title: "Digital CFO — AI moliyaviy tahlil va hisobot",
+    description:
+      "Balans va moliyaviy hisobotingizni yuboring — biz ularni tahlil qilib, KPI'lar va amaliy tavsiyalar bilan tayyor CFO darajasidagi hisobotni qaytaramiz.",
     canonical,
     ogType: "website",
     pageJsonLd,
