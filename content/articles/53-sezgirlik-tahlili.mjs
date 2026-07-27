@@ -29,7 +29,7 @@ export default {
     {
       question: "Sezgirlik tahlili nimaga foydali?",
       answer:
-        "<p>U qaysi omil natijaga eng ko'p ta'sir qilishini ko'rsatadi. Shunda diqqatني eng muhim omilga (masalan, narx yoki sotuv hajmi) qaratasiz — ular ustidan nazorat foydani eng ko'p himoya qiladi.</p>",
+        "<p>U qaysi omil natijaga eng ko'p ta'sir qilishini ko'rsatadi. Shunda diqqatni eng muhim omilga (masalan, narx yoki sotuv hajmi) qaratasiz — ular ustidan nazorat foydani eng ko'p himoya qiladi.</p>",
     },
     {
       question: "Buni nimada qilaman?",

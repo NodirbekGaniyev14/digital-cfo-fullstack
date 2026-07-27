@@ -79,7 +79,7 @@ export default {
 <li><strong>Uch stsenariy quring.</strong> Optimistik/realistik/pessimistik — <a href="/blog/stsenariy-tahlili">stsenariy tahlili</a>.</li>
 </ol>
 
-<h2>Aniqlikني oshirish</h2>
+<h2>Aniqlikni oshirish</h2>
 
 <ul>
 <li><strong>Konservativ bo'ling.</strong> Kam baholab ko'p sotish — yaxshi. Aksincha — pul tanqisligi.</li>

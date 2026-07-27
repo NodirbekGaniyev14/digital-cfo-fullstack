@@ -111,7 +111,7 @@ export default {
 
 <h2>Xulosa</h2>
 
-<p>Benchmarking — o'z holatingizni tashqi ko'zgu orqali ko'rish. U kuchli tomonni tasdiqlaydi va zaif tomonni — ya'ni imkoniyatني — ochib beradi.</p>
+<p>Benchmarking — o'z holatingizni tashqi ko'zgu orqali ko'rish. U kuchli tomonni tasdiqlaydi va zaif tomonni — ya'ni imkoniyatni — ochib beradi.</p>
 
 <p>Amaliy maslahat: 3–4 asosiy koeffitsientingizni hisoblang va tarmoq mo'ljallari bilan solishtiring. Eng katta farq — sizning eng katta imkoniyatingiz. Uni <a href="/blog/moliyaviy-maqsad-qoyish">moliyaviy maqsadga</a> aylantiring va ustida ishlang.</p>
 `.trim(),
