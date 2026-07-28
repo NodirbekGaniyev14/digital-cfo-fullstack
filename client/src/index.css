@@ -1,4 +1,6 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap");
+/* Shriftlar bu yerdan EMAS, index.html'dan asinxron yuklanadi.
+   @import bo'lganda brauzer: HTML -> bundle.css -> fonts.css zanjirini kutardi
+   (render-blocking ~2.1 s). Endi CSS darhol qo'llanadi, shrift keyin keladi. */
 
 @tailwind base;
 @tailwind components;
@@ -126,8 +128,34 @@ body {
 .dark .text-slate-500 {
   color: #94a1b5 !important;
 }
+/* #7e8b9f qorong'i kartada 4.38:1 edi — WCAG AA (4.5:1) dan sal past.
+   #8693a8 => 4.86:1, hamon "muted", lekin o'qiladi. */
 .dark .text-slate-400 {
-  color: #7e8b9f !important;
+  color: #8693a8 !important;
+}
+
+/* ---- Light rejim kontrasti (WCAG AA) ---------------------------------------
+   Brend ranglari MATN sifatida oq fonda o'tmaydi:
+     text-azure       #3b82f6 -> 3.68:1   (kerak 4.5)
+     text-emerald-500 #10b981 -> 2.54:1
+     text-slate-400   #94a3b8 -> 2.56:1
+   Fon, ramka va gradient ranglari tegilmaydi — faqat matn to'qlashtiriladi.
+   `.on-dark` — doimo qorong'i qoladigan bloklar (bg-navy sectionlar, footer,
+   dashboard maketi); u yerda aksincha, ochroq rang kerak.
+   `.bg-navy` (logo/ikonka plitkalari) ham chetda: fon qorong'i, brend
+   yashili aynan yorqin qolishi kerak. */
+html:not(.dark) .text-azure:not(.on-dark *):not(.bg-navy):not(.bg-navy *) {
+  color: #1d4ed8 !important; /* blue-700 — 6.70:1 */
+}
+html:not(.dark) .text-emerald-500:not(.on-dark *):not(.bg-navy):not(.bg-navy *) {
+  color: #047857 !important; /* emerald-700 — 5.48:1 */
+}
+html:not(.dark) .text-slate-400:not(.on-dark *):not(.bg-navy):not(.bg-navy *) {
+  color: #64748b !important; /* slate-500 — 4.76:1 */
+}
+/* Qorong'i blokda slate-500 (#64748b) 3.75:1 — bir pog'ona ochroq olamiz. */
+.on-dark .text-slate-500 {
+  color: #94a3b8 !important; /* slate-400 — 7.34:1 */
 }
 
 @keyframes floaty {

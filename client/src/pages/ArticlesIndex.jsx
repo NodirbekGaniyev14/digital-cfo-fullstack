@@ -53,7 +53,9 @@ export default function ArticlesIndex() {
       />
       <Navbar />
 
-      <header className="hero-gradient px-6 pb-12 pt-32">
+      {/* Sahifa sarlavhasi — <header> EMAS: Navbar allaqachon banner landmark,
+          ikkinchisi axe "landmark-no-duplicate-banner" ni buzardi. */}
+      <section className="hero-gradient px-6 pb-12 pt-32">
         <div className="mx-auto max-w-[820px] text-center">
           <span className="mb-4 inline-flex items-center gap-2 rounded-full border border-navy/10 bg-white/60 px-4 py-1.5 text-[13px] font-semibold text-navy dark:border-white/10 dark:bg-white/[.05] dark:text-slate-200">
             <BookOpen className="h-4 w-4 text-emerald-500" /> Bilim bazasi
@@ -67,9 +69,9 @@ export default function ArticlesIndex() {
             qo'llanmalar. Oddiy tilda, formulalar va misollar bilan.
           </p>
         </div>
-      </header>
+      </section>
 
-      <main className="mx-auto max-w-[860px] px-4 pb-24 sm:px-6">
+      <main id="main" className="mx-auto max-w-[860px] px-4 pb-24 sm:px-6">
         {tag && (
           <div className="mb-4 flex items-center gap-2 text-[14px] text-slate-500 dark:text-slate-400">
             <span>Teg bo'yicha:</span>

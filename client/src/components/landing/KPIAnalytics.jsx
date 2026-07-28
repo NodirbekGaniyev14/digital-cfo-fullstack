@@ -25,7 +25,9 @@ export default function KPIAnalytics() {
   const items = t("kpi.items");
   const KPIS = KPI_META.map((k, i) => ({ ...k, bench: items[i].bench, desc: items[i].desc }));
   return (
-    <section id="kpi" className="relative overflow-hidden bg-navy px-6 py-[90px]">
+    // on-dark — index.css'dagi light-rejim kontrast tuzatishlari bu blokka
+    // tegmasin (fon har doim qorong'i).
+    <section id="kpi" className="on-dark relative overflow-hidden bg-navy px-6 py-[90px]">
       <div
         className="absolute inset-0 opacity-60"
         style={{

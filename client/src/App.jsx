@@ -2,17 +2,22 @@ import { useEffect, lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route, Navigate, useLocation, useParams } from "react-router-dom";
 import { MotionConfig } from "framer-motion";
 import { Toaster } from "sonner";
+// Home / ArticlesIndex / Article — SSR qilinadigan sahifalar. createRoot()
+// #root ni tozalagani uchun bularni lazy qilib bo'lmaydi: bo'lak yuklanguncha
+// SSR matni yo'qolib, ekran miltillaydi (CLS). Shuning uchun asosiy bundle'da.
 import Home from "./pages/Home.jsx";
 import ArticlesIndex from "./pages/ArticlesIndex.jsx";
 import Article from "./pages/Article.jsx";
-import NotFound from "./pages/NotFound.jsx";
-
-// Admin panel — faqat kerak bo'lganda yuklanadi (Quill public bundle'ga tushmaydi).
+import NotFound from "./pages/NotFound.jsx"; // Article.jsx ham ishlatadi
+// Admin panel — faqat kerak bo'lganda yuklanadi (Tiptap public bundle'ga tushmaydi).
 const AdminApp = lazy(() => import("./admin/AdminApp.jsx"));
+
+// Suzuvchi elementlar — birinchi ekranga kirmaydi, alohida bo'lakda kelsin.
+const TelegramFAB = lazy(() => import("./components/TelegramFAB.jsx"));
+const AIAssistant = lazy(() => import("./components/AIAssistant.jsx"));
+const ContactModal = lazy(() => import("./components/ContactModal.jsx"));
+
 import ScrollProgress from "./components/ScrollProgress.jsx";
-import TelegramFAB from "./components/TelegramFAB.jsx";
-import AIAssistant from "./components/AIAssistant.jsx";
-import ContactModal from "./components/ContactModal.jsx";
 import ErrorBoundary from "./components/ErrorBoundary.jsx";
 import { AppProvider } from "./lib/i18n.jsx";
 
@@ -62,9 +67,11 @@ function PublicChrome() {
   if (pathname.startsWith("/admin")) return null;
   return (
     <div className="print:hidden">
-      <TelegramFAB />
-      <AIAssistant />
-      <ContactModal />
+      <Suspense fallback={null}>
+        <TelegramFAB />
+        <AIAssistant />
+        <ContactModal />
+      </Suspense>
     </div>
   );
 }
@@ -80,23 +87,18 @@ export default function App() {
             <ScrollManager />
             <PageTracker />
             <div className="print:hidden"><ScrollProgress /></div>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/blog" element={<ArticlesIndex />} />
-              <Route path="/blog/:slug" element={<Article />} />
-              {/* Eski URL'lar -> yangi (/blog) */}
-              <Route path="/maqolalar" element={<Navigate to="/blog" replace />} />
-              <Route path="/article/:slug" element={<RedirectToBlog />} />
-              <Route
-                path="/admin/*"
-                element={
-                  <Suspense fallback={null}>
-                    <AdminApp />
-                  </Suspense>
-                }
-              />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+            <Suspense fallback={null}>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/blog" element={<ArticlesIndex />} />
+                <Route path="/blog/:slug" element={<Article />} />
+                {/* Eski URL'lar -> yangi (/blog) */}
+                <Route path="/maqolalar" element={<Navigate to="/blog" replace />} />
+                <Route path="/article/:slug" element={<RedirectToBlog />} />
+                <Route path="/admin/*" element={<AdminApp />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
             <PublicChrome />
             <Toaster position="top-center" richColors closeButton />
           </MotionConfig>

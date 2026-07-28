@@ -95,6 +95,7 @@ export default function Article() {
       />
       <Navbar />
 
+      <main id="main">
       <article className="px-6 pt-28">
        <div className="mx-auto max-w-[1120px]">
         <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_240px] lg:gap-12">
@@ -230,7 +231,7 @@ export default function Article() {
               href={BOT_URL}
               target="_blank"
               rel="noreferrer"
-              className="mt-5 inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-6 py-3 font-semibold text-white transition-transform hover:-translate-y-0.5"
+              className="mt-5 inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-6 py-3 font-semibold text-[#0f172a] transition-transform hover:-translate-y-0.5"
             >
               <Send className="h-[18px] w-[18px]" /> Telegram botga o'tish
             </a>
@@ -269,6 +270,7 @@ export default function Article() {
           </div>
         </section>
       )}
+      </main>
 
       <Footer />
     </div>

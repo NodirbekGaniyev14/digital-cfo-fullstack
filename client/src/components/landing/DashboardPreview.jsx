@@ -76,7 +76,7 @@ export default function DashboardPreview() {
   ];
 
   return (
-    <section id="dashboard" className="bg-navy px-6 py-[90px]">
+    <section id="dashboard" className="on-dark bg-navy px-6 py-[90px]">
       <div className="mx-auto max-w-[1100px]">
         <motion.div
           initial="hidden"

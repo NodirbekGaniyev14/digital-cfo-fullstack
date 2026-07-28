@@ -24,7 +24,7 @@ const BOT_URL = "https://t.me/Moliyaviy_Tahlilchi_bot";
 
 // Ranglar sobit; status yorlig'i t() dan (ia.good/warn/bad) keladi.
 const ST = {
-  good: { t: "text-emerald-700", b: "bg-emerald-500/12", k: "ia.good" },
+  good: { t: "text-emerald-700 dark:text-emerald-400", b: "bg-emerald-500/12", k: "ia.good" },
   warn: { t: "text-amber-700", b: "bg-amber-500/12", k: "ia.warn" },
   bad: { t: "text-red-700", b: "bg-red-500/12", k: "ia.bad" },
   na: { t: "text-slate-400", b: "bg-slate-400/10", k: null },
@@ -202,7 +202,7 @@ export default function InstantAnalysis() {
                       {t("ia.verdict")}: «{result.verdict}»
                     </div>
                     <div className="mt-3 flex flex-wrap justify-center gap-2 sm:justify-start">
-                      <Cnt n={result.counts.good} t={t("ia.good")} c="text-emerald-700 bg-emerald-500/12" />
+                      <Cnt n={result.counts.good} t={t("ia.good")} c="text-emerald-700 dark:text-emerald-400 bg-emerald-500/12" />
                       <Cnt n={result.counts.warn} t={t("ia.warn")} c="text-amber-700 bg-amber-500/12" />
                       <Cnt n={result.counts.bad} t={t("ia.bad")} c="text-red-700 bg-red-500/12" />
                     </div>

@@ -9,12 +9,16 @@ const buttonVariants = cva(
     variants: {
       variant: {
         navy: "bg-navy text-white shadow-[0_10px_24px_rgba(15,23,42,.2)] hover:-translate-y-0.5 hover:shadow-[0_16px_30px_rgba(15,23,42,.28)]",
+        // Brend yashiliga (emerald-500) oq matn 2.54:1 — WCAG AA (4.5:1) dan
+        // o'tmaydi. Rangni saqlab, matnni navy qilamiz: 7.04:1. `text-navy`
+        // EMAS — index.css uni dark rejimda oqartiradi; fon esa o'zgarmaydi.
         emerald:
-          "bg-emerald-500 text-white shadow-[0_10px_22px_rgba(16,185,129,.35)] hover:-translate-y-0.5",
+          "bg-emerald-500 text-[#0f172a] shadow-[0_10px_22px_rgba(16,185,129,.35)] hover:-translate-y-0.5",
         outline:
           "border-[1.5px] border-navy/20 bg-transparent text-navy hover:border-navy hover:bg-navy/[.03]",
+        // Qorong'i fonda emerald-700 3.12:1 — dark rejimda emerald-400 (8.9:1).
         "emerald-outline":
-          "border-[1.5px] border-emerald-500/40 text-emerald-700 hover:bg-emerald-500/10",
+          "border-[1.5px] border-emerald-500/40 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/10",
         ghost: "text-navy hover:bg-navy/[.06]",
       },
       size: {

@@ -41,7 +41,10 @@ export default function PDFReport() {
           className="relative"
         >
           <div className="relative overflow-hidden rounded-2xl border border-navy/10 bg-white p-[30px] shadow-[0_30px_60px_rgba(15,23,42,.14)]">
-            <div className="pointer-events-none absolute left-1/2 top-[46%] -translate-x-1/2 -translate-y-1/2 -rotate-[24deg] whitespace-nowrap font-heading text-[54px] font-extrabold tracking-[0.05em] text-navy/[.05]">
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute left-1/2 top-[46%] -translate-x-1/2 -translate-y-1/2 -rotate-[24deg] whitespace-nowrap font-heading text-[54px] font-extrabold tracking-[0.05em] text-navy/[.05]"
+            >
               SAMPLE REPORT
             </div>
             <div className="mb-[18px] flex items-center justify-between border-b border-navy/[.08] pb-4">
@@ -53,9 +56,9 @@ export default function PDFReport() {
               </div>
               <span className="font-mono text-[11px] text-slate-400">2026-06-21</span>
             </div>
-            <h4 className="mb-3.5 font-heading text-[18px] font-bold">
+            <h3 className="mb-3.5 font-heading text-[18px] font-bold">
               {t("pdf.docTitle")}
-            </h4>
+            </h3>
             <div className="mb-5 flex flex-col gap-2">
               {["100%", "88%", "94%", "70%"].map((w, i) => (
                 <div key={i} className="h-[9px] rounded-[5px] bg-navy/[.07]" style={{ width: w }} />

@@ -11,6 +11,27 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
+    <!-- Shriftlar renderni to'smaydi: media="print" bilan yuklanadi, tayyor
+         bo'lgach media="all" ga o'tadi. display=swap tufayli matn darhol
+         tizim shriftida ko'rinadi. -->
+    <link
+      rel="preload"
+      as="style"
+      href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+      media="print"
+      onload="this.media='all';this.onload=null"
+    />
+    <noscript>
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+      />
+    </noscript>
+
     <!-- Dark mode: render'dan oldin mavzuni o'rnatamiz (miltillashning oldini olish) -->
     <script>
       (function () {

@@ -1,0 +1,36 @@
+# Digital CFO
+
+> AI yordamida moliyaviy tahlil va CFO darajasidagi hisobot xizmati (O'zbekiston).
+> Foydalanuvchi Balans (Shakl 1) va Moliyaviy natijalar (Shakl 2) Excel faylini
+> yuboradi — tizim 40+ KPI hisoblaydi, risk diagnostikasi qiladi va amaliy
+> tavsiyalar bilan tayyor PDF hisobotni bir daqiqada qaytaradi.
+
+Til: o'zbek (uz). Hudud: O'zbekiston. Hozirda barcha tahlillar bepul.
+
+## Asosiy sahifalar
+
+- [Bosh sahifa](https://digitalcfo.uz/): xizmat tavsifi, qanday ishlaydi, tariflar, ko'p so'raladigan savollar.
+- [Maqolalar](https://digitalcfo.uz/blog): moliyaviy tahlil, KPI, likvidlik, rentabellik va biznes moliyasi bo'yicha bilim bazasi.
+- [Sitemap](https://digitalcfo.uz/sitemap.xml): barcha indekslanadigan URL'lar ro'yxati.
+
+## Xizmat
+
+- Moliyaviy fayl tahlili — .xlsx / .xls formatdagi Balans va Moliyaviy natijalar hisobotlari.
+- KPI hisoblash — likvidlik, moliyaviy barqarorlik, rentabellik (ROA, ROE), ishbilarmonlik faolligi, o'sish dinamikasi.
+- AI tahlil — holat bahosi va amaliy tavsiyalar.
+- PDF hisobot — boshqaruv xulosasi, KPI jadvali, risk diagnostikasi.
+
+## Kanallar
+
+- Telegram bot (asosiy kirish nuqtasi): https://t.me/Moliyaviy_Tahlilchi_bot
+- WhatsApp: https://wa.me/998911622545
+
+## Huquqiy
+
+- [Maxfiylik siyosati](https://digitalcfo.uz/maxfiylik)
+- [Foydalanish shartlari](https://digitalcfo.uz/shartlar)
+
+## Eslatma
+
+Hisobotlar ma'lumot va tahlil maqsadida beriladi; ular litsenziyalangan moliyaviy
+yoki investitsiya maslahati emas.

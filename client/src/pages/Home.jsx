@@ -17,18 +17,22 @@ export default function Home() {
   return (
     <div className="overflow-x-hidden">
       <Navbar />
-      <HeroSection />
-      <ProblemSolution />
-      <HowItWorks />
-      <InstantAnalysis />
-      <Roadmap />
-      <Services />
-      <KPIAnalytics />
-      <PDFReport />
-      <Testimonials />
-      <Pricing />
-      <FAQ />
-      <DashboardPreview />
+      {/* <main> — Lighthouse "document does not have a main landmark" auditi
+          va skrin-riderlar uchun asosiy kontent chegarasi. */}
+      <main id="main">
+        <HeroSection />
+        <ProblemSolution />
+        <HowItWorks />
+        <InstantAnalysis />
+        <Roadmap />
+        <Services />
+        <KPIAnalytics />
+        <PDFReport />
+        <Testimonials />
+        <Pricing />
+        <FAQ />
+        <DashboardPreview />
+      </main>
       <Footer />
     </div>
   );

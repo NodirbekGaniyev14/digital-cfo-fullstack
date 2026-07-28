@@ -116,7 +116,7 @@ function ctaBlock() {
     `<aside style="margin:36px 0;padding:24px;border-radius:16px;background:linear-gradient(135deg,#eff6ff,#ecfdf5);border:1px solid #bfdbfe">` +
     `<p style="font-weight:800;font-size:18px;color:#0f172a;margin:0 0 8px">Biznesingiz moliyaviy holatini 1 daqiqada tekshiring</p>` +
     `<p style="color:#475569;margin:0 0 14px">Balans (Shakl 1) va Moliyaviy natijalar (Shakl 2) faylini Telegram botga yuboring — 40+ KPI, risk diagnostikasi va amaliy tavsiyalar bilan tayyor PDF hisobot oling. Hozircha to'liq bepul.</p>` +
-    `<a href="${BOT_URL}" style="display:inline-block;background:#3b82f6;color:#fff;font-weight:700;padding:10px 22px;border-radius:12px;text-decoration:none">Bepul tahlil qilish →</a>` +
+    `<a href="${BOT_URL}" style="display:inline-block;background:#1d4ed8;color:#fff;font-weight:700;padding:10px 22px;border-radius:12px;text-decoration:none">Bepul tahlil qilish →</a>` +
     `</aside>`
   );
 }

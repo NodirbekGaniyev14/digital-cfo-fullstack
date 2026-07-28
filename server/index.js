@@ -1,6 +1,7 @@
 import "./load-env.js"; // ENG BIRINCHI — .env ni auth.js/ssr.js dan oldin yuklaydi
 import express from "express";
 import sharp from "sharp";
+import compression from "compression";
 import cors from "cors";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
@@ -23,6 +24,18 @@ const isProd = process.env.NODE_ENV === "production";
 
 const app = express();
 app.set("trust proxy", 1); // reverse-proxy ortida to'g'ri IP olish uchun
+
+// ---- Gzip siqish -------------------------------------------------------------
+// nginx faqat text/html ni siqadi (gzip_types default), shuning uchun JS/CSS
+// siqilmay ketardi (~533 KB bundle). Node darajasida siqamiz — nginx uni
+// o'zgarishsiz uzatadi. `x-no-compression` sarlavhasi — debug uchun.
+app.use(
+  compression({
+    threshold: 1024,
+    filter: (req, res) =>
+      req.headers["x-no-compression"] ? false : compression.filter(req, res),
+  })
+);
 
 // ---- Xavfsizlik sarlavhalari --------------------------------------------------
 // SPA inline-style va Google Fonts ishlatadi, shuning uchun CSP'ni o'chiramiz.
@@ -53,7 +66,7 @@ const statsFile = path.join(dataDir, "stats.json");
 // Excel yuklamalaridan (uploads/, PII) ALOHIDA papka — mijoz fayllari oshkor bo'lmaydi.
 const mediaDir = path.join(__dirname, "media");
 fs.mkdirSync(mediaDir, { recursive: true });
-app.use("/media", express.static(mediaDir));
+app.use("/media", express.static(mediaDir, { maxAge: "7d" }));
 
 const IMG_EXT = [".jpg", ".jpeg", ".png", ".webp", ".gif", ".svg"];
 // Xotirada qabul qilamiz, so'ng sharp bilan optimallab diskka yozamiz.
@@ -1144,6 +1157,19 @@ if (fs.existsSync(clientDist)) {
   // --- SEO: maqola sahifalarini DB'dan server-side render qilamiz -------------
   // (static'dan OLDIN — robotlar to'liq matnni JS'siz ko'radi).
 
+  // --- Robotlar va AI agentlar uchun matn fayllari ---------------------------
+  // Lighthouse SPA fallback'ga tushib qolmasligi (llms.txt) va sekin fayl
+  // qidiruvi tufayli timeout bo'lmasligi (robots.txt) uchun aniq yo'llar.
+  for (const name of ["robots.txt", "llms.txt"]) {
+    app.get(`/${name}`, (_req, res, next) => {
+      const file = path.join(clientDist, name);
+      if (!fs.existsSync(file)) return next();
+      res.type("text/plain; charset=utf-8");
+      res.set("Cache-Control", "public, max-age=3600");
+      res.sendFile(file);
+    });
+  }
+
   // Dinamik sitemap — DB'dagi published maqolalar bilan.
   app.get("/sitemap.xml", (_req, res) => {
     try {
@@ -1202,8 +1228,29 @@ if (fs.existsSync(clientDist)) {
   app.get("/maqolalar/:slug", (req, res) => res.redirect(301, `/blog/${req.params.slug}`));
   app.get("/article/:slug", (req, res) => res.redirect(301, `/blog/${req.params.slug}`));
 
+  // /assets/* — nomida kontent hash bor (index-CNA9PBHt.js), demak mazmuni
+  // o'zgarsa nom ham o'zgaradi. 1 yil immutable kesh: qayta tashrifda 0 so'rov.
+  app.use(
+    "/assets",
+    express.static(path.join(clientDist, "assets"), {
+      immutable: true,
+      maxAge: "1y",
+    })
+  );
+
   // extensions:["html"] — toza URL beradi (maxfiylik.html, shartlar.html).
-  app.use(express.static(clientDist, { extensions: ["html"] }));
+  // Qolgan statik fayllar (favicon, og-image, pdf, demo.mp4) — 1 kun kesh.
+  // HTML esa keshlanmaydi: deploy'dan keyin eski hash'li asset'ga ishora
+  // qiluvchi sahifa qolib ketmasligi kerak.
+  app.use(
+    express.static(clientDist, {
+      extensions: ["html"],
+      maxAge: "1d",
+      setHeaders: (res, filePath) => {
+        if (filePath.endsWith(".html")) res.set("Cache-Control", "no-cache");
+      },
+    })
+  );
   // Qolgan (client-side) yo'llar uchun SPA fallback.
   app.get("*", (_req, res) =>
     res.sendFile(path.join(clientDist, "index.html"))

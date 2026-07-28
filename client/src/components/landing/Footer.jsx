@@ -17,7 +17,7 @@ export default function Footer() {
   const isHome = useLocation().pathname === "/";
   const SERVICES = t("ft.services");
   return (
-    <footer className="bg-[#0c111f] px-6 pb-[30px] pt-16 text-slate-300">
+    <footer className="on-dark bg-[#0c111f] px-6 pb-[30px] pt-16 text-slate-300">
       <div className="mx-auto max-w-[1200px]">
         <div className="grid gap-9 border-b border-white/[.08] pb-10 sm:grid-cols-2 lg:grid-cols-4">
           <div>
@@ -35,7 +35,7 @@ export default function Footer() {
           </div>
 
           <div>
-            <h4 className="mb-4 font-heading text-[15px] font-bold text-white">{t("ft.links")}</h4>
+            <h3 className="mb-4 font-heading text-[15px] font-bold text-white">{t("ft.links")}</h3>
             <div className="flex flex-col gap-2.5">
               {NAV_LINKS.map((l) =>
                 l.to ? (
@@ -52,7 +52,7 @@ export default function Footer() {
           </div>
 
           <div>
-            <h4 className="mb-4 font-heading text-[15px] font-bold text-white">{t("ft.servicesTitle")}</h4>
+            <h3 className="mb-4 font-heading text-[15px] font-bold text-white">{t("ft.servicesTitle")}</h3>
             <div className="flex flex-col gap-2.5">
               {SERVICES.map((s) => (
                 <span key={s} className="text-[14px] text-slate-400">{s}</span>
@@ -61,7 +61,7 @@ export default function Footer() {
           </div>
 
           <div>
-            <h4 className="mb-4 font-heading text-[15px] font-bold text-white">{t("ft.contactTitle")}</h4>
+            <h3 className="mb-4 font-heading text-[15px] font-bold text-white">{t("ft.contactTitle")}</h3>
             <div className="flex flex-col gap-[11px] text-[14px] text-slate-400">
               <a href="mailto:n.ganiyev2007@gmail.com" className="flex items-center gap-2.5 hover:text-white">
                 <Mail className="h-4 w-4" /> n.ganiyev2007@gmail.com

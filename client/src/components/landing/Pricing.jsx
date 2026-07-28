@@ -43,7 +43,7 @@ export default function Pricing() {
             variants={fadeUp}
             className="relative w-full max-w-[460px] rounded-[22px] border-[1.5px] border-emerald-500 bg-white p-9 shadow-[0_24px_54px_rgba(16,185,129,.18)]"
           >
-            <div className="absolute -top-[13px] left-1/2 -translate-x-1/2 rounded-full bg-emerald-500 px-4 py-1.5 text-xs font-bold text-white shadow-[0_8px_18px_rgba(16,185,129,.4)]">
+            <div className="absolute -top-[13px] left-1/2 -translate-x-1/2 rounded-full bg-emerald-500 px-4 py-1.5 text-xs font-bold text-[#0f172a] shadow-[0_8px_18px_rgba(16,185,129,.4)]">
               {PLAN.badge}
             </div>
 
@@ -59,7 +59,7 @@ export default function Pricing() {
               <span className="mb-1.5 text-base font-semibold text-slate-600">{t("pr.sum")}</span>
             </div>
             <div className="mb-2.5 text-[13.5px] text-slate-400">{PLAN.per}</div>
-            <div className="mb-6 inline-block rounded-full bg-emerald-500/10 px-3.5 py-1 text-[12.5px] font-bold text-emerald-700">
+            <div className="mb-6 inline-block rounded-full bg-emerald-500/10 px-3.5 py-1 text-[12.5px] font-bold text-emerald-700 dark:text-emerald-400">
               {PLAN.note}
             </div>
 

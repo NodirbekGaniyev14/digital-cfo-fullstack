@@ -52,7 +52,8 @@ export default function Navbar() {
   }, []);
 
   return (
-    <nav
+    // <header> — banner landmark (skrin-riderlar sayt sarlavhasini shundan topadi).
+    <header
       className={cn(
         "fixed inset-x-0 top-0 z-[200] border-b px-6 py-3.5 transition-all duration-300",
         scrolled
@@ -60,7 +61,7 @@ export default function Navbar() {
           : "border-transparent bg-transparent"
       )}
     >
-      <div className="mx-auto flex max-w-[1200px] items-center justify-between gap-3">
+      <nav aria-label="Asosiy menyu" className="mx-auto flex max-w-[1200px] items-center justify-between gap-3">
         <Link to="/" className="flex flex-none items-center gap-2.5">
           <div className="flex h-10 w-10 flex-none items-center justify-center rounded-[11px] bg-navy text-emerald-500 shadow-[0_6px_16px_rgba(15,23,42,.25)]">
             <BarChart3 className="h-[21px] w-[21px]" />
@@ -100,7 +101,7 @@ export default function Navbar() {
             {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
         </div>
-      </div>
+      </nav>
 
       <AnimatePresence>
         {open && (
@@ -126,7 +127,7 @@ export default function Navbar() {
           </motion.div>
         )}
       </AnimatePresence>
-    </nav>
+    </header>
   );
 }
 
