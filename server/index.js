@@ -37,6 +37,30 @@ app.use(
   })
 );
 
+// ---- Kanonik URL (SEO: dublikatlarni yagona manzilga 301 bilan yig'amiz) -----
+// Google Search Console "Вариант страницы с тегом canonical" (Alternate page
+// with proper canonical tag) ogohlantirishi: www.digitalcfo.uz va oxirida "/"
+// bo'lgan URL'lar 200 qaytarardi — Google ularni <link canonical> tufayli
+// chetlagan (indekslamagan). Endi 301 bilan asosiy manzilga yuboramiz.
+// Faqat GET/HEAD: POST beacon'lari (/api/track) 301'da GET'ga aylanib buzilmasin.
+const SITE_ORIGIN = (process.env.SITE_URL || "https://digitalcfo.uz").replace(/\/$/, "");
+const CANON_HOST = SITE_ORIGIN.replace(/^https?:\/\//, "");
+app.use((req, res, next) => {
+  if (req.method !== "GET" && req.method !== "HEAD") return next();
+  const host = (req.headers.host || "").toLowerCase().split(":")[0];
+  // www.digitalcfo.uz -> digitalcfo.uz (yo'l va query o'zgarishsiz)
+  if (host === `www.${CANON_HOST}`) {
+    return res.redirect(301, SITE_ORIGIN + req.originalUrl);
+  }
+  // Oxiridagi "/" (root emas) -> slashsiz variant; ?query saqlanadi
+  if (req.path.length > 1 && req.path.endsWith("/")) {
+    const [p, ...rest] = req.originalUrl.split("?");
+    const qs = rest.length ? "?" + rest.join("?") : "";
+    return res.redirect(301, p.replace(/\/+$/, "") + qs);
+  }
+  next();
+});
+
 // ---- Xavfsizlik sarlavhalari --------------------------------------------------
 // SPA inline-style va Google Fonts ishlatadi, shuning uchun CSP'ni o'chiramiz.
 app.use(helmet({ contentSecurityPolicy: false }));
