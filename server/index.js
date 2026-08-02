@@ -1276,9 +1276,17 @@ if (fs.existsSync(clientDist)) {
     })
   );
   // Qolgan (client-side) yo'llar uchun SPA fallback.
-  app.get("*", (_req, res) =>
-    res.sendFile(path.join(clientDist, "index.html"))
-  );
+  // MUHIM: mavjud bo'lmagan yo'lga 200 qaytarish "soft 404" — Google uni
+  // haqiqiy sahifa deb hisoblab indekslashga urinadi va sayt sifatini
+  // pasaytiradi. Bu yergacha yetib kelgan so'rov = SSR route topmagan
+  // (masalan noto'g'ri /blog/<slug>) => haqiqiy 404 status beramiz.
+  // Faqat /admin/* bundan mustasno: u to'liq client-side router.
+  app.get("*", (req, res) => {
+    const isAdmin = req.path === "/admin" || req.path.startsWith("/admin/");
+    res
+      .status(isAdmin ? 200 : 404)
+      .sendFile(path.join(clientDist, "index.html"));
+  });
 }
 
 app.listen(PORT, () =>

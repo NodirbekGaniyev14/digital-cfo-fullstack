@@ -69,7 +69,11 @@ const WEBSITE = {
 
 function buildPage({ title, description, canonical, ogType, pageJsonLd, rootHtml, robots, image }) {
   let html = template();
-  const fullTitle = title.includes("Digital CFO") ? title : `${title} — Digital CFO`;
+  // Brend allaqachon sarlavhada bo'lsa qayta qo'shmaymiz. Solishtirishda bo'sh
+  // joy va registrni tashlaymiz: admin "… | DigitalCFO" deb yozsa ham
+  // "… | DigitalCFO — Digital CFO" kabi ikkilanish SERP'ga chiqmasin.
+  const norm = (s) => s.toLowerCase().replace(/\s+/g, "");
+  const fullTitle = norm(title).includes("digitalcfo") ? title : `${title} — Digital CFO`;
   const rep = (re, val, label) => {
     if (!re.test(html)) throw new Error(`ssr: shablonda topilmadi — ${label}`);
     html = html.replace(re, () => val);
@@ -319,10 +323,12 @@ export function renderHome() {
     `<p style="margin-top:30px"><a href="/blog" style="color:#3b82f6;font-weight:700">Moliyaviy tahlil bo'yicha maqolalar →</a></p>` +
     `</main>${SHELL_FOOTER}`;
 
+  // Title/description marketing shioridan emas, real qidiruv so'rovlaridan
+  // qurilgan: "moliyaviy tahlil", "balans tahlili", "1C hisoboti".
   return buildPage({
-    title: "Digital CFO — AI moliyaviy tahlil va hisobot",
+    title: "Moliyaviy tahlil onlayn — balans va 1C hisoboti | Digital CFO",
     description:
-      "Balans va moliyaviy hisobotingizni yuboring — biz ularni tahlil qilib, KPI'lar va amaliy tavsiyalar bilan tayyor CFO darajasidagi hisobotni qaytaramiz.",
+      "Balans (Shakl 1) va Moliyaviy natijalar (Shakl 2) faylini yuklang — likvidlik, rentabellik va 40+ KPI bo'yicha tayyor PDF tahlilni 1 daqiqada oling. Bepul.",
     canonical,
     ogType: "website",
     pageJsonLd,
