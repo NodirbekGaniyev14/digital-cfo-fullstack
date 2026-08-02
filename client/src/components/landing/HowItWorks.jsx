@@ -1,9 +1,19 @@
 import { motion } from "framer-motion";
-import { Upload, ShieldCheck, BarChart3, Brain, FileText } from "lucide-react";
+import { Upload, ShieldCheck, BarChart3, Brain, FileText, Download } from "lucide-react";
 import { fadeUp, viewportOnce } from "@/lib/motion";
 import { useApp } from "@/lib/i18n";
 
 const STEP_ICONS = [Upload, ShieldCheck, BarChart3, Brain, FileText];
+
+// Qadam bo'yicha yuklab olinadigan namuna fayllar (public/ dan beriladi).
+// 0-qadam ("Faylni yuklang") — 2 ta Excel; oxirgi ("PDF hisobot") — namuna PDF.
+const STEP_DOWNLOADS = {
+  0: [
+    { href: "/Shakl_1_Balans_namuna.xlsx", labelKey: "how.dlBalans" },
+    { href: "/Shakl_2_Moliyaviy_namuna.xlsx", labelKey: "how.dlMoliya" },
+  ],
+  4: [{ href: "/Namuna_Moliyaviy_Hisobot.pdf", labelKey: "how.dlPdf" }],
+};
 
 export default function HowItWorks() {
   const { t } = useApp();
@@ -65,6 +75,26 @@ export default function HowItWorks() {
                     <p className="text-[14.5px] leading-relaxed text-slate-500">
                       {s.desc}
                     </p>
+                    {STEP_DOWNLOADS[i] && (
+                      <div className="mt-3.5">
+                        <div className="mb-2 font-mono text-[11px] font-semibold uppercase tracking-[0.06em] text-slate-400">
+                          {t("how.dlLabel")}
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {STEP_DOWNLOADS[i].map((f) => (
+                            <a
+                              key={f.href}
+                              href={f.href}
+                              download
+                              className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-500/40 bg-emerald-500/[.07] px-2.5 py-1.5 text-[12.5px] font-semibold text-emerald-700 transition-colors hover:bg-emerald-500/15 dark:text-emerald-400"
+                            >
+                              <Download className="h-3.5 w-3.5 flex-none" />
+                              {t(f.labelKey)}
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </motion.div>

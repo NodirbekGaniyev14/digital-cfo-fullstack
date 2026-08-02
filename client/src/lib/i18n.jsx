@@ -61,6 +61,10 @@ const DICT = {
       { title: "AI tahlil", desc: "Sun'iy intellekt natijalarni chuqur tahlil qiladi." },
       { title: "PDF hisobot", desc: "Tayyor professional hisobotni yuklab oling." },
     ],
+    "how.dlLabel": "Namuna fayllar:",
+    "how.dlBalans": "Shakl 1 — Balans",
+    "how.dlMoliya": "Shakl 2 — Moliyaviy natijalar",
+    "how.dlPdf": "Namuna hisobot (PDF)",
 
     "ia.eyebrow": "Bepul tahlil", "ia.title": "Faylingizni hoziroq sinab ko'ring",
     "ia.subA": "Balans va Moliyaviy hisobotni yuklang — umumiy ball va ",
@@ -221,6 +225,10 @@ const DICT = {
       { title: "AI анализ", desc: "Искусственный интеллект глубоко анализирует результаты." },
       { title: "PDF отчёт", desc: "Скачайте готовый профессиональный отчёт." },
     ],
+    "how.dlLabel": "Образцы файлов:",
+    "how.dlBalans": "Форма 1 — Баланс",
+    "how.dlMoliya": "Форма 2 — Фин. результаты",
+    "how.dlPdf": "Образец отчёта (PDF)",
 
     "ia.eyebrow": "Бесплатный анализ", "ia.title": "Попробуйте свой файл прямо сейчас",
     "ia.subA": "Загрузите баланс и финансовый отчёт — общий балл и ",
@@ -381,6 +389,10 @@ const DICT = {
       { title: "AI analysis", desc: "AI analyzes the results in depth." },
       { title: "PDF report", desc: "Download the ready professional report." },
     ],
+    "how.dlLabel": "Sample files:",
+    "how.dlBalans": "Form 1 — Balance sheet",
+    "how.dlMoliya": "Form 2 — Income statement",
+    "how.dlPdf": "Sample report (PDF)",
 
     "ia.eyebrow": "Free analysis", "ia.title": "Try your file right now",
     "ia.subA": "Upload the balance sheet and financial report — the overall score and ",
