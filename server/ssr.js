@@ -91,7 +91,18 @@ function buildPage({ title, description, canonical, ogType, pageJsonLd, rootHtml
   };
   rep(/<title>[\s\S]*?<\/title>/, `<title>${escHtml(fullTitle)}</title>`, "title");
   rep(/<meta\s+name="description"[\s\S]*?\/>/, `<meta name="description" content="${escAttr(description)}" />`, "description");
-  rep(/<meta name="robots"[^>]*>/, `<meta name="robots" content="${robots || "index,follow"}" />`, "robots");
+  // Qidiruv tizimi tasdiqlash teglari (.env orqali — build/commit kerak emas,
+  // faqat `pm2 restart`). Yandex.Webmaster / Google Search Console "meta tag"
+  // usulini tanlaganda content="..." qiymatini shu yerga qo'yish yetarli.
+  const verifyTags = [
+    process.env.YANDEX_VERIFICATION &&
+      `\n    <meta name="yandex-verification" content="${escAttr(process.env.YANDEX_VERIFICATION)}" />`,
+    process.env.GOOGLE_SITE_VERIFICATION &&
+      `\n    <meta name="google-site-verification" content="${escAttr(process.env.GOOGLE_SITE_VERIFICATION)}" />`,
+  ]
+    .filter(Boolean)
+    .join("");
+  rep(/<meta name="robots"[^>]*>/, `<meta name="robots" content="${robots || "index,follow"}" />${verifyTags}`, "robots");
   // hreflang — bir sahifaning til variantlari. Google qaysi tilni kimga
   // ko'rsatishni shundan biladi; x-default esa "boshqasi mos kelmasa" varianti.
   const altTags = (alternates || [])
