@@ -13,7 +13,7 @@ import { execFile } from "node:child_process";
 import { timingSafeEqual, createHash } from "node:crypto";
 import db, { Articles, Authors, Tags, Categories, Subscribers, Revisions, AutopilotTopics, SocialPosts, PageViews, cleanHtml, uniqueSlug } from "./db.js";
 import { loginHandler, requireAdmin } from "./auth.js";
-import { renderArticle, renderList, renderHome, buildSitemap, hasTemplate } from "./ssr.js";
+import { renderArticle, renderList, renderHome, buildSitemap, hasTemplate, MERGED_SLUGS } from "./ssr.js";
 import { aiEnabled, generateArticle, generateSocialPackage, scoreArticle } from "./anthropic.js";
 import { startAutopilot, autopilotStatus, setAutopilotSettings, seedStarterTopics, runGuarded } from "./autopilot.js";
 import { publisherStatus, publishArticleSocial, autoPostArticleTelegram } from "./publisher.js";
@@ -1208,10 +1208,23 @@ if (fs.existsSync(clientDist)) {
   app.get("/", (_req, res, next) => {
     if (!hasTemplate()) return next();
     try {
-      res.type("html").send(renderHome());
+      res.type("html").send(renderHome("uz"));
     } catch (e) {
       console.warn("⚠️ SSR (bosh sahifa) xatosi:", e.message);
       next(); // fallback: express.static index.html (SPA)
+    }
+  });
+
+  // Ruscha landing — alohida URL (hreflang bilan o'zbekchaga bog'langan).
+  // O'zbekistonda B2B moliya so'rovlarining katta qismi rus tilida.
+  // Maqolalar tarjima qilinmagan, shuning uchun faqat bosh sahifa.
+  app.get("/ru", (_req, res, next) => {
+    if (!hasTemplate()) return next();
+    try {
+      res.type("html").send(renderHome("ru"));
+    } catch (e) {
+      console.warn("⚠️ SSR (ruscha bosh sahifa) xatosi:", e.message);
+      next();
     }
   });
 
@@ -1224,6 +1237,14 @@ if (fs.existsSync(clientDist)) {
       console.warn("⚠️ SSR (ro'yxat) xatosi:", e.message);
       next();
     }
+  });
+
+  // Birlashtirilgan maqolalar: eski slug -> qoladigan slug (301).
+  // /blog/:slug SSR route'idan OLDIN turishi shart.
+  app.get("/blog/:slug", (req, res, next) => {
+    const target = MERGED_SLUGS[req.params.slug];
+    if (!target) return next();
+    res.redirect(301, `/blog/${target}`);
   });
 
   // Bitta maqola sahifasi — /blog/<slug>.

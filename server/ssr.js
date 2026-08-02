@@ -20,6 +20,17 @@ export function hasTemplate() {
   return fs.existsSync(TEMPLATE_PATH);
 }
 
+// Birlashtirilgan (kannibalizatsiya) maqolalar: eski slug -> qoladigan slug.
+// Ikki maqola bir xil so'rovga ("moliyaviy tahlil nima") raqobatlashardi —
+// Google ikkalasini ham pastga tushiradi. Eski URL 301 bilan yo'naltiriladi
+// va sitemap'dan chiqariladi (301'li URL sitemap'da turmasligi kerak).
+export const MERGED_SLUGS = {
+  "moliyaviy-tahlil-nima": "moliyaviy-tahlil-nima-asosiy-tushunchalar",
+};
+
+// Landing sahifaning til variantlari (maqolalar faqat o'zbekchada).
+export const HOME_PATHS = { uz: "/", ru: "/ru" };
+
 const escAttr = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/"/g, "&quot;");
 const escHtml = (s) =>
   String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -67,7 +78,7 @@ const WEBSITE = {
   publisher: { "@id": `${SITE_URL}/#org` },
 };
 
-function buildPage({ title, description, canonical, ogType, pageJsonLd, rootHtml, robots, image }) {
+function buildPage({ title, description, canonical, ogType, pageJsonLd, rootHtml, robots, image, lang, alternates }) {
   let html = template();
   // Brend allaqachon sarlavhada bo'lsa qayta qo'shmaymiz. Solishtirishda bo'sh
   // joy va registrni tashlaymiz: admin "… | DigitalCFO" deb yozsa ham
@@ -81,7 +92,16 @@ function buildPage({ title, description, canonical, ogType, pageJsonLd, rootHtml
   rep(/<title>[\s\S]*?<\/title>/, `<title>${escHtml(fullTitle)}</title>`, "title");
   rep(/<meta\s+name="description"[\s\S]*?\/>/, `<meta name="description" content="${escAttr(description)}" />`, "description");
   rep(/<meta name="robots"[^>]*>/, `<meta name="robots" content="${robots || "index,follow"}" />`, "robots");
-  rep(/<link rel="canonical"[^>]*>/, `<link rel="canonical" href="${canonical}" />`, "canonical");
+  // hreflang — bir sahifaning til variantlari. Google qaysi tilni kimga
+  // ko'rsatishni shundan biladi; x-default esa "boshqasi mos kelmasa" varianti.
+  const altTags = (alternates || [])
+    .map((a) => `\n    <link rel="alternate" hreflang="${a.lang}" href="${escAttr(a.href)}" />`)
+    .join("");
+  rep(/<link rel="canonical"[^>]*>/, `<link rel="canonical" href="${canonical}" />${altTags}`, "canonical");
+  if (lang && lang !== "uz") {
+    html = html.replace(/<html lang="[^"]*"/, `<html lang="${lang}"`);
+    html = html.replace(/<meta property="og:locale" content="[^"]*"/, `<meta property="og:locale" content="${lang === "ru" ? "ru_RU" : "en_US"}"`);
+  }
   rep(/<meta property="og:url"[^>]*>/, `<meta property="og:url" content="${canonical}" />`, "og:url");
   rep(/<meta property="og:title"[^>]*>/, `<meta property="og:title" content="${escAttr(fullTitle)}" />`, "og:title");
   rep(/<meta\s+property="og:description"[\s\S]*?\/>/, `<meta property="og:description" content="${escAttr(description)}" />`, "og:description");
@@ -115,12 +135,26 @@ function absUrl(u) {
 // foydalanuvchilar uchun — SSR ham xuddi shu yo'lni taklif qilsin.
 const BOT_URL = "https://t.me/Moliyaviy_Tahlilchi_bot";
 
-function ctaBlock() {
+const CTA_COPY = {
+  uz: {
+    title: "Biznesingiz moliyaviy holatini 1 daqiqada tekshiring",
+    text: "Balans (Shakl 1) va Moliyaviy natijalar (Shakl 2) faylini Telegram botga yuboring — 40+ KPI, risk diagnostikasi va amaliy tavsiyalar bilan tayyor PDF hisobot oling. Hozircha to'liq bepul.",
+    btn: "Bepul tahlil qilish →",
+  },
+  ru: {
+    title: "Проверьте финансовое состояние бизнеса за 1 минуту",
+    text: "Отправьте Баланс (Форма 1) и Отчёт о финансовых результатах (Форма 2) в Telegram-бот — получите готовый PDF-отчёт с 40+ KPI, диагностикой рисков и практическими рекомендациями. Пока полностью бесплатно.",
+    btn: "Бесплатный анализ →",
+  },
+};
+
+function ctaBlock(lang = "uz") {
+  const c = CTA_COPY[lang] || CTA_COPY.uz;
   return (
     `<aside style="margin:36px 0;padding:24px;border-radius:16px;background:linear-gradient(135deg,#eff6ff,#ecfdf5);border:1px solid #bfdbfe">` +
-    `<p style="font-weight:800;font-size:18px;color:#0f172a;margin:0 0 8px">Biznesingiz moliyaviy holatini 1 daqiqada tekshiring</p>` +
-    `<p style="color:#475569;margin:0 0 14px">Balans (Shakl 1) va Moliyaviy natijalar (Shakl 2) faylini Telegram botga yuboring — 40+ KPI, risk diagnostikasi va amaliy tavsiyalar bilan tayyor PDF hisobot oling. Hozircha to'liq bepul.</p>` +
-    `<a href="${BOT_URL}" style="display:inline-block;background:#1d4ed8;color:#fff;font-weight:700;padding:10px 22px;border-radius:12px;text-decoration:none">Bepul tahlil qilish →</a>` +
+    `<p style="font-weight:800;font-size:18px;color:#0f172a;margin:0 0 8px">${c.title}</p>` +
+    `<p style="color:#475569;margin:0 0 14px">${c.text}</p>` +
+    `<a href="${BOT_URL}" style="display:inline-block;background:#1d4ed8;color:#fff;font-weight:700;padding:10px 22px;border-radius:12px;text-decoration:none">${c.btn}</a>` +
     `</aside>`
   );
 }
@@ -251,17 +285,104 @@ export function renderList(list) {
 // Bosh sahifa SSR — Google JS'siz ham to'liq marketing matnini ko'rsin.
 // (Avval #root bo'sh edi: robot 0 so'z ko'rardi.) Matn client i18n (uz) bilan
 // mazmunan bir xil; React yuklangach #root'ni interaktiv versiya bilan almashtiradi.
-export function renderHome() {
-  const canonical = `${SITE_URL}/`;
+// Bosh sahifa matni tillar bo'yicha. Maqolalar faqat o'zbekcha, shuning uchun
+// ruscha versiya faqat landing (/ru) — hreflang orqali o'zbekchaga bog'langan.
+const HOME_COPY = {
+  uz: {
+    title: "Moliyaviy tahlil onlayn — balans va 1C hisoboti | Digital CFO",
+    description:
+      "Balans (Shakl 1) va Moliyaviy natijalar (Shakl 2) faylini yuklang — likvidlik, rentabellik va 40+ KPI bo'yicha tayyor PDF tahlilni 1 daqiqada oling. Bepul.",
+    h1: "AI yordamida moliyaviy tahlil va CFO darajasidagi hisobot",
+    lead: "Balans (Shakl 1) va Moliyaviy natijalar (Shakl 2) faylingizni yuboring — Digital CFO ularni chuqur tahlil qilib, 40+ KPI, risk diagnostikasi va amaliy tavsiyalar bilan tayyor PDF hisobotni bir daqiqada qaytaradi.",
+    h2how: "Qanday ishlaydi",
+    how: [
+      "<b>Faylni yuklang</b> — Excel (.xlsx/.xls) moliyaviy faylingizni yuboring.",
+      "<b>Validatsiya</b> — tizim ma'lumotlarni avtomatik tekshiradi va tozalaydi.",
+      "<b>KPI hisoblash</b> — barcha asosiy moliyaviy ko'rsatkichlar hisoblanadi.",
+      "<b>AI tahlil</b> — kuchli AI holatni baholab, tavsiyalar tayyorlaydi.",
+      "<b>PDF hisobot</b> — professional hisobotni yuklab olasiz.",
+    ],
+    h2what: "Nimalarni tahlil qilamiz",
+    what: [
+      "<b>Likvidlik va to'lov qobiliyati</b> — joriy, tezkor va mutlaq likvidlik, ishchi kapital.",
+      "<b>Moliyaviy barqarorlik</b> — avtonomiya, qarz yuki, manyovrlik koeffitsientlari.",
+      "<b>Rentabellik</b> — ROA, ROE, sof va yalpi foyda marjalari.",
+      "<b>Ishbilarmonlik faolligi</b> — aktivlar, zaxiralar, debitorlik aylanuvchanligi, pul aylanish sikli.",
+      "<b>O'sish dinamikasi</b> — tushum, foyda va kapital o'zgarishi.",
+    ],
+    h2report: "Hisobotda nimalar bor",
+    report: [
+      "Boshqaruv xulosasi (Executive Summary)",
+      "Asosiy KPI ko'rsatkichlari jadvali",
+      "Likvidlik va to'lov qobiliyati tahlili",
+      "Rentabellik va foyda dinamikasi",
+      "Risk diagnostikasi va baholash",
+      "AI tavsiyalari va xulosalar",
+    ],
+    h2price: "Narx",
+    price: "Hozirda barcha tahlillar <b>to'liq bepul</b>. Pullik tariflar joriy etilganda oldindan e'lon qilamiz.",
+    h2faq: "Ko'p so'raladigan savollar",
+    blogLink: "Moliyaviy tahlil bo'yicha maqolalar →",
+    faqs: [
+      { q: "Qaysi fayl formatlari qabul qilinadi?", a: "Tizim .xlsx va .xls formatdagi moliyaviy fayllarni qabul qiladi. Fayl avtomatik tekshiriladi va validatsiyadan o'tkaziladi." },
+      { q: "Tahlil qancha vaqt oladi?", a: "Tahlilni atigi 1 daqiqada yetkazamiz — faylni yuborishingiz bilan hisobot tayyor bo'ladi." },
+      { q: "Xizmat pullikmi?", a: "Hozirda barcha tahlillar to'liq bepul. Pullik tariflar joriy etilganda saytda va botda oldindan e'lon qilamiz." },
+      { q: "Tahlil ishonchliligi qanchalik?", a: "Har bir hisobot tajribali mutaxassis nazoratidan o'tadi va natijalar benchmark ko'rsatkichlar bilan solishtirib tekshiriladi." },
+      { q: "Hisobotni yuklab olsa bo'ladimi?", a: "Ha, har bir tahlil yakunida professional PDF hisobotni bir tugma bilan yuklab olishingiz mumkin." },
+      { q: "Ma'lumotlarim xavfsizmi?", a: "Ma'lumotlaringiz himoyalangan (HTTPS) ulanish orqali uzatiladi, faqat tahlil maqsadida ishlatiladi va uchinchi shaxslarga berilmaydi." },
+    ],
+  },
+  ru: {
+    title: "Финансовый анализ онлайн — баланс и отчёты 1С | Digital CFO",
+    description:
+      "Загрузите Баланс (Форма 1) и Отчёт о финансовых результатах (Форма 2) — получите готовый PDF-анализ по ликвидности, рентабельности и 40+ KPI за 1 минуту. Бесплатно.",
+    h1: "Финансовый анализ с помощью AI и отчёт уровня CFO",
+    lead: "Отправьте файлы Баланса (Форма 1) и Отчёта о финансовых результатах (Форма 2) — Digital CFO проведёт глубокий анализ и вернёт готовый PDF-отчёт с 40+ KPI, диагностикой рисков и практическими рекомендациями за одну минуту.",
+    h2how: "Как это работает",
+    how: [
+      "<b>Загрузите файл</b> — отправьте финансовый файл Excel (.xlsx/.xls).",
+      "<b>Валидация</b> — система автоматически проверяет и очищает данные.",
+      "<b>Расчёт KPI</b> — рассчитываются все основные финансовые показатели.",
+      "<b>AI-анализ</b> — искусственный интеллект оценивает состояние и готовит рекомендации.",
+      "<b>PDF-отчёт</b> — вы скачиваете профессиональный отчёт.",
+    ],
+    h2what: "Что мы анализируем",
+    what: [
+      "<b>Ликвидность и платёжеспособность</b> — текущая, быстрая и абсолютная ликвидность, оборотный капитал.",
+      "<b>Финансовая устойчивость</b> — коэффициенты автономии, долговой нагрузки, манёвренности.",
+      "<b>Рентабельность</b> — ROA, ROE, чистая и валовая маржа прибыли.",
+      "<b>Деловая активность</b> — оборачиваемость активов, запасов, дебиторской задолженности, денежный цикл.",
+      "<b>Динамика роста</b> — изменение выручки, прибыли и капитала.",
+    ],
+    h2report: "Что входит в отчёт",
+    report: [
+      "Управленческое резюме (Executive Summary)",
+      "Таблица основных KPI",
+      "Анализ ликвидности и платёжеспособности",
+      "Рентабельность и динамика прибыли",
+      "Диагностика и оценка рисков",
+      "AI-рекомендации и выводы",
+    ],
+    h2price: "Стоимость",
+    price: "Сейчас все анализы <b>полностью бесплатны</b>. О введении платных тарифов сообщим заранее.",
+    h2faq: "Часто задаваемые вопросы",
+    blogLink: "Статьи о финансовом анализе (на узбекском) →",
+    faqs: [
+      { q: "Какие форматы файлов принимаются?", a: "Система принимает финансовые файлы в форматах .xlsx и .xls. Файл автоматически проверяется и проходит валидацию." },
+      { q: "Сколько времени занимает анализ?", a: "Анализ занимает всего 1 минуту — отчёт готов сразу после отправки файла." },
+      { q: "Услуга платная?", a: "Сейчас все анализы полностью бесплатны. О введении платных тарифов мы заранее сообщим на сайте и в боте." },
+      { q: "Насколько надёжен анализ?", a: "Каждый отчёт проходит контроль опытного специалиста, а результаты сверяются с бенчмарками." },
+      { q: "Можно ли скачать отчёт?", a: "Да, в конце каждого анализа профессиональный PDF-отчёт скачивается одной кнопкой." },
+      { q: "Мои данные в безопасности?", a: "Данные передаются по защищённому соединению (HTTPS), используются только для анализа и не передаются третьим лицам." },
+    ],
+  },
+};
+
+export function renderHome(lang = "uz") {
+  const c = HOME_COPY[lang] || HOME_COPY.uz;
+  const canonical = `${SITE_URL}${HOME_PATHS[lang] || "/"}`;
   // index.html'dagi FAQ bilan BIR XIL savol-javoblar (tuzatilgan, halol versiya).
-  const faqs = [
-    { q: "Qaysi fayl formatlari qabul qilinadi?", a: "Tizim .xlsx va .xls formatdagi moliyaviy fayllarni qabul qiladi. Fayl avtomatik tekshiriladi va validatsiyadan o'tkaziladi." },
-    { q: "Tahlil qancha vaqt oladi?", a: "Tahlilni atigi 1 daqiqada yetkazamiz — faylni yuborishingiz bilan hisobot tayyor bo'ladi." },
-    { q: "Xizmat pullikmi?", a: "Hozirda barcha tahlillar to'liq bepul. Pullik tariflar joriy etilganda saytda va botda oldindan e'lon qilamiz." },
-    { q: "Tahlil ishonchliligi qanchalik?", a: "Har bir hisobot tajribali mutaxassis nazoratidan o'tadi va natijalar benchmark ko'rsatkichlar bilan solishtirib tekshiriladi." },
-    { q: "Hisobotni yuklab olsa bo'ladimi?", a: "Ha, har bir tahlil yakunida professional PDF hisobotni bir tugma bilan yuklab olishingiz mumkin." },
-    { q: "Ma'lumotlarim xavfsizmi?", a: "Ma'lumotlaringiz himoyalangan (HTTPS) ulanish orqali uzatiladi, faqat tahlil maqsadida ishlatiladi va uchinchi shaxslarga berilmaydi." },
-  ];
+  const faqs = c.faqs;
   const pageJsonLd = {
     "@context": "https://schema.org",
     "@graph": [
@@ -283,73 +404,64 @@ export function renderHome() {
 
   const rootHtml =
     `${SHELL_HEADER}<main style="max-width:760px;margin:0 auto;padding:0 24px 40px">` +
-    `<h1 style="font-size:34px;font-weight:800;line-height:1.2;color:#0f172a;margin:0 0 12px">AI yordamida moliyaviy tahlil va CFO darajasidagi hisobot</h1>` +
-    p("Balans (Shakl 1) va Moliyaviy natijalar (Shakl 2) faylingizni yuboring — Digital CFO ularni chuqur tahlil qilib, 40+ KPI, risk diagnostikasi va amaliy tavsiyalar bilan tayyor PDF hisobotni bir daqiqada qaytaradi.") +
-    ctaBlock() +
-    h2("Qanday ishlaydi") +
-    ul([
-      "<b>Faylni yuklang</b> — Excel (.xlsx/.xls) moliyaviy faylingizni yuboring.",
-      "<b>Validatsiya</b> — tizim ma'lumotlarni avtomatik tekshiradi va tozalaydi.",
-      "<b>KPI hisoblash</b> — barcha asosiy moliyaviy ko'rsatkichlar hisoblanadi.",
-      "<b>AI tahlil</b> — kuchli AI holatni baholab, tavsiyalar tayyorlaydi.",
-      "<b>PDF hisobot</b> — professional hisobotni yuklab olasiz.",
-    ]) +
-    h2("Nimalarni tahlil qilamiz") +
-    ul([
-      "<b>Likvidlik va to'lov qobiliyati</b> — joriy, tezkor va mutlaq likvidlik, ishchi kapital.",
-      "<b>Moliyaviy barqarorlik</b> — avtonomiya, qarz yuki, manyovrlik koeffitsientlari.",
-      "<b>Rentabellik</b> — ROA, ROE, sof va yalpi foyda marjalari.",
-      "<b>Ishbilarmonlik faolligi</b> — aktivlar, zaxiralar, debitorlik aylanuvchanligi, pul aylanish sikli.",
-      "<b>O'sish dinamikasi</b> — tushum, foyda va kapital o'zgarishi.",
-    ]) +
-    h2("Hisobotda nimalar bor") +
-    ul([
-      "Boshqaruv xulosasi (Executive Summary)",
-      "Asosiy KPI ko'rsatkichlari jadvali",
-      "Likvidlik va to'lov qobiliyati tahlili",
-      "Rentabellik va foyda dinamikasi",
-      "Risk diagnostikasi va baholash",
-      "AI tavsiyalari va xulosalar",
-    ]) +
-    h2("Narx") +
-    p("Hozirda barcha tahlillar <b>to'liq bepul</b>. Pullik tariflar joriy etilganda oldindan e'lon qilamiz.") +
-    h2("Ko'p so'raladigan savollar") +
+    `<h1 style="font-size:34px;font-weight:800;line-height:1.2;color:#0f172a;margin:0 0 12px">${c.h1}</h1>` +
+    p(c.lead) +
+    ctaBlock(lang) +
+    h2(c.h2how) + ul(c.how) +
+    h2(c.h2what) + ul(c.what) +
+    h2(c.h2report) + ul(c.report) +
+    h2(c.h2price) + p(c.price) +
+    h2(c.h2faq) +
     faqs
       .map(
         (f) =>
           `<h3 style="font-size:17px;font-weight:700;color:#0f172a;margin:18px 0 6px">${f.q}</h3><p style="color:#475569;line-height:1.6;margin:0">${f.a}</p>`
       )
       .join("") +
-    `<p style="margin-top:30px"><a href="/blog" style="color:#3b82f6;font-weight:700">Moliyaviy tahlil bo'yicha maqolalar →</a></p>` +
+    `<p style="margin-top:30px"><a href="/blog" style="color:#3b82f6;font-weight:700">${c.blogLink}</a></p>` +
     `</main>${SHELL_FOOTER}`;
 
   // Title/description marketing shioridan emas, real qidiruv so'rovlaridan
   // qurilgan: "moliyaviy tahlil", "balans tahlili", "1C hisoboti".
   return buildPage({
-    title: "Moliyaviy tahlil onlayn — balans va 1C hisoboti | Digital CFO",
-    description:
-      "Balans (Shakl 1) va Moliyaviy natijalar (Shakl 2) faylini yuklang — likvidlik, rentabellik va 40+ KPI bo'yicha tayyor PDF tahlilni 1 daqiqada oling. Bepul.",
+    title: c.title,
+    description: c.description,
     canonical,
     ogType: "website",
     pageJsonLd,
     rootHtml,
+    lang,
+    alternates: HOME_ALTERNATES,
   });
 }
+
+// Bosh sahifaning til variantlari — har ikkala sahifada bir xil ro'yxat
+// bo'lishi shart (hreflang o'zaro ("reciprocal") bo'lmasa Google e'tiborsiz
+// qoldiradi). x-default — tili mos kelmagan foydalanuvchi uchun.
+const HOME_ALTERNATES = [
+  { lang: "uz", href: `${SITE_URL}/` },
+  { lang: "ru", href: `${SITE_URL}/ru` },
+  { lang: "x-default", href: `${SITE_URL}/` },
+];
 
 // Dinamik sitemap.xml (DB'dagi published maqolalar bilan).
 export function buildSitemap(list) {
   const staticUrls = [
     { loc: `${SITE_URL}/`, changefreq: "weekly", priority: "1.0" },
+    { loc: `${SITE_URL}/ru`, changefreq: "weekly", priority: "0.9" },
     { loc: `${SITE_URL}/blog`, changefreq: "weekly", priority: "0.9" },
     { loc: `${SITE_URL}/maxfiylik.html`, changefreq: "yearly", priority: "0.3" },
     { loc: `${SITE_URL}/shartlar.html`, changefreq: "yearly", priority: "0.3" },
   ];
-  const articleUrls = list.map((a) => ({
-    loc: `${SITE_URL}/blog/${a.slug}`,
-    lastmod: (a.updated_at || a.created_at || "").slice(0, 10),
-    changefreq: "monthly",
-    priority: "0.8",
-  }));
+  // 301 bilan yo'naltirilgan (birlashtirilgan) slug'lar sitemap'da turmasin.
+  const articleUrls = list
+    .filter((a) => !MERGED_SLUGS[a.slug])
+    .map((a) => ({
+      loc: `${SITE_URL}/blog/${a.slug}`,
+      lastmod: (a.updated_at || a.created_at || "").slice(0, 10),
+      changefreq: "monthly",
+      priority: "0.8",
+    }));
   const body = [...staticUrls, ...articleUrls]
     .map((u) => {
       const lastmod = u.lastmod ? `\n    <lastmod>${u.lastmod}</lastmod>` : "";

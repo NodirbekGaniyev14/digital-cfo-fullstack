@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { BarChart3, Menu, X, Globe, ChevronDown, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -40,7 +40,9 @@ function NavItem({ link, isHome, className, onClick }) {
 export default function Navbar() {
   const { t, lang, setLang, setContactOpen } = useApp();
   const { pathname } = useLocation();
-  const isHome = pathname === "/";
+  // /ru ham bosh sahifa — anchor havolalari (#kpi, #pricing) shu sahifa
+  // ichida ishlashi kerak, "/#kpi" ga sakrab uzbekchaga qaytmasin.
+  const isHome = pathname === "/" || pathname === "/ru";
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -134,12 +136,27 @@ export default function Navbar() {
 function LangDropdown({ lang, setLang }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
   useEffect(() => {
     const onClick = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
     document.addEventListener("mousedown", onClick);
     return () => document.removeEventListener("mousedown", onClick);
   }, []);
   const cur = LANGS.find((l) => l.code === lang) || LANGS[0];
+
+  // Bosh sahifada til URL bilan bog'langan (/ = uz, /ru = ru) — canonical va
+  // ko'rinayotgan matn mos kelishi uchun URL'ni ham almashtiramiz.
+  // Boshqa sahifalarda (maqolalar faqat o'zbekcha) — faqat client-side.
+  const pickLang = (code) => {
+    const onHome = pathname === "/" || pathname === "/ru";
+    if (onHome) {
+      const target = code === "ru" ? "/ru" : "/";
+      if (target !== pathname) navigate(target);
+    }
+    setLang(code);
+    setOpen(false);
+  };
   return (
     <div className="relative" ref={ref}>
       <button
@@ -161,7 +178,7 @@ function LangDropdown({ lang, setLang }) {
             {LANGS.map((l) => (
               <button
                 key={l.code}
-                onClick={() => { setLang(l.code); setOpen(false); }}
+                onClick={() => pickLang(l.code)}
                 className={`flex w-full items-center justify-between px-3.5 py-2.5 text-left text-[14px] transition-colors hover:bg-navy/[.04] dark:hover:bg-white/[.06] ${
                   l.code === lang ? "font-bold text-azure" : "text-slate-600 dark:text-slate-300"
                 }`}

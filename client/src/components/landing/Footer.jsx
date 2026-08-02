@@ -14,7 +14,9 @@ const NAV_LINKS = [
 
 export default function Footer() {
   const { t } = useApp();
-  const isHome = useLocation().pathname === "/";
+  // /ru ham bosh sahifa (Navbar bilan bir xil mantiq).
+  const isHomePath = useLocation().pathname;
+  const isHome = isHomePath === "/" || isHomePath === "/ru";
   const SERVICES = t("ft.services");
   return (
     <footer className="on-dark bg-[#0c111f] px-6 pb-[30px] pt-16 text-slate-300">

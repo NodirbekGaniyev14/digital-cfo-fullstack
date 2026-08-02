@@ -509,7 +509,12 @@ const AppCtx = createContext(null);
 
 export function AppProvider({ children }) {
   const [lang, setLang] = useState(() => {
+    // URL tilni belgilaydi va localStorage'dan ustun turadi: /ru ga kirgan
+    // (yoki Google'dan kelgan) foydalanuvchi ruscha sahifani ko'rishi kerak,
+    // ilgari boshqa til tanlagan bo'lsa ham. Aks holda SSR bergan ruscha matn
+    // React yuklangach o'zbekchaga almashib ketardi.
     try {
+      if (typeof location !== "undefined" && location.pathname.startsWith("/ru")) return "ru";
       const s = localStorage.getItem("lang");
       return LANGS.some((l) => l.code === s) ? s : "uz";
     } catch {

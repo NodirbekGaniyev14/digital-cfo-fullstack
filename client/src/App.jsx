@@ -90,6 +90,9 @@ export default function App() {
             <Suspense fallback={null}>
               <Routes>
                 <Route path="/" element={<Home />} />
+                {/* Ruscha landing — alohida URL (SEO/hreflang uchun).
+                    Til AppProvider'da URL'dan olinadi. */}
+                <Route path="/ru" element={<Home />} />
                 <Route path="/blog" element={<ArticlesIndex />} />
                 <Route path="/blog/:slug" element={<Article />} />
                 {/* Eski URL'lar -> yangi (/blog) */}
