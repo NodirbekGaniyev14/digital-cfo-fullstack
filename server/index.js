@@ -17,6 +17,7 @@ import { renderArticle, renderList, renderHome, buildSitemap, hasTemplate, MERGE
 import { aiEnabled, generateArticle, generateSocialPackage, scoreArticle } from "./anthropic.js";
 import { startAutopilot, autopilotStatus, setAutopilotSettings, seedStarterTopics, runGuarded } from "./autopilot.js";
 import { publisherStatus, publishArticleSocial, autoPostArticleTelegram } from "./publisher.js";
+import { indexNowKey, indexNowStatus, submitArticle, submitArticles, submitAll } from "./indexnow.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 4000;
@@ -338,7 +339,10 @@ function runScheduler() {
       console.log(`🕒 ${ids.length} ta rejalashtirilgan maqola chop etildi`);
       // Telegram avto-post (bepul rejim; toggle o'chiq bo'lsa jim o'tadi, hech qachon throw qilmaydi)
       (async () => {
-        for (const id of ids) await autoPostArticleTelegram(Articles.getById(id));
+        const due = ids.map((id) => Articles.getById(id)).filter(Boolean);
+        for (const a of due) await autoPostArticleTelegram(a);
+        // IndexNow: bir nechta maqola bir vaqtda chiqsa — bitta so'rovda yuboramiz.
+        await submitArticles(due);
       })();
     }
   } catch (err) {
@@ -353,6 +357,15 @@ startAutopilot();
 
 // ---- Routes -------------------------------------------------------------------
 app.get("/api/health", (_req, res) => res.json({ ok: true }));
+
+// IndexNow kalit fayli — https://digitalcfo.uz/<KEY>.txt ichida kalitning o'zi.
+// Qidiruv tizimi shu fayl orqali domen egaligini tekshiradi. Statikdan OLDIN
+// va SPA fallback'dan oldin turishi shart (aks holda index.html qaytadi).
+app.get("/:file.txt", (req, res, next) => {
+  const key = indexNowKey();
+  if (key && req.params.file === key) return res.type("text/plain").send(key);
+  next(); // boshqa .txt (robots.txt, llms.txt) — statik beradi
+});
 
 // Kontakt formasiga maxsus rate-limit: 15 daqiqada IP'dan maks 6 ta
 const contactLimiter = rateLimit({
@@ -993,6 +1006,18 @@ app.post("/api/admin/articles/:id/social/publish", requireAdmin, async (req, res
   }
 });
 
+// ---- IndexNow (GEO) ----------------------------------------------------------
+// Status: kalit sozlanganmi, kalit fayli qayerda.
+app.get("/api/admin/indexnow", requireAdmin, (_req, res) => {
+  res.json(indexNowStatus());
+});
+
+// Barcha chop etilgan URL'larni qo'lda yuborish (birinchi seeding / tiklash).
+app.post("/api/admin/indexnow/submit-all", requireAdmin, async (_req, res) => {
+  const result = await submitAll(Articles.listPublished());
+  res.json(result);
+});
+
 // ---- Sifat bahosi (DCOS Part 9 — Quality Gate) -------------------------------
 app.post("/api/admin/articles/:id/quality", requireAdmin, aiLimiter, async (req, res) => {
   if (!aiEnabled()) {
@@ -1040,7 +1065,10 @@ app.post("/api/admin/articles", requireAdmin, (req, res) => {
   if (error) return res.status(400).json({ error });
   const created = Articles.insert(data);
   console.log("📝 Yangi maqola:", created.slug, `(${created.status})`);
-  if (created.status === "published") autoPostArticleTelegram(created); // bepul avto-post (toggle o'chiq bo'lsa jim)
+  if (created.status === "published") {
+    autoPostArticleTelegram(created); // bepul avto-post (toggle o'chiq bo'lsa jim)
+    submitArticle(created); // IndexNow — fire-and-forget, hech qachon throw qilmaydi
+  }
   res.json({ ok: true, article: created });
 });
 
@@ -1054,6 +1082,9 @@ app.put("/api/admin/articles/:id", requireAdmin, (req, res) => {
   console.log("✏️ Maqola tahrirlandi:", updated.slug, `(${updated.status})`);
   // Faqat draft/scheduled → published O'TISHIDA avto-post (eski maqola tahririda emas).
   if (updated.status === "published" && prev.status !== "published") autoPostArticleTelegram(updated);
+  // IndexNow: chop etilgan maqola HAR tahrirda yuboriladi — matn o'zgargani
+  // qidiruv tizimiga xabar qilinsin (avto-postdan farqli, bu dublikat emas).
+  if (updated.status === "published") submitArticle(updated);
   res.json({ ok: true, article: updated });
 });
 
