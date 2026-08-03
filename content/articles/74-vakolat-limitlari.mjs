@@ -40,7 +40,7 @@ export default {
   content: `
 <p>Ikki teskari muammo. Birinchisi: har bir xarajat — hatto qalam sotib olish — rahbar tasdig'ini kutadi. Natija: sekinlik, rahbar mayda ishga ko'milgan, xodimlar bloklangan. Ikkinchisi: hech kim hech narsani tasdiqlamaydi, har kishi istaganini sarflaydi. Natija: nazoratsizlik, isrof, firibgarlik.</p>
 
-<p>Ikkalasi ham zararli. Yechım — <strong>vakolat limitlari tizimi</strong>: kim qancha pulni tasdiqsiz sarflay olishini aniq belgilash. Bu nazorat va tezlikni balanslaydi.</p>
+<p>Ikkalasi ham zararli. Yechim — <strong>vakolat limitlari tizimi</strong>: kim qancha pulni tasdiqsiz sarflay olishini aniq belgilash. Bu nazorat va tezlikni balanslaydi.</p>
 
 <h2>Vakolat limiti nima?</h2>
 

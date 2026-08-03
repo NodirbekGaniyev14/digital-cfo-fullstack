@@ -60,9 +60,9 @@ export default {
 </thead>
 <tbody>
 <tr><td>Yetkazish + qadoqlash</td><td>Har buyurtma uchun logistika</td></tr>
-<tr><td>Reklama (CAC)</td><td>Mijozni jalb qilish narxı</td></tr>
+<tr><td>Reklama (CAC)</td><td>Mijozni jalb qilish narxi</td></tr>
 <tr><td>To'lov komissiyasi</td><td>Onlayn to'lov tizimi foizi</td></tr>
-<tr><td>Platforma komissiyasi</td><td>Marketplace ulushı</td></tr>
+<tr><td>Platforma komissiyasi</td><td>Marketplace ulushi</td></tr>
 <tr><td>Qaytarish (returns)</td><td>Qaytgan tovar logistika + yo'qotish</td></tr>
 <tr><td>Ombor</td><td>Zaxira saqlash</td></tr>
 </tbody>
@@ -77,12 +77,12 @@ export default {
 <tr><th>Modda</th><th>Summa</th></tr>
 </thead>
 <tbody>
-<tr><td>Sotuv narxı</td><td>100 000</td></tr>
-<tr><td>Tovar tannarxı</td><td>−60 000</td></tr>
+<tr><td>Sotuv narxi</td><td>100 000</td></tr>
+<tr><td>Tovar tannarxi</td><td>−60 000</td></tr>
 <tr><td>Yetkazish + qadoqlash</td><td>−12 000</td></tr>
-<tr><td>Reklama (CAC ulushı)</td><td>−15 000</td></tr>
+<tr><td>Reklama (CAC ulushi)</td><td>−15 000</td></tr>
 <tr><td>To'lov + platforma komissiyasi</td><td>−8 000</td></tr>
-<tr><td>Qaytarish ulushı (o'rtacha)</td><td>−7 000</td></tr>
+<tr><td>Qaytarish ulushi (o'rtacha)</td><td>−7 000</td></tr>
 <tr><td><strong>Haqiqiy foyda</strong></td><td><strong>−2 000 🔴</strong></td></tr>
 </tbody>
 </table>
@@ -92,7 +92,7 @@ export default {
 <h2>Eng muhim ikki dushman: reklama va qaytarish</h2>
 
 <h3>Reklama (CAC)</h3>
-<p>Mijozni jalb qilish narxı (CAC) onlayn savdoda eng tez o'sadigan xarajat. Agar bitta mijozni jalb qilish uning keltiradigan foydasidan qimmatga tushsa — birlik iqtisodiyoti manfiy. <a href="/blog/unit-economics">LTV/CAC</a> nisbatini kuzating.</p>
+<p>Mijozni jalb qilish narxi (CAC) onlayn savdoda eng tez o'sadigan xarajat. Agar bitta mijozni jalb qilish uning keltiradigan foydasidan qimmatga tushsa — birlik iqtisodiyoti manfiy. <a href="/blog/unit-economics">LTV/CAC</a> nisbatini kuzating.</p>
 
 <h3>Qaytarish (returns)</h3>
 <p>Har qaytgan tovar ikki tomonlama yetkazish, qayta ishlash va ba'zan yo'qotish. Yuqori qaytarish darajasi butun modelni buzadi. Uni kuzating va kamaytiring (aniq tavsif, sifat, o'lcham jadvali).</p>

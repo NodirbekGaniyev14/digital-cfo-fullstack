@@ -38,7 +38,7 @@ export default {
     },
   ],
   content: `
-<p>Kredit olganda hammasi yaxshi edi: biznes o'sar, to'lovlar bemalol edi. Keyin nimadir o'zgardी — sotuv tushdi, xarajat oshdi, kutilmagan muammo chiqdi. Endi qarz to'lovlari og'irlik qiladi va har oy "qayerdan pul topaman?" degan savol. Bu — ko'p biznesga tanish holat, va u <em>tuganish emas.</em></p>
+<p>Kredit olganda hammasi yaxshi edi: biznes o'sar, to'lovlar bemalol edi. Keyin nimadir o'zgardi — sotuv tushdi, xarajat oshdi, kutilmagan muammo chiqdi. Endi qarz to'lovlari og'irlik qiladi va har oy "qayerdan pul topaman?" degan savol. Bu — ko'p biznesga tanish holat, va u <em>tuganish emas.</em></p>
 
 <p><strong>Qarzni qayta tuzish</strong> (restrukturizatsiya) — biznesni saqlab qolishning real va qonuniy yo'li. Muhimi — panika emas, tizimli yondashuv.</p>
 
@@ -119,6 +119,6 @@ export default {
 
 <p>Qarzni qayta tuzish — moliyaviy qiyinchilikdan chiqishning nazoratli yo'li. Kalit — erta harakat, kreditor bilan ochiq muzokara, real reja va sababni parallel tuzatish.</p>
 
-<p>Amaliy maslahat: agar qarz to'lovlari og'ırlik qila boshlasa, oxirgi daqiqani kutmang. Bugun <a href="/blog/pul-oqimi-hisoboti">pul oqimingizni</a> tahlil qiling va real to'lov imkoniyatingizni aniqlang. Keyin kreditor bilan ochiq gaplashing — erta va halol yondashuv eng yaxshi shartlarni beradi. Qarz — muammo, lekin boshqariladigan muammo.</p>
+<p>Amaliy maslahat: agar qarz to'lovlari og'irlik qila boshlasa, oxirgi daqiqani kutmang. Bugun <a href="/blog/pul-oqimi-hisoboti">pul oqimingizni</a> tahlil qiling va real to'lov imkoniyatingizni aniqlang. Keyin kreditor bilan ochiq gaplashing — erta va halol yondashuv eng yaxshi shartlarni beradi. Qarz — muammo, lekin boshqariladigan muammo.</p>
 `.trim(),
 };

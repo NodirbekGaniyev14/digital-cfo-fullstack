@@ -92,7 +92,7 @@ export default {
 
 <h2>Hisobotdan qarorga: struktura</h2>
 
-<p>Yaxshi hisobot uchtा savolga javob beradi:</p>
+<p>Yaxshi hisobot uchta savolga javob beradi:</p>
 <ol>
 <li><strong>Qanday ketyapmiz?</strong> — asosiy KPI'lar, plan-fakt.</li>
 <li><strong>Nega shunday?</strong> — og'ishlar izohi.</li>

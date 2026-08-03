@@ -68,7 +68,7 @@ export default {
 <tbody>
 <tr><td>Qoplanish muddati</td><td>Investitsiya necha yilda qaytadi</td><td>Oddiy, lekin vaqt qiymatini e'tiborsiz</td></tr>
 <tr><td><a href="/blog/npv-va-irr">NPV</a></td><td>Yaratilgan sof qiymat (pulda)</td><td>Eng ishonchli</td></tr>
-<tr><td>IRR</td><td>Loyihaning daromadliligi (%)</td><td>Tushunarli, ba'zan chalg'ıtadi</td></tr>
+<tr><td>IRR</td><td>Loyihaning daromadliligi (%)</td><td>Tushunarli, ba'zan chalg'itadi</td></tr>
 </tbody>
 </table>
 
