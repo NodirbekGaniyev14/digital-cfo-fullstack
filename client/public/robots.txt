@@ -1,4 +1,77 @@
 User-agent: *
 Allow: /
 
+# AI/LLM kraulerlari — ochiq ruxsat.
+# Maqsad: kontentimiz AI modellarga o'qitilsin va javoblarda manba sifatida
+# ko'rsatilsin. "*" allaqachon ruxsat beradi, lekin ba'zi CDN/proxy'lar
+# nomsiz botlarni to'sadi — bu yerda niyat aniq yozilgan.
+
+# OpenAI (ChatGPT)
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+# Anthropic (Claude)
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+# Perplexity
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+# Google Gemini (grounding + training)
+User-agent: Google-Extended
+Allow: /
+
+# Common Crawl — ko'plab modellar uchun o'quv korpusi
+User-agent: CCBot
+Allow: /
+
+# Microsoft Copilot / Bing (ChatGPT search Bing indeksiga tayanadi)
+User-agent: bingbot
+Allow: /
+
+User-agent: msnbot
+Allow: /
+
+# Apple Intelligence
+User-agent: Applebot
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+# Meta AI
+User-agent: FacebookBot
+Allow: /
+
+User-agent: meta-externalagent
+Allow: /
+
+# Amazon
+User-agent: Amazonbot
+Allow: /
+
+# ByteDance
+User-agent: Bytespider
+Allow: /
+
+# Yandex (mahalliy bozor + YandexGPT)
+User-agent: YandexBot
+Allow: /
+
 Sitemap: https://digitalcfo.uz/sitemap.xml
